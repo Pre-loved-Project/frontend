@@ -9,7 +9,6 @@ const meta: Meta<typeof TextField> = {
     width: { control: "text" },
     height: { control: "text" },
     placeholder: { control: "text" },
-    hint: { control: "text" },
     error: { control: "boolean" },
   },
 };
@@ -19,17 +18,17 @@ type Story = StoryObj<typeof TextField>;
 
 export const Default: Story = {
   args: {
-    hint: "Enter your text",
     width: "400px",
     height: "70px",
+    placeholder: "Enter your text",
   },
 };
 
 export const Focused: Story = {
   args: {
-    hint: "Type something...",
     width: "400px",
     height: "70px",
+    placeholder: "Type something...",
   },
   play: async ({ canvasElement }) => {
     const input = canvasElement.querySelector("input") as HTMLInputElement;
@@ -39,7 +38,7 @@ export const Focused: Story = {
 
 export const Error: Story = {
   args: {
-    hint: "This field has an error",
+    placeholder: "This field has an error",
     error: true,
     width: "400px",
     height: "70px",

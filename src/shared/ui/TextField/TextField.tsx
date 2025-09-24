@@ -5,14 +5,13 @@ import React, { InputHTMLAttributes, useState } from "react";
 interface TextFieldProps extends InputHTMLAttributes<HTMLInputElement> {
     width?: string | number;
     height?: string | number;
-    hint?: string;
     error?: boolean;
 }
 
 export const TextField: React.FC<TextFieldProps> = ({
     width = 400,
     height = 60,
-    hint = "내용을 입력해주세요.",
+    placeholder = "내용을 입력해주세요.",
     error = false,
     className = "",
     ...props
@@ -33,6 +32,7 @@ export const TextField: React.FC<TextFieldProps> = ({
     >
       <input
         {...props}
+        placeholder={placeholder}
         value={text}
         onChange={(e) => {
           setText(e.target.value);
@@ -50,11 +50,6 @@ export const TextField: React.FC<TextFieldProps> = ({
           props.onBlur?.(e);
         }}
       />
-      {!text && (
-        <span className="absolute text-[#6E6E82] text-[20px] pointer-events-none">
-          {hint}
-        </span>
-      )}
     </div>
   );
 };
