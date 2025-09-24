@@ -8,14 +8,9 @@ interface TextFieldProps extends InputHTMLAttributes<HTMLInputElement> {
     error?: boolean;
 }
 
-export const TextField: React.FC<TextFieldProps> = ({
-    width = 400,
-    height = 60,
-    placeholder = "내용을 입력해주세요.",
-    error = false,
-    className = "",
-    ...props
-}) => {
+export const TextField = (props: TextFieldProps) => {
+    const { width, height, error, className, ...rest} = props;
+
     const [text, setText] = useState("");
     const [focused, setFocused] = useState(false);
 
@@ -31,8 +26,7 @@ export const TextField: React.FC<TextFieldProps> = ({
       style={{width, height}}
     >
       <input
-        {...props}
-        placeholder={placeholder}
+        {...rest}
         value={text}
         onChange={(e) => {
           setText(e.target.value);
