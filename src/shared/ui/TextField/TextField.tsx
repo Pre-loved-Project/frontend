@@ -24,7 +24,6 @@ export const TextField = (props: TextFieldProps) => {
           : focused
           ? "border border-blue"
           : "border border-gray-400",
-        className
       )}
       style={{ width, height }}
     >
@@ -35,7 +34,10 @@ export const TextField = (props: TextFieldProps) => {
           setText(e.target.value);
           props.onChange?.(e);
         }}
-        className={cn("flex-1 bg-transparent outline-none text-[20px] text-white")}
+        className={cn(
+          "flex-1 bg-transparent outline-none text-white",
+          className
+        )}
         onFocus={(e) => {
           setFocused(true);
           props.onFocus?.(e);
