@@ -1,4 +1,4 @@
-import{j as i}from"./jsx-runtime-BzYWVRZR.js";import{r as c}from"./iframe-B38aNa2i.js";import"./preload-helper-PPVm8Dsz.js";const p=e=>{const{width:s,height:d,error:l,className:u,...m}=e,[h,x]=c.useState(""),[g,a]=c.useState(!1);return i.jsx("div",{className:`
+import{j as i}from"./jsx-runtime-Bae3JrSl.js";import{r as c}from"./iframe-CLjA7gU8.js";import"./preload-helper-PPVm8Dsz.js";const p=e=>{const{width:s,height:d,error:l,className:u,...m}=e,[h,x]=c.useState(""),[g,a]=c.useState(!1);return i.jsx("div",{className:`
         flex items-center rounded-lg transition-colors
         bg-[#252530]
         px-[20px] py-[23px]
