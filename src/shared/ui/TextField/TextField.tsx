@@ -18,9 +18,9 @@ export const TextField = (props: TextFieldProps) => {
     <div
       className={`
         flex items-center rounded-lg transition-colors
-        bg-[#252530]
+        bg-black-800
         px-[20px] py-[23px]
-        ${error ? "border-2 border-red-500" : focused ? "border-2 border-[#5097FA]" : "border-2 border-[#353542]"}
+        ${error ? "border border-red" : focused ? "border border-blue" : "border border-gray-400"}
         ${className}
       `}
       style={{width, height}}
@@ -32,8 +32,8 @@ export const TextField = (props: TextFieldProps) => {
           setText(e.target.value);
           props.onChange?.(e);
         }}
-        className={`flex-1 bg-transparent outline-none font-[Pretendard] text-[20px] ${
-          "text-[#F1F1F5]"
+        className={`flex-1 bg-transparent outline-none text-[20px] ${
+          "text-white"
         }`}
         onFocus={(e) => {
           setFocused(true);
