@@ -107,7 +107,7 @@ export const Error: Story = {
   },
 };
 
-// ✅ Controlled (value를 state로 제어)
+// Controlled (value를 state로 제어)
 export const Controlled: Story = {
   render: (args) => {
     const [value, setValue] = useState("초기값");
