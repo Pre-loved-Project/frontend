@@ -1,0 +1,38 @@
+import { create } from "zustand";
+import { persist, createJSONStorage } from "zustand/middleware";
+
+interface User {
+  id: string;
+  email: string;
+}
+
+interface AuthState {
+  user: User | null;
+  isAuthenticated: boolean;
+  setUser: (user: User) => void;
+  updateUser: (partial: Partial<User>) => void;
+  logout: () => void;
+}
+
+export const useAuthStore = create<AuthState>()(
+  persist(
+    (set) => ({
+      user: null,
+      isAuthenticated: false,
+      setUser: (user) => set({ user, isAuthenticated: true }),
+      updateUser: (partial) =>
+        set((state) => ({
+          user: state.user ? { ...state.user, ...partial } : null,
+        })),
+      logout: () => set({ user: null, isAuthenticated: false }),
+    }),
+    {
+      name: "auth-store",
+      storage: createJSONStorage(() => localStorage),
+      partialize: (state) => ({
+        user: state.user,
+        isAuthenticated: state.isAuthenticated,
+      }),
+    },
+  ),
+);
