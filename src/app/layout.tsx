@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
-
+import Header from "@/widgets/header/ui/Header";
 const myFont = localFont({
   src: "./fonts/PretendardVariable.woff2",
 });
@@ -18,7 +18,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="kr" className={myFont.className}>
-      <body>{children}</body>
+      <body>
+        <Header />
+        {children}
+      </body>
     </html>
   );
 }
