@@ -129,6 +129,7 @@ export const DropDown = ({
           "border border-gray-400",
           "origin-top overflow-hidden transform-gpu",
           "transition-[opacity,transform] duration-200",
+          "max-h-60 overflow-y-auto",
           optionWrapper,
           open
             ? "opacity-100 scale-y-100 pointer-events-auto"
