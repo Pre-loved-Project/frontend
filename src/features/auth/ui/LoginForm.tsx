@@ -35,10 +35,10 @@ export const LoginForm = ({size = "lg"} : LoginFormProps) => {
         const value = e.target.value;
         setEmail(value);
 
-        if (!validateEmail(value)) {
-        setEmailError("올바른 이메일 형식이 아닙니다.");
+        if (value != null && value !== "" && !validateEmail(value)) {
+            setEmailError("올바른 이메일 형식이 아닙니다.");
         } else {
-        setEmailError(null);
+            setEmailError(null);
         }
     };
 
@@ -47,10 +47,10 @@ export const LoginForm = ({size = "lg"} : LoginFormProps) => {
         const value = e.target.value;
         setPassword(value);
 
-        if (value.length < 8) {
-        setPasswordError("비밀번호는 최소 8자 이상이어야 합니다.");
+        if (value != null && value !== "" && value.length < 8) {
+            setPasswordError("비밀번호는 최소 8자 이상이어야 합니다.");
         } else {
-        setPasswordError(null);
+            setPasswordError(null);
         }
     };
 
