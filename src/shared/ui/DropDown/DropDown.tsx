@@ -53,9 +53,9 @@ const styleMap: Record<
       option: "w-[320px] h-[32px] text-[14px]",
     },
     short: {
-      wrapper: "w-[180px] h-[60px] text-[14px]",
-      optionWrapper: "w-[180px] p-[10px] gap-[5px]",
-      option: "w-[160px] h-[32px] text-[14px]",
+      wrapper: "w-[140px] h-[60px] text-[14px]",
+      optionWrapper: "w-[140px] p-[10px] gap-[5px]",
+      option: "w-[130px] h-[32px] text-[14px]",
     },
   },
   sm: {
@@ -65,9 +65,9 @@ const styleMap: Record<
       option: "w-[310px] h-[32px] text-[14px]",
     },
     short: {
-      wrapper: "w-[160px] h-[55px] text-[14px]",
-      optionWrapper: "w-[160px] p-[10px] gap-[5px]",
-      option: "w-[140px] h-[32px] text-[14px]",
+      wrapper: "w-[100px] h-[55px] text-[14px]",
+      optionWrapper: "w-[100px] p-[10px] gap-[5px]",
+      option: "w-[90px] h-[32px] text-[14px]",
     },
   },
 };
