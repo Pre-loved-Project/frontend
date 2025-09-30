@@ -21,3 +21,9 @@
   --color-pink: #ff2f9f;
   --color-red: #ff0000;
 }
+
+@layer base {
+  input[type="search"]::-webkit-search-cancel-button {
+    -webkit-appearance: none;
+  }
+}
