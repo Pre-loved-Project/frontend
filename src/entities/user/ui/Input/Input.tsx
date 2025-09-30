@@ -60,7 +60,7 @@ export const Input = ({
   return (
     <div className="flex flex-col gap-[6px]">
       {label && (
-        <label className={cn("font-medium text-white", labelSizeMap[size])}>
+        <label className={cn("font-medium text-black-800", labelSizeMap[size])}>
           {label}
         </label>
       )}
