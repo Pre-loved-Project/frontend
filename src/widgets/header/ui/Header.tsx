@@ -8,7 +8,7 @@ import SearchForm from "./SearchForm";
 const Header = () => {
   const [showSearch, setShowSearch] = useState(false);
   return (
-    <header className="bg-[#1C1C22] h-[70px] px-[20px] md:h-[80px] md:px-[30px] xl:h-[100px]">
+    <header className="fixed top-0 left-0 w-full bg-[#1C1C22] h-[70px] px-[20px] md:h-[80px] md:px-[30px] xl:h-[100px]">
       <div className="flex h-full w-full items-center justify-between lg:mx-auto lg:max-w-[1200px]">
         {!showSearch ? (
           <div className="flex w-full items-center justify-between md:hidden">
