@@ -8,9 +8,16 @@ type FormSize = "sm" | "md" | "lg";
 
 interface LoginFormProps {
   size?: FormSize;
+  onSuccess?: () => void;
+  onError?: (msg: string) => void;
 }
 
-export const LoginForm = ({ size = "lg" }: LoginFormProps) => {
+export const LoginForm = ({
+  size = "lg",
+  onSuccess,
+  onError,
+  ...props
+}: LoginFormProps) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   //에러 메시지 관리
@@ -20,8 +27,9 @@ export const LoginForm = ({ size = "lg" }: LoginFormProps) => {
   //로그인 요청 제출 핸들러, 추후 API 호출 예정
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO : api 호출 및 검증 로직 추가
+    // TODO : api 호출 및 검증 로직 추가, Zustand를 통한 토큰 저장 및 부모 핸들러 전달 로직 추가
     console.log("로그인 요청 폼 제출");
+    const res = {}; //
   };
 
   // 이메일 유효성 검사 함수
