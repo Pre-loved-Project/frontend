@@ -1,3 +1,6 @@
+import { useAuthStore } from "@/features/auth/model/auth.store";
+import { refreshAccessToken } from "./refresh";
+
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export async function apiFetch<T>(
@@ -5,23 +8,44 @@ export async function apiFetch<T>(
   options: RequestInit & { noAuth?: boolean },
 ): Promise<T> {
   const { headers, noAuth, ...restOptions } = options;
+  const { accessToken, setAccessToken, logout } = useAuthStore.getState();
 
   const defaultHeaders: HeadersInit = {
     "Content-Type": "application/json",
   };
 
   if (!noAuth && typeof window !== "undefined") {
-    const token = localStorage.getItem("access-token");
-    if (token) {
-      defaultHeaders["Authorization"] = `Bearer ${token}`;
-    }
+    defaultHeaders["Authorization"] = `Bearer ${accessToken}`;
   }
 
-  const res = await fetch(`${BASE_URL}${endpoint}`, {
+  let res = await fetch(`${BASE_URL}${endpoint}`, {
     headers: { ...defaultHeaders, ...headers },
     cache: "no-store",
     ...restOptions,
   });
+
+  //AccessToken 만료 처리
+  if (res.status === 401 && !noAuth) {
+    const newToken = await refreshAccessToken();
+
+    if (newToken) {
+      setAccessToken(newToken);
+      defaultHeaders["Authorization"] = `Bearer ${newToken}`;
+
+      //동일한 경로에 요청 재시도
+      res = await fetch(`${BASE_URL}${endpoint}`, {
+        headers: { ...defaultHeaders, ...headers },
+        cache: "no-store",
+        ...restOptions,
+      });
+    } else {
+      logout();
+      if (typeof window !== "undefined") {
+        location.replace("/login");
+      }
+      throw new Error("세션이 만료되었습니다. 다시 로그인 해주세요.");
+    }
+  }
 
   if (!res.ok) {
     let message = `API Error ${res.status}`;
