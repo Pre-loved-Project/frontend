@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { Input } from "@/entities/user/ui/Input/Input";
 import { DropDown } from "@/shared/ui/DropDown/DropDown";
 import Button from "@/shared/ui/Button/Button";
+import { apiFetch } from "@/shared/api/fetcher";
 
 type FormSize = "sm" | "md" | "lg";
 
@@ -123,11 +124,55 @@ export const SignUpForm = ({
   };
 
   // 회원가입 폼 제출 핸들러
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: API 호출 로직 추가
     console.log("회원가입 요청 폼 제출");
-    onSuccess?.();
+    const res = await apiFetch<{
+      status: string;
+    }>("/health", {
+      method: "GET",
+      noAuth: true,
+    });
+    console.log(res);
+    try {
+      const body = {
+        email,
+        nickname,
+        birthDate: `${year}-${String(month).padStart(2, "0")}-${String(
+          day,
+        ).padStart(2, "0")}`,
+        password,
+      };
+
+      console.log(body);
+      const res = await apiFetch<{
+        userId: number;
+        email: string;
+        nickname: string;
+        birthDate: string;
+        createdAt: string;
+        updatedAt: string;
+      }>("/auth/signup", {
+        method: "POST",
+        body: JSON.stringify(body),
+        noAuth: true,
+      });
+
+      console.log("회원가입 성공:", res);
+      onSuccess?.();
+    } catch (error: unknown) {
+      console.error("회원가입 실패:", error + "\n");
+      if (error instanceof Error) {
+        // 서버 에러 메시지 처리
+        if (error.message.includes("isEmailUsed")) {
+          setEmailError("이미 사용 중인 이메일입니다.");
+        } else if (error.message.includes("isNicknameUsed")) {
+          setNicknameError("이미 사용 중인 닉네임입니다.");
+        } else {
+          onError?.("회원가입에 실패했습니다. 잠시 후 다시 시도해주세요.");
+        }
+      }
+    }
   };
 
   return (
