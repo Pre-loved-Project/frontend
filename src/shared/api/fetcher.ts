@@ -51,7 +51,7 @@ export async function apiFetch<T>(
     let message = `API Error ${res.status}`;
     try {
       const data = await res.json();
-      message = data.message ?? message;
+      message = data.message ?? data.detail ?? message;
     } catch {
       const text = await res.text();
       if (text) message = text;
