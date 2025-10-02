@@ -12,7 +12,7 @@ const config: StorybookConfig = {
     name: "@storybook/nextjs-vite",
     options: {},
   },
-  staticDirs: ["../public"],
+  staticDirs: [{ from: "../public", to: "/" }],
   viteFinal: async (config) => {
     config.base = "/frontend/";
     return config;
