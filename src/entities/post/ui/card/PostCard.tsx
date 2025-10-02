@@ -2,7 +2,7 @@ import Image from "next/image";
 
 import DefaultImage from "./assets/product_image.png";
 
-interface ProductProps {
+interface PostCardProps {
   imageSrc: string;
   name: string;
   reviewCount: number;
@@ -10,13 +10,13 @@ interface ProductProps {
   rating: number;
 }
 
-const Product = ({
+const PostCard = ({
   imageSrc,
   name,
   reviewCount,
   likeCount,
   rating,
-}: ProductProps) => {
+}: PostCardProps) => {
   return (
     <article className="w-fit rounded-[8px] border border-[#353542] bg-[#252530] p-[10px] md:pb-[20px] xl:pb-[25px]">
       <div className="flex flex-col gap-[10px] md:gap-[20px] lg:gap-[25px]">
@@ -52,4 +52,4 @@ const Product = ({
   );
 };
 
-export default Product;
+export default PostCard;

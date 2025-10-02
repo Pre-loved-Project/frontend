@@ -1,9 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import Product from "./Product";
+import PostCard from "./PostCard";
 
-const meta: Meta<typeof Product> = {
-  title: "Post/Product",
-  component: Product,
+const meta: Meta<typeof PostCard> = {
+  title: "Post/PostCard",
+  component: PostCard,
   tags: ["autodocs"],
   argTypes: {
     imageSrc: { control: "text" },
@@ -15,7 +15,7 @@ const meta: Meta<typeof Product> = {
 };
 
 export default meta;
-type Story = StoryObj<typeof Product>;
+type Story = StoryObj<typeof PostCard>;
 
 export const Default: Story = {
   args: {
