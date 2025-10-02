@@ -24,7 +24,7 @@ const Profile = ({ imageSrc, nickname, bio }: ProfileProps) => {
           <h1 className="mb-[10px] text-center font-semibold text-xl leading-7 text-white xl:text-[24px]">
             {nickname}
           </h1>
-          <p className="font-normal text-sm leading-5 text-gray-600 xl:font-[16px]">
+          <p className="font-normal text-sm leading-5 text-gray-600 xl:font-[16px] break-words">
             {bio}
           </p>
         </div>
