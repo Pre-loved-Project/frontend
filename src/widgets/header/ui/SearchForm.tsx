@@ -23,7 +23,7 @@ const SearchForm = ({
     >
       {showIcon && (
         <img
-          src="/icons/search.svg"
+          src="icons/search.svg"
           alt="검색 아이콘"
           aria-hidden="true"
           className="w-6 h-6 shrink-0"
