@@ -15,7 +15,12 @@ interface ModalProps {
 
 const sizeMap: Record<
   ModalSize,
-  { width: number; height: number; buttonSize: "sm" | "md" | "lg"; textSize: string }
+  {
+    width: number;
+    height: number;
+    buttonSize: "sm" | "md" | "lg";
+    textSize: string;
+  }
 > = {
   sm: { width: 400, height: 200, buttonSize: "sm", textSize: "text-base" },
   md: { width: 500, height: 200, buttonSize: "md", textSize: "text-lg" },
@@ -34,11 +39,13 @@ export const Modal = ({
     <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
       <div
         className={cn(
-          "bg-black-900 rounded-lg shadow-lg flex flex-col items-center justify-center gap-10 p-6 text-center"
+          "bg-black-900 rounded-lg shadow-lg flex flex-col items-center justify-center gap-10 p-6 text-center",
         )}
         style={{ width, height }}
       >
-        <p className={cn("text-white", textSize)}>{message}</p>
+        <p className={cn("text-white whitespace-pre-line", textSize)}>
+          {message}
+        </p>
         <Button variant="primary" size={buttonSize} onClick={onClick}>
           {buttonText}
         </Button>
