@@ -19,7 +19,7 @@ type Story = StoryObj<typeof Product>;
 
 export const Default: Story = {
   args: {
-    imageSrc: "./assets/product_image.png",
+    imageSrc: "",
     name: "다이슨 슈퍼소닉 블루",
     reviewCount: 129,
     likeCount: 34,

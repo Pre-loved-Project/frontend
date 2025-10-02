@@ -17,7 +17,7 @@ type Story = StoryObj<typeof Profile>;
 
 export const Default: Story = {
   args: {
-    imageSrc: "./assets/profile.jpg",
+    imageSrc: "",
     nickname: "홍길동",
     bio: "간단한 자기소개만 있는 프로필입니다.",
   },
