@@ -1,7 +1,7 @@
 import Image from "next/image";
 
 import Button from "@/shared/ui/Button/Button";
-import DefaultProfileImage from "@/shared/images/profile.jpg";
+import DefaultProfileImage from "./assets/profile.jpg";
 
 interface ProfileProps {
   imageSrc: string;

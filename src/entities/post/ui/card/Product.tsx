@@ -1,6 +1,6 @@
 import Image from "next/image";
 
-import DefaultImage from "@/shared/images/product_image.png";
+import DefaultImage from "./assets/product_image.png";
 
 interface ProductProps {
   imageSrc: string;
