@@ -21,8 +21,7 @@ const meta: Meta<typeof PostCard> = {
 
 export default meta;
 type Story = StoryObj<typeof PostCard>;
-
-export const Default: Story = {
+export const Mobile: Story = {
   args: {
     postingId: 101,
     title: "다이슨 슈퍼소닉 블루 판매",
@@ -34,5 +33,44 @@ export const Default: Story = {
     chatCount: 2,
     viewCount: 101,
     thumbnail: "",
+  },
+  globals: {
+    viewport: { value: "mobile2", isRotated: false },
+  },
+};
+
+export const Tablet: Story = {
+  args: {
+    postingId: 101,
+    title: "다이슨 슈퍼소닉 블루 판매",
+    price: 1200000,
+    sellerId: 12,
+    content: "사용감 있어서 싸게 팝니다",
+    createdAt: "2025-09-13T15:23:45Z",
+    likeCount: 5,
+    chatCount: 2,
+    viewCount: 101,
+    thumbnail: "",
+  },
+  globals: {
+    viewport: { value: "tablet", isRotated: false },
+  },
+};
+
+export const Desktop: Story = {
+  args: {
+    postingId: 101,
+    title: "다이슨 슈퍼소닉 블루 판매",
+    price: 1200000,
+    sellerId: 12,
+    content: "사용감 있어서 싸게 팝니다",
+    createdAt: "2025-09-13T15:23:45Z",
+    likeCount: 5,
+    chatCount: 2,
+    viewCount: 101,
+    thumbnail: "",
+  },
+  globals: {
+    viewport: { value: "desktop", isRotated: false },
   },
 };
