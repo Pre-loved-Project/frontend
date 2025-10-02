@@ -3,6 +3,8 @@
 import React, { useState } from "react";
 import { Input } from "@/entities/user/ui/Input/Input";
 import Button from "@/shared/ui/Button/Button";
+import { useAuthStore } from "../../model/auth.store";
+import { apiFetch } from "@/shared/api/fetcher";
 
 type FormSize = "sm" | "md" | "lg";
 
@@ -24,12 +26,27 @@ export const LoginForm = ({
   const [emailError, setEmailError] = useState<string | null>(null);
   const [passwordError, setPasswordError] = useState<string | null>(null);
 
+  const { setAccessToken } = useAuthStore();
+
   //로그인 요청 제출 핸들러, 추후 API 호출 예정
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO : api 호출 및 검증 로직 추가, Zustand를 통한 토큰 저장 및 부모 핸들러 전달 로직 추가
+
     console.log("로그인 요청 폼 제출");
-    const res = {}; //
+    try {
+      const res = await apiFetch<{
+        accessToken: string;
+      }>("/auth/login", {
+        method: "POST",
+        body: JSON.stringify({ email, password }),
+        noAuth: true,
+      });
+
+      setAccessToken(res.accessToken);
+      onSuccess?.();
+    } catch {
+      onError?.("로그인에 실패하였습니다.\n이메일과 비밀번호를 확인해주세요.");
+    }
   };
 
   // 이메일 유효성 검사 함수
