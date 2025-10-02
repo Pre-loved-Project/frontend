@@ -6,11 +6,16 @@ const meta: Meta<typeof PostCard> = {
   component: PostCard,
   tags: ["autodocs"],
   argTypes: {
-    imageSrc: { control: "text" },
-    name: { control: "text" },
-    reviewCount: { control: "number" },
+    postingId: { control: "number" },
+    title: { control: "text" },
+    price: { control: "number" },
+    sellerId: { control: "number" },
+    content: { control: "text" },
+    createdAt: { control: "text" },
     likeCount: { control: "number" },
-    rating: { control: "number" },
+    chatCount: { control: "number" },
+    viewCount: { control: "number" },
+    thumbnail: { control: "text" },
   },
 };
 
@@ -19,10 +24,15 @@ type Story = StoryObj<typeof PostCard>;
 
 export const Default: Story = {
   args: {
-    imageSrc: "",
-    name: "다이슨 슈퍼소닉 블루",
-    reviewCount: 129,
-    likeCount: 34,
-    rating: 4.7,
+    postingId: 101,
+    title: "다이슨 슈퍼소닉 블루 판매",
+    price: 1200000,
+    sellerId: 12,
+    content: "사용감 있어서 싸게 팝니다",
+    createdAt: "2025-09-13T15:23:45Z",
+    likeCount: 5,
+    chatCount: 2,
+    viewCount: 101,
+    thumbnail: "",
   },
 };
