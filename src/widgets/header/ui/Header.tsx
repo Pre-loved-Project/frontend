@@ -1,62 +1,51 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 
-import SearchForm from "./SearchForm";
+import HeaderMobile from "./HeaderMobile";
+import HeaderMobileSearch from "./HeaderMobileSearch";
+import HeaderDesktop from "./HeaderDesktop";
+
+import { useAuthStore } from "@/features/auth/model/auth.store";
+
+const navItems = [
+  {
+    href: "/chat",
+    label: "채팅하기",
+    icon: "icons/chat.png",
+    hasDivider: false,
+  },
+  {
+    href: "/ai",
+    label: "분석하기",
+    icon: "icons/analyze.svg",
+    hasDivider: true,
+  },
+  {
+    href: "/my",
+    label: "마이페이지",
+    icon: "icons/user.png",
+    hasDivider: false,
+  },
+];
 
 const Header = () => {
   const [showSearch, setShowSearch] = useState(false);
+  const isLogined = useAuthStore((state) => state.isLogined);
+
   return (
     <header className="fixed top-0 left-0 w-full bg-[#1C1C22] h-[70px] px-[20px] md:h-[80px] md:px-[30px] xl:h-[100px]">
       <div className="flex h-full w-full items-center justify-between lg:mx-auto lg:max-w-[1200px]">
         {!showSearch ? (
-          <div className="flex w-full items-center justify-between md:hidden">
-            <button aria-label="menu" type="button" className="cursor-pointer">
-              <img src="icons/menu.svg" alt="메뉴" />
-            </button>
-            <div className="flex-1 text-center text-white">
-              <Link href="/">찰딱</Link>
-            </div>
-            <button
-              aria-label="search-button"
-              type="button"
-              className="cursor-pointer"
-              onClick={() => setShowSearch(true)}
-            >
-              <img src="icons/search.svg" alt="검색" />
-            </button>
-          </div>
+          <HeaderMobile setShowSearch={setShowSearch} />
         ) : (
-          <div className="flex w-full items-center md:hidden">
-            <SearchForm className="w-full" />
-            <button
-              aria-label="검색 닫기"
-              type="button"
-              className="cursor-pointer p-3"
-              onClick={() => setShowSearch(false)}
-            >
-              <img src="icons/delete.svg" alt="닫기" />
-            </button>
-          </div>
+          <HeaderMobileSearch setShowSearch={setShowSearch} />
         )}
 
-        <div className="hidden w-full items-center justify-between md:flex">
-          <div className="text-white">
-            <Link href="/">찰딱</Link>
-          </div>
-          <div className="flex items-center gap-[60px]">
-            <SearchForm />
-            <Link href="/" className="text-sm font-normal text-white">
-              로그인
-            </Link>
-            <Link href="/" className="text-sm font-normal text-white">
-              회원가입
-            </Link>
-          </div>
-        </div>
+        <HeaderDesktop isLogined={isLogined} navItems={navItems} />
       </div>
     </header>
   );
 };
+
 export default Header;
