@@ -13,7 +13,7 @@ const Header = () => {
         {!showSearch ? (
           <div className="flex w-full items-center justify-between md:hidden">
             <button aria-label="menu" type="button" className="cursor-pointer">
-              <img src="/icons/menu.svg" alt="메뉴" />
+              <img src="icons/menu.svg" alt="메뉴" />
             </button>
             <div className="flex-1 text-center text-white">
               <Link href="/">찰딱</Link>
@@ -24,7 +24,7 @@ const Header = () => {
               className="cursor-pointer"
               onClick={() => setShowSearch(true)}
             >
-              <img src="/icons/search.svg" alt="검색" />
+              <img src="icons/search.svg" alt="검색" />
             </button>
           </div>
         ) : (
@@ -36,7 +36,7 @@ const Header = () => {
               className="cursor-pointer p-3"
               onClick={() => setShowSearch(false)}
             >
-              <img src="/icons/delete.svg" alt="닫기" />
+              <img src="icons/delete.svg" alt="닫기" />
             </button>
           </div>
         )}
