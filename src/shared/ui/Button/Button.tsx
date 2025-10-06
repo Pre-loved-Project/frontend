@@ -1,27 +1,21 @@
+"use client";
+
 import React from "react";
 import cn from "@/shared/lib/cn";
 
 type ButtonVariant = "primary" | "secondary" | "tertiary";
-type ButtonSize = "sm" | "md" | "lg";
-type VariantStyle = {
-  default: string;
-  disabled: string;
-};
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: ButtonVariant;
-  size?: ButtonSize;
+  className?: string;
 }
 
-const sizeClassMap: Record<ButtonSize, string> = {
-  sm: "text-base w-[335px] h-[50px]",
-  md: "text-base w-[440px] h-[55px]",
-  lg: "text-lg w-[640px] h-[65px]",
-};
-
-const variantClassMap: Record<ButtonVariant, VariantStyle> = {
+const variantClassMap: Record<
+  ButtonVariant,
+  { default: string; disabled: string }
+> = {
   primary: {
-    default: "bg-linear-to-r from-[#5097fa] to-[#5363ff] text-[#F1F1F5]",
+    default: "bg-gradient-to-r from-[#5097fa] to-[#5363ff] text-[#F1F1F5]",
     disabled: "bg-[#353542] text-[#6E6E82]",
   },
   secondary: {
@@ -36,25 +30,28 @@ const variantClassMap: Record<ButtonVariant, VariantStyle> = {
 
 const Button = ({
   variant = "primary",
-  size = "sm",
   disabled = false,
   className,
   children,
   ...props
 }: ButtonProps) => {
-  const baseClasses = "font-semibold leading-none rounded-lg";
-
-  const mergedClasses = cn(
-    baseClasses,
-    sizeClassMap[size],
-    disabled
-      ? [variantClassMap[variant].disabled, "cursor-not-allowed"]
-      : [variantClassMap[variant].default, "cursor-pointer"],
-    className,
+  const baseClasses = cn(
+    "font-semibold leading-none rounded-lg flex items-center justify-center transition-all duration-200",
+    "w-[335px] h-[50px] text-base",
+    "md:w-[440px] md:h-[55px] md:text-base",
+    "xl:w-[640px] xl:h-[65px] xl:text-lg",
   );
 
+  const variantClasses = disabled
+    ? `${variantClassMap[variant].disabled} cursor-not-allowed`
+    : `${variantClassMap[variant].default} cursor-pointer`;
+
   return (
-    <button className={mergedClasses} disabled={disabled} {...props}>
+    <button
+      className={cn(baseClasses, variantClasses, className)}
+      disabled={disabled}
+      {...props}
+    >
       {children}
     </button>
   );

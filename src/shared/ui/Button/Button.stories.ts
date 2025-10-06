@@ -15,10 +15,6 @@ const meta = {
       control: { type: "radio" },
       options: ["primary", "secondary", "tertiary"],
     },
-    size: {
-      control: { type: "radio" },
-      options: ["sm", "md", "lg"],
-    },
     disabled: {
       control: "boolean",
     },
