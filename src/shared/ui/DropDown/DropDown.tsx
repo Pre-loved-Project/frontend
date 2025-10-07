@@ -16,7 +16,7 @@ interface DropDownProps {
   value?: string | number;
   onChange: (value: string | number) => void;
   placeholder?: string;
-  className: string;
+  className?: string;
 }
 
 export const DropDown = ({
@@ -81,6 +81,7 @@ export const DropDown = ({
           "w-[335px] p-[10px] gap-[5px]",
           "md:w-[360px] md:p-[10px] md:gap-[5px]",
           "xl:w-[400px] xl:p-[10px] xl:gap-[5px]",
+          className,
           open
             ? "opacity-100 scale-y-100 pointer-events-auto"
             : "opacity-0 scale-y-0 pointer-events-none",
@@ -99,6 +100,7 @@ export const DropDown = ({
               "w-[380px] p-[10px] gap-[5px]",
               "md:w-[360px] md:p-[10px] md:gap-[5px]",
               "xl:w-[400px] xl:p-[10px] xl:gap-[5px]",
+              className,
             )}
           >
             {opt.label}
