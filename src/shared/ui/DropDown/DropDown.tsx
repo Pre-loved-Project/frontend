@@ -6,84 +6,28 @@ import Image from "next/image";
 import arrowDown from "@/shared/images/arrow-down.svg";
 import arrowUp from "@/shared/images/arrow-up.svg";
 
-type DropDownSize = "sm" | "md" | "lg";
-type DropDownWidthSize = "long" | "short";
-
 interface Option {
   label: string;
   value: string | number;
 }
 
 interface DropDownProps {
-  size?: DropDownSize;
-  widthSize?: DropDownWidthSize;
   options: Option[];
   value?: string | number;
   onChange: (value: string | number) => void;
   placeholder?: string;
+  className: string;
 }
 
-const styleMap: Record<
-  DropDownSize,
-  Record<
-    DropDownWidthSize,
-    {
-      wrapper: string;
-      optionWrapper: string;
-      option: string;
-    }
-  >
-> = {
-  lg: {
-    long: {
-      wrapper: "w-[400px] h-[70px] text-[16px]",
-      optionWrapper: "w-[400px] p-[10px] gap-[5px]",
-      option: "w-[380px] h-[34px] text-[16px]",
-    },
-    short: {
-      wrapper: "w-[200px] h-[70px] text-[16px]",
-      optionWrapper: "w-[200px] p-[10px] gap-[5px]",
-      option: "w-[190px] h-[34px] text-[16px]",
-    },
-  },
-  md: {
-    long: {
-      wrapper: "w-[360px] h-[60px] text-[14px]",
-      optionWrapper: "w-[360px] p-[10px] gap-[5px]",
-      option: "w-[320px] h-[32px] text-[14px]",
-    },
-    short: {
-      wrapper: "w-[140px] h-[60px] text-[14px]",
-      optionWrapper: "w-[140px] p-[10px] gap-[5px]",
-      option: "w-[130px] h-[32px] text-[14px]",
-    },
-  },
-  sm: {
-    long: {
-      wrapper: "w-[335px] h-[55px] text-[14px]",
-      optionWrapper: "w-[335px] p-[10px] gap-[5px]",
-      option: "w-[310px] h-[32px] text-[14px]",
-    },
-    short: {
-      wrapper: "w-[100px] h-[55px] text-[14px]",
-      optionWrapper: "w-[100px] p-[10px] gap-[5px]",
-      option: "w-[90px] h-[32px] text-[14px]",
-    },
-  },
-};
-
 export const DropDown = ({
-  size = "lg",
-  widthSize = "long",
   options,
   value,
   onChange,
   placeholder = "선택하세요",
+  className,
 }: DropDownProps) => {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
-
-  const { wrapper, optionWrapper, option } = styleMap[size][widthSize];
 
   // 외부 클릭 시 닫힘
   useEffect(() => {
@@ -106,7 +50,10 @@ export const DropDown = ({
         className={cn(
           "flex items-center justify-between rounded-lg border bg-black-800 px-4 cursor-pointer transition-colors",
           open ? "border-blue" : "border-gray-400",
-          wrapper,
+          "w-[335px] h-[55px] text-[14px]",
+          "md:w-[360px] md:h-[60px] md:text-[14px]",
+          "xl:w-[400px] xl:h-[70px] xl:text-[16px]",
+          className,
         )}
       >
         <span className={value ? "text-white" : "text-gray-400"}>
@@ -117,8 +64,9 @@ export const DropDown = ({
         <Image
           src={open ? arrowUp : arrowDown}
           alt="arrow"
-          width={10}
-          height={10}
+          width={16}
+          height={16}
+          className="w-[12px] h-[12px] md:w-[14px] md:h-[14px] xl:w-[16px] xl:h-[16px]"
         />
       </div>
 
@@ -130,7 +78,9 @@ export const DropDown = ({
           "origin-top overflow-hidden transform-gpu",
           "transition-[opacity,transform] duration-200",
           "max-h-60 overflow-y-auto",
-          optionWrapper,
+          "w-[335px] p-[10px] gap-[5px]",
+          "md:w-[360px] md:p-[10px] md:gap-[5px]",
+          "xl:w-[400px] xl:p-[10px] xl:gap-[5px]",
           open
             ? "opacity-100 scale-y-100 pointer-events-auto"
             : "opacity-0 scale-y-0 pointer-events-none",
@@ -145,8 +95,10 @@ export const DropDown = ({
             }}
             className={cn(
               "mt-1 flex items-center px-2 rounded-md cursor-pointer transition-colors",
-              option,
               "text-gray-400 hover:text-white hover:bg-gray-600",
+              "w-[380px] p-[10px] gap-[5px]",
+              "md:w-[360px] md:p-[10px] md:gap-[5px]",
+              "xl:w-[400px] xl:p-[10px] xl:gap-[5px]",
             )}
           >
             {opt.label}

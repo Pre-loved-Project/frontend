@@ -15,14 +15,6 @@ const meta: Meta<typeof DropDown> = {
     },
   },
   argTypes: {
-    size: {
-      control: { type: "radio" },
-      options: ["sm", "md", "lg"],
-    },
-    widthSize: {
-      control: { type: "radio" },
-      options: ["long", "short"],
-    },
     value: {
       control: "text",
     },
@@ -71,46 +63,5 @@ export const Main: Story = {
         <div className="text-black-900">선택된 값: {value || "없음"}</div>
       </div>
     );
-  },
-  args: {
-    size: "lg",
-    widthSize: "long",
-  },
-};
-
-// --- Size Variants ---
-export const Large: Story = {
-  args: {
-    size: "lg",
-    widthSize: "long",
-  },
-};
-
-export const Medium: Story = {
-  args: {
-    size: "md",
-    widthSize: "long",
-  },
-};
-
-export const Small: Story = {
-  args: {
-    size: "sm",
-    widthSize: "long",
-  },
-};
-
-// --- Width Variants ---
-export const Long: Story = {
-  args: {
-    size: "lg",
-    widthSize: "long",
-  },
-};
-
-export const Short: Story = {
-  args: {
-    size: "lg",
-    widthSize: "short",
   },
 };
