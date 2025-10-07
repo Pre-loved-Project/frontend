@@ -36,7 +36,7 @@ const SearchForm = ({
         aria-label="search-box"
         autoComplete="off"
         autoFocus={autoFocus}
-        className="text-white placeholder-gray-600 outline-none"
+        className="text-white placeholder-gray-600 outline-none w-full"
       />
     </form>
   );
