@@ -40,20 +40,24 @@ const PostCard = ({
           <p className="text-xs text-[#9FA6B2] md:text-sm">
             {price?.toLocaleString()} 원
           </p>
-          <div className="flex flex-col gap-[5px] md:flex-row md:justify-between">
-            <dl className="flex gap-[10px] text-xs font-light leading-none text-[#6E6E82] md:text-[14px] xl:text-[16px]">
-              <div className="flex gap-[5px]">
-                <dt>채팅</dt>
-                <dd>{chatCount}</dd>
-              </div>
-              <div className="flex gap-[5px]">
-                <dt>조회</dt>
-                <dd>{viewCount}</dd>
-              </div>
-            </dl>
-            <p className="flex gap-[2px] text-xs font-light leading-none text-[#6E6E82] md:text-[14px] xl:text-[16px]">
-              <span aria-hidden="true">❤️</span> {likeCount}
-            </p>
+          <div className="w-full flex flex-col gap-[5px] md:flex-row md:justify-between text-xs font-light leading-none text-[#6E6E82] md:text-[14px] xl:text-[16px]">
+            <div className="flex gap-[5px]">
+              <span aria-label="조회 수" title="조회 수">
+                조회
+              </span>
+              <span>{viewCount}</span>
+            </div>
+            <div className="flex gap-[5px]">
+              <span aria-label="채팅 수" title="채팅 수">
+                💬
+              </span>
+              <span>{chatCount}</span>
+
+              <span aria-label="좋아요 수" title="좋아요 수">
+                ❤️
+              </span>
+              <span>{likeCount}</span>
+            </div>
           </div>
         </div>
       </div>

@@ -18,7 +18,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="kr" className={myFont.className}>
-      <body>
+      <body className="pt-[70px] md:pt-[80px] xl:pt-[100px]">
         <Header />
         {children}
       </body>
