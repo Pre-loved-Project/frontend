@@ -7,7 +7,6 @@ type ButtonVariant = "primary" | "secondary" | "tertiary";
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: ButtonVariant;
-  className?: string;
 }
 
 const variantClassMap: Record<
@@ -15,7 +14,7 @@ const variantClassMap: Record<
   { default: string; disabled: string }
 > = {
   primary: {
-    default: "bg-gradient-to-r from-[#5097fa] to-[#5363ff] text-[#F1F1F5]",
+    default: "bg-linear-to-r from-[#5097fa] to-[#5363ff] text-[#F1F1F5]",
     disabled: "bg-[#353542] text-[#6E6E82]",
   },
   secondary: {
