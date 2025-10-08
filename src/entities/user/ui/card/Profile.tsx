@@ -66,10 +66,10 @@ const Profile = ({ imageSrc, nickname, bio, stats }: ProfileProps) => {
         </dl>
 
         <div className="flex flex-col w-full gap-[10px] md:gap-[15px] lg:gap-[20px]">
-          <Button className="w-full">프로필 편집</Button>
+          <Button className="w-full md:w-full xl:w-full">프로필 편집</Button>
           <Button
             variant="tertiary"
-            className="w-full"
+            className="w-full md:w-full xl:w-full"
             onClick={() => {
               logout();
               router.push("/login");
