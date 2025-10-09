@@ -26,10 +26,10 @@ export default function SignUpPage() {
 
       {!!errorMessage && (
         <Modal
-          size="md"
           message={errorMessage}
           buttonText="확인"
           onClick={() => setErrorMessage(null)}
+          className=""
         />
       )}
     </div>
