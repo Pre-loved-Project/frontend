@@ -1,0 +1,11 @@
+import{j as e}from"./jsx-runtime-CKSxVlmJ.js";import{r as p}from"./iframe-DhILOKFf.js";import{c as a}from"./cn-DWDuF9m2.js";import{B as i}from"./Button-DmSgHXRH.js";import"./preload-helper-B4AOKawx.js";const o=({message:s,buttonText:n="확인",onClick:t,className:c})=>e.jsx("div",{className:"fixed inset-0 flex items-center justify-center bg-black/50 z-50",children:e.jsxs("div",{className:a("bg-black-900 rounded-lg shadow-lg flex flex-col items-center justify-center gap-10 p-6 text-center","w-[320px] h-[180px]","md:w-[420px] md:h-[190px]","xl:w-[500px] xl:h-[200px]",c),children:[e.jsx("p",{className:a("text-white whitespace-pre-line","text-[14px] md:text-[16px] xl:text-[18px]"),children:s}),e.jsx(i,{variant:"primary",onClick:t,className:a("w-[200px]","md:w-[300px]","xl:w-[400px]"),children:n})]})});o.__docgenInfo={description:"",methods:[],displayName:"Modal",props:{message:{required:!0,tsType:{name:"string"},description:""},buttonText:{required:!1,tsType:{name:"string"},description:"",defaultValue:{value:'"확인"',computed:!1}},onClick:{required:!0,tsType:{name:"signature",type:"function",raw:"() => void",signature:{arguments:[],return:{name:"void"}}},description:""},className:{required:!0,tsType:{name:"string"},description:""}}};const f={title:"COMPONENTS/Modal",component:o,tags:["autodocs"],parameters:{docs:{story:{inline:!1,iframeHeight:700}}},argTypes:{message:{control:"text"},buttonText:{control:"text"},onClick:{action:"clicked"}}},r={render:s=>{const[n,t]=p.useState(!1);return e.jsxs("div",{children:[e.jsx(i,{variant:"primary",onClick:()=>t(!0),children:"모달 열기"}),n&&e.jsx(o,{...s,onClick:()=>t(!1),message:"이 모달은 스토리에서 열고 닫을 수 있습니다.",buttonText:"닫기"})]})}};r.parameters={...r.parameters,docs:{...r.parameters?.docs,source:{originalSource:`{
+  render: args => {
+    const [open, setOpen] = useState(false);
+    return <div>
+        <Button variant="primary" onClick={() => setOpen(true)}>
+          모달 열기
+        </Button>
+        {open && <Modal {...args} onClick={() => setOpen(false)} message="이 모달은 스토리에서 열고 닫을 수 있습니다." buttonText="닫기" />}
+      </div>;
+  }
+}`,...r.parameters?.docs?.source}}};const g=["Interactive"];export{r as Interactive,g as __namedExportsOrder,f as default};
