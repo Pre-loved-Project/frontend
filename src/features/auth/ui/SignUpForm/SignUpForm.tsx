@@ -5,20 +5,14 @@ import { Input } from "@/entities/user/ui/Input/Input";
 import { DropDown } from "@/shared/ui/DropDown/DropDown";
 import Button from "@/shared/ui/Button/Button";
 import { apiFetch } from "@/shared/api/fetcher";
-
-type FormSize = "sm" | "md" | "lg";
+import cn from "@/shared/lib/cn";
 
 interface SignUpFormProps {
-  size?: FormSize;
   onSuccess?: () => void;
   onError?: (msg: string) => void;
 }
 
-export const SignUpForm = ({
-  size = "lg",
-  onSuccess,
-  onError,
-}: SignUpFormProps) => {
+export const SignUpForm = ({ onSuccess, onError }: SignUpFormProps) => {
   //input text 상태
   const [email, setEmail] = useState("");
   const [nickname, setNickname] = useState("");
@@ -174,11 +168,11 @@ export const SignUpForm = ({
       }
     }
   };
+  const dropDownWidth = cn("w-[100px]", "md:w-[135px]", "xl:w-[200px]");
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-6">
       <Input
-        size={size}
         label="이메일"
         placeholder="이메일을 입력해 주세요"
         isError={!!emailError}
@@ -187,7 +181,6 @@ export const SignUpForm = ({
       />
 
       <Input
-        size={size}
         label="닉네임"
         placeholder="닉네임을 입력해 주세요"
         message="최대 10자 가능"
@@ -197,7 +190,6 @@ export const SignUpForm = ({
       />
 
       <Input
-        size={size}
         label="비밀번호"
         placeholder="비밀번호를 입력해 주세요"
         message="최소 8자 이상"
@@ -208,7 +200,6 @@ export const SignUpForm = ({
       />
 
       <Input
-        size={size}
         label="비밀번호 확인"
         placeholder="비밀번호를 한번 더 입력해 주세요"
         isHiddenable
@@ -224,8 +215,6 @@ export const SignUpForm = ({
         </label>
         <div className="flex gap-4">
           <DropDown
-            size={size}
-            widthSize="short"
             options={yearOptions}
             value={year}
             onChange={(val) => {
@@ -234,10 +223,9 @@ export const SignUpForm = ({
               setDay("");
             }}
             placeholder="연도"
+            className={dropDownWidth}
           />
           <DropDown
-            size={size}
-            widthSize="short"
             options={monthOptions()}
             value={month}
             onChange={(val) => {
@@ -245,21 +233,20 @@ export const SignUpForm = ({
               setDay("");
             }}
             placeholder="월"
+            className={dropDownWidth}
           />
           <DropDown
-            size={size}
-            widthSize="short"
             options={dayOptions()}
             value={day}
             onChange={(val) => setDay(val as number)}
             placeholder="일"
+            className={dropDownWidth}
           />
         </div>
       </div>
 
       <Button
         variant="primary"
-        size={size}
         type="submit"
         className="mt-6"
         disabled={

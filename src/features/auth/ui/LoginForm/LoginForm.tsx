@@ -82,7 +82,6 @@ export const LoginForm = ({
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-6">
       <Input
-        size={size}
         label="이메일"
         placeholder="이메일을 입력해주세요"
         isError={!!emailError}
@@ -91,7 +90,6 @@ export const LoginForm = ({
       />
 
       <Input
-        size={size}
         label="비밀번호"
         placeholder="비밀번호를 입력해주세요"
         message="최소 8자 이상"
@@ -103,7 +101,6 @@ export const LoginForm = ({
 
       <Button
         variant="primary"
-        size={size}
         type="submit"
         disabled={
           !email || emailError !== null || !password || passwordError !== null
