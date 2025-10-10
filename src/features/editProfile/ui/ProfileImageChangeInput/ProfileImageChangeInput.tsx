@@ -6,15 +6,17 @@ import cn from "@/shared/lib/cn";
 import imageSelectIcon from "@/shared/images/image-select.svg";
 
 interface ProfileImageChangeInputProps {
+  imgUrl?: string;
   className?: string;
   onChange?: (file: File | null) => void;
 }
 
 export const ProfileImageChangeInput = ({
+  imgUrl,
   className,
   onChange,
 }: ProfileImageChangeInputProps) => {
-  const [preview, setPreview] = useState<string | null>(null);
+  const [preview, setPreview] = useState<string | null>(imgUrl ?? null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
