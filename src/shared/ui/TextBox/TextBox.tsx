@@ -18,7 +18,7 @@ export const TextBox = ({
   onChange,
   ...props
 }: TextBoxProps) => {
-  const [text, setText] = useState("");
+  const [text, setText] = useState(value ?? "");
   return (
     <div
       className={cn(
