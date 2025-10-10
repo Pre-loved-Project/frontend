@@ -44,7 +44,7 @@ export const Input = ({
       {label && (
         <label
           className={cn(
-            "font-medium text-black-800",
+            "text-black-800 font-medium",
             "text-[14px] md:text-[16px] xl:text-[16px]",
           )}
         >
@@ -58,6 +58,7 @@ export const Input = ({
         isHiddenable={isHiddenable}
         isError={isError}
         onChange={onChange}
+        className={className}
       />
 
       {helperText && (
