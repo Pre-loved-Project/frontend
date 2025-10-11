@@ -63,7 +63,7 @@ export const ProfileEditModal = ({
         onClick={onClose}
         className="absolute top-3 right-3"
       >
-        <Image src="/icons/delete.svg" alt="닫기" width={24} height={24} />
+        <Image src="icons/delete.svg" alt="닫기" width={24} height={24} />
       </button>
 
       <h2 className="mb-6 text-lg font-semibold text-white">프로필 수정</h2>
