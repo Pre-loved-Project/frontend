@@ -25,8 +25,9 @@ const Tab = ({ options, selected, onChange }: TabSortProps) => {
       <div className="flex w-fit items-center justify-center xl:hidden">
         <button
           type="button"
-          aria-haspopup="listbox"
+          aria-haspopup="dialog"
           aria-expanded={open}
+          aria-controls="sort-options"
           className="flex items-center justify-between p-[5px] text-[14px] leading-none font-[400] text-white"
           onClick={() => setOpen((prev) => !prev)}
         >
@@ -40,7 +41,7 @@ const Tab = ({ options, selected, onChange }: TabSortProps) => {
         </button>
 
         {open && (
-          <div className="fixed inset-0 z-50">
+          <dialog open className="fixed inset-0 z-50">
             <div
               className={`absolute inset-0 bg-black/50 transition-opacity duration-300 ${
                 animate ? "opacity-100" : "opacity-0"
@@ -50,20 +51,22 @@ const Tab = ({ options, selected, onChange }: TabSortProps) => {
             />
 
             <div
-              role="tablist"
-              aria-label="상품 보기 선택"
+              id="sort-options"
+              role="listbox"
+              aria-label="상품 분류 선택"
               className={`absolute bottom-0 left-0 w-full rounded-t-2xl bg-[#252530] p-5 transition-transform duration-300 ${
                 animate ? "translate-y-0" : "translate-y-full"
               }`}
             >
               <div className="mx-auto mb-5 h-1.5 w-10 rounded-full bg-gray-500" />
-              <ul className="space-y-3 text-center text-white">
+              <ul className="space-y-3">
                 {options.map(({ label, value }) => (
-                  <li key={value} role="none">
+                  <li key={value}>
                     <button
-                      role="tab"
+                      type="button"
+                      role="option"
                       aria-selected={selected === value}
-                      className={`w-full rounded-lg py-2 ${
+                      className={`w-full rounded-lg py-2 text-center text-white ${
                         selected === value
                           ? "bg-[#353542]"
                           : "hover:bg-[#353542]/70"
@@ -79,7 +82,7 @@ const Tab = ({ options, selected, onChange }: TabSortProps) => {
                 ))}
               </ul>
             </div>
-          </div>
+          </dialog>
         )}
       </div>
       <div role="tablist" className="hidden flex-row xl:flex">
@@ -88,6 +91,7 @@ const Tab = ({ options, selected, onChange }: TabSortProps) => {
             key={value}
             role="tab"
             aria-selected={selected === value}
+            aria-controls={`panel-${value}`}
             id={`tab-${value}`}
             tabIndex={selected === value ? 0 : -1}
             className={cn(
