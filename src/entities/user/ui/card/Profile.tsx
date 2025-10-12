@@ -14,6 +14,7 @@ export interface ProfileProps {
   category?: string;
   sellCount: number;
   buyCount: number;
+  onEdit?: () => void;
 }
 
 const Profile = ({
@@ -23,6 +24,7 @@ const Profile = ({
   category,
   sellCount,
   buyCount,
+  onEdit,
 }: ProfileProps) => {
   const router = useRouter();
   const { logout } = useAuthStore();
@@ -72,7 +74,9 @@ const Profile = ({
         </div>
 
         <div className="flex w-full flex-col gap-[10px] md:gap-[15px] lg:gap-[20px]">
-          <Button className="w-full md:w-full xl:w-full">프로필 편집</Button>
+          <Button className="w-full md:w-full xl:w-full" onClick={onEdit}>
+            프로필 편집
+          </Button>
           <Button
             variant="tertiary"
             className="w-full md:w-full xl:w-full"
