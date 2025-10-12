@@ -29,7 +29,7 @@ const Profile = ({ imageSrc, nickname, bio, stats }: ProfileProps) => {
   ];
 
   return (
-    <article className="flex h-[466px] w-[335px] items-center justify-center rounded-[12px] border border-[#353542] bg-[#252530] px-[20px] py-[30px] md:h-[451px] md:w-[509px] md:px-[30px] xl:h-[603px] xl:w-[340px] xl:px-[20px] xl:pt-[40px]">
+    <article className="flex h-[556px] w-[335px] items-center justify-center rounded-[12px] border border-[#353542] bg-[#252530] px-[20px] py-[30px] md:h-[601px] md:w-[509px] md:px-[30px] xl:h-[753px] xl:w-[340px] xl:px-[20px] xl:pt-[40px]">
       <div className="flex h-full w-full flex-col items-center justify-between">
         <Image
           src={imageSrc || DefaultProfileImage}
@@ -48,22 +48,29 @@ const Profile = ({ imageSrc, nickname, bio, stats }: ProfileProps) => {
           </p>
         </div>
 
-        <dl className="flex w-full text-center">
-          {statItems.map((item, idx) => (
-            <div key={item.label} className="relative flex-1">
-              <dd className="text-[18px] leading-none font-semibold text-[#F1F1F5]">
-                {item.value}
+        <div className="w-full">
+          <div className="mb-2 flex justify-between text-center">
+            <div className="relative flex-1">
+              <dd className="text-[18px] font-semibold text-[#F1F1F5]">
+                {stats.purchase}
               </dd>
-              <dt className="mt-[10px] text-[14px] leading-none font-[400] text-[#9FA6B2]">
-                {item.label}
-              </dt>
-
-              {idx < statItems.length - 1 && (
-                <span className="absolute top-0 right-0 h-full w-[1px] bg-[#353542]" />
-              )}
+              <dt className="mt-1 text-[14px] text-[#9FA6B2]">구매내역</dt>
+              <span className="absolute top-0 right-0 h-full w-[1px] bg-[#353542]" />
             </div>
-          ))}
-        </dl>
+            <div className="relative flex-1">
+              <dd className="text-[18px] font-semibold text-[#F1F1F5]">
+                {stats.sales}
+              </dd>
+              <dt className="mt-1 text-[14px] text-[#9FA6B2]">판매내역</dt>
+            </div>
+          </div>
+        </div>
+        <div className="w-full text-center">
+          <dd className="text-[18px] font-semibold text-[#F1F1F5]">
+            {stats.category}
+          </dd>
+          <dt className="mt-1 text-[14px] text-[#9FA6B2]">관심 카테고리</dt>
+        </div>
 
         <div className="flex w-full flex-col gap-[10px] md:gap-[15px] lg:gap-[20px]">
           <Button className="w-full md:w-full xl:w-full">프로필 편집</Button>
