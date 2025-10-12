@@ -8,6 +8,8 @@ import { Input } from "@/entities/user/ui/Input/Input";
 import { TextBox } from "@/shared/ui/TextBox/TextBox";
 import { DropDown } from "@/shared/ui/DropDown/DropDown";
 import Button from "@/shared/ui/Button/Button";
+import { apiFetch } from "@/shared/api/fetcher";
+import { uploadImage } from "@/shared/api/uploadImage";
 
 interface ProfileEditModalProps {
   imageUrl?: string;
@@ -17,7 +19,7 @@ interface ProfileEditModalProps {
   className?: string;
   onClose?: () => void;
   onSave?: () => void;
-  onError?: () => void;
+  onError?: (e: Error) => void;
 }
 
 export const ProfileEditModal = ({
@@ -34,6 +36,7 @@ export const ProfileEditModal = ({
   const [nickname, setNickname] = useState(initialNickname);
   const [introduction, setIntroduction] = useState(initialIntroduction ?? "");
   const [category, setCategory] = useState(initialCategory ?? "");
+  const [loading, setLoading] = useState(false);
 
   const categoryOptions = [
     "전자제품/가전제품",
@@ -47,6 +50,40 @@ export const ProfileEditModal = ({
     "리빙/가구/생활",
     "반려동물/취미",
   ].map((cat) => ({ label: cat, value: cat }));
+
+  const handleSave = async () => {
+    try {
+      setLoading(true);
+
+      let uploadedImageUrl = imageUrl;
+
+      // 이미지 새로 업로드한 경우
+      if (imageFile) {
+        uploadedImageUrl = await uploadImage(imageFile);
+      }
+
+      // null 아닌 값만 body에 포함
+      const updateBody: Record<string, string> = {};
+      if (nickname.trim()) updateBody.nickname = nickname;
+      if (introduction.trim()) updateBody.introduction = introduction;
+      if (uploadedImageUrl) updateBody.imageUrl = uploadedImageUrl;
+      if (category.trim()) updateBody.category = category;
+
+      await apiFetch("/api/users/me", {
+        method: "PATCH",
+        body: JSON.stringify(updateBody),
+      });
+
+      onSave?.();
+    } catch (error) {
+      if (error instanceof Error) {
+        console.error("프로필 수정 실패:", error);
+        onError?.(error);
+      } else onError?.(new Error(String(error)));
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div
@@ -106,11 +143,10 @@ export const ProfileEditModal = ({
         <Button
           className="mt-3 md:w-[440px]"
           variant="primary"
-          onClick={() => {
-            //TODO: IMG 저장 API , 유저 정보 수정 API 호출,
-          }}
+          disabled={loading}
+          onClick={handleSave}
         >
-          저장하기
+          {loading ? "저장 중..." : "저장하기"}
         </Button>
       </div>
     </div>
