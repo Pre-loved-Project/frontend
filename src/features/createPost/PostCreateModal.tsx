@@ -1,0 +1,199 @@
+"use client";
+
+import React, { useState, useRef } from "react";
+import cn from "@/shared/lib/cn";
+import { TextField } from "@/shared/ui/TextField/TextField";
+import { TextBox } from "@/shared/ui/TextBox/TextBox";
+import { DropDown } from "@/shared/ui/DropDown/DropDown";
+import Button from "@/shared/ui/Button/Button";
+import Image from "next/image";
+import imageSelectIcon from "@/shared/images/image-select.svg";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Navigation } from "swiper/modules";
+import "swiper/css";
+import "swiper/css/navigation";
+import "swiper/css/pagination";
+
+interface PostAddModalProps {
+  className?: string;
+  onClose?: () => void;
+  onSubmit?: (data: {
+    images: File[];
+    title: string;
+    price: number;
+    category: string;
+    description: string;
+  }) => void;
+}
+
+export const PostCreateModal = ({
+  className,
+  onClose,
+  onSubmit,
+}: PostAddModalProps) => {
+  const [images, setImages] = useState<File[]>([]);
+  const [title, setTitle] = useState("");
+  const [price, setPrice] = useState<number | "">("");
+  const [category, setCategory] = useState("");
+  const [description, setDescription] = useState("");
+
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const categoryOptions = [
+    "전자제품/가전제품",
+    "식료품",
+    "의류/패션",
+    "스포츠/레저",
+    "뷰티/화장품",
+    "게임",
+    "도서/음반/문구",
+    "티켓/쿠폰",
+    "리빙/가구/생활",
+    "반려동물/취미",
+  ].map((cat) => ({ label: cat, value: cat }));
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files) {
+      setImages((prev) => [...prev, ...Array.from(files)]);
+      e.target.value = ""; // input 값 초기화
+    }
+  };
+
+  const handleRemoveImage = (index: number) => {
+    setImages((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const handleSubmit = () => {
+    if (!title || !price || !category) return;
+    onSubmit?.({ images, title, price: Number(price), category, description });
+  };
+
+  const widthClass = "w-[290px] md:w-[510px] xl:w-[540px]";
+
+  return (
+    <div
+      className={cn(
+        "bg-black-950 fixed inset-0 z-50 flex items-center justify-center",
+        "overflow-auto p-4",
+        className,
+      )}
+    >
+      <div className="bg-black-900 bg-black-800 relative flex w-[335px] max-w-[620px] flex-col gap-7 rounded-lg p-6 md:w-[590px] md:p-10 xl:w-[620px] xl:p-10">
+        <button
+          type="button"
+          className="absolute top-4 right-4"
+          onClick={onClose}
+        >
+          <Image src="icons/delete.svg" alt="닫기" width={24} height={24} />
+        </button>
+
+        <h2 className="text-lg font-semibold text-white">게시물 추가</h2>
+
+        {/* 이미지 추가 + 미리보기 */}
+        <div className="flex items-center gap-4">
+          {/* 이미지 추가 버튼 */}
+          <label
+            className="bg-black-800 flex h-[50px] w-[50px] shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-lg md:h-[70px] md:w-[70px] xl:h-[70px] xl:w-[70px]"
+            onClick={() => inputRef.current?.click()}
+          >
+            <Image
+              src={imageSelectIcon}
+              alt="이미지 선택"
+              className="h-8 w-8"
+              width={32}
+              height={32}
+            />
+          </label>
+          <input
+            ref={inputRef}
+            type="file"
+            accept="image/*"
+            multiple
+            onChange={handleFileSelect}
+            className="hidden"
+          />
+
+          {images.length > 0 && (
+            <Swiper
+              modules={[Navigation]}
+              spaceBetween={8}
+              slidesPerView={3}
+              navigation={true}
+              className="bg-black-800 flex-1 items-center rounded-lg py-2"
+            >
+              {images.map((file, idx) => (
+                <SwiperSlide
+                  key={idx}
+                  style={{ width: 90, height: 120 }}
+                  className="flex items-center justify-center"
+                >
+                  <div className="lx:my-5 relative mx-auto my-7 h-[70px] w-[70px] md:my-3 md:h-[100px] md:w-[100px] xl:h-[100px] xl:w-[100px]">
+                    <Image
+                      src={URL.createObjectURL(file)}
+                      alt={`preview-${idx}`}
+                      fill
+                      style={{ objectFit: "cover" }}
+                      className="rounded-lg"
+                    />
+                    <button
+                      type="button"
+                      className="absolute top-0.5 right-0.5 rounded-full bg-black/50 p-1"
+                      onClick={() => handleRemoveImage(idx)}
+                    >
+                      <Image
+                        src="icons/delete.svg"
+                        alt="삭제"
+                        width={10}
+                        height={10}
+                      />
+                    </button>
+                  </div>
+                </SwiperSlide>
+              ))}
+            </Swiper>
+          )}
+        </div>
+
+        <TextField
+          placeholder="제목을 입력해주세요"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          className={widthClass}
+        />
+
+        <TextField
+          placeholder="가격을 입력해주세요"
+          type="number"
+          value={price}
+          onChange={(e) => setPrice(Number(e.target.value))}
+          className={widthClass}
+        />
+
+        <DropDown
+          placeholder="카테고리"
+          value={category}
+          onChange={(val) => setCategory(val as string)}
+          options={categoryOptions}
+          className={widthClass}
+        />
+
+        <TextBox
+          value={description}
+          placeholder="상품 설명을 입력하세요..."
+          onChange={(e) => setDescription(e.target.value)}
+          className={widthClass}
+        />
+
+        <Button
+          variant="primary"
+          disabled={!title || !price || !category || !description}
+          onClick={handleSubmit}
+          className={cn("mt-4", widthClass)}
+        >
+          추가하기
+        </Button>
+      </div>
+    </div>
+  );
+};
