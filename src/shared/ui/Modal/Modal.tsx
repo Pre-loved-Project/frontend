@@ -4,7 +4,7 @@ import React from "react";
 import cn from "@/shared/lib/cn";
 import Button from "../Button/Button";
 
-interface ModalProps {
+export interface ModalProps {
   message: string;
   buttonText?: string;
   onClick: () => void;
