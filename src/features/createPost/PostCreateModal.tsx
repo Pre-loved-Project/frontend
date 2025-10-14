@@ -117,18 +117,17 @@ export const PostCreateModal = ({
           {images.length > 0 && (
             <Swiper
               modules={[Navigation]}
-              spaceBetween={8}
+              spaceBetween={0}
               slidesPerView={3}
               navigation={true}
-              className="bg-black-800 flex-1 items-center rounded-lg py-2"
+              className="flex flex-1 items-center justify-center rounded-lg"
             >
               {images.map((file, idx) => (
                 <SwiperSlide
                   key={idx}
-                  style={{ width: 90, height: 120 }}
-                  className="flex items-center justify-center"
+                  className="xl:w-[100px]bg-blue flex h-[70px] w-[70px] items-center justify-center md:h-[100px] md:w-[100px] xl:h-[100px]"
                 >
-                  <div className="lx:my-5 relative mx-auto my-7 h-[70px] w-[70px] md:my-3 md:h-[100px] md:w-[100px] xl:h-[100px] xl:w-[100px]">
+                  <div className="relative mx-auto h-[70px] w-[70px] md:h-[100px] md:w-[100px] xl:h-[100px] xl:w-[100px]">
                     <Image
                       src={URL.createObjectURL(file)}
                       alt={`preview-${idx}`}
@@ -166,7 +165,10 @@ export const PostCreateModal = ({
           placeholder="가격을 입력해주세요"
           type="number"
           value={price}
-          onChange={(e) => setPrice(Number(e.target.value))}
+          onChange={(e) => {
+            const value = Number(e.target.value);
+            setPrice(Number.isNaN(value) ? "" : value);
+          }}
           className={widthClass}
         />
 
