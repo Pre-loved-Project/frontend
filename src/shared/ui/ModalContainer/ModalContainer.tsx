@@ -16,12 +16,9 @@ export const ModalContainer = () => {
 
   if (!activeKey) return null;
   const ModalComponent = modalFactory[activeKey];
+
   const modalElement = ModalComponent({
     ...modalProps,
-    onClose: () => {
-      modalProps?.onClose?.(); // 내부에서 onClose가 정의되어 있다면 실행
-      closeModal();
-    },
   });
 
   return createPortal(

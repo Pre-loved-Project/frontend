@@ -22,6 +22,12 @@ export interface ProfileEditModalProps {
   onError?: (e: Error) => void;
 }
 
+export function isProfileEditModalProps(
+  v: unknown,
+): v is ProfileEditModalProps {
+  return typeof v === "object" && v != null && "nickname" in v;
+}
+
 export const ProfileEditModal = ({
   imageUrl,
   nickname: initialNickname,

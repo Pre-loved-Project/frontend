@@ -14,15 +14,17 @@ export interface ModalPropsMap {
 export type ModalKey = keyof ModalPropsMap;
 
 export const modalFactory: {
-  [K in ModalKey]: (props: ModalPropsMap[K]) => ReactNode;
+  [K in ModalKey]: (props: unknown) => ReactNode;
 } = {
-  normal: (props) => <Modal {...props} />,
-  editProfile: (props) => <ProfileEditModal {...props} />,
+  normal: (props) => <Modal {...(props as ModalProps)} />,
+  editProfile: (props) => (
+    <ProfileEditModal {...(props as ProfileEditModalProps)} />
+  ),
 };
 
 interface ModalState {
   activeKey: ModalKey | null;
-  modalProps: ProfileEditModalProps | ModalProps | null;
+  modalProps: ModalPropsMap[ModalKey] | null;
   openModal: <K extends ModalKey>(key: K, props: ModalPropsMap[K]) => void;
   closeModal: () => void;
 }
