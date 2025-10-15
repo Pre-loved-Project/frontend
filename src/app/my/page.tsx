@@ -2,9 +2,12 @@
 import { useState, useEffect } from "react";
 import Profile, { ProfileProps } from "@/entities/user/ui/card/Profile";
 import PostCard from "@/entities/post/ui/card/PostCard";
+import { PostCreateButton } from "@/features/createPost/ui/PostCreateButton/PostCreateButton";
 import Tab from "@/widgets/mypage/ui/Tab.tsx/Tab";
 import { apiFetch } from "@/shared/api/fetcher";
 import { useModalStore } from "@/shared/model/modal.store";
+import { usePostCreateModal } from "@/features/createPost/lib/usePostCreateModal";
+
 const options = [
   { label: "판매중 상품", value: "selling" },
   { label: "판매완료 상품", value: "sold" },
@@ -67,6 +70,11 @@ const Mypage = () => {
   const [selected, setSelected] = useState(options[0].value);
   const [userProfile, setUserProfile] = useState<ProfileProps | null>(null);
   const { openModal, closeModal } = useModalStore();
+  const { openPostCreateModal } = usePostCreateModal({
+    onSuccess: async () => {
+      //TODO : 게시글 목록 다시 불러오기
+    },
+  });
 
   async function fetchUserProfile() {
     try {
@@ -129,6 +137,7 @@ const Mypage = () => {
             </li>
           ))}
         </ul>
+        <PostCreateButton onClick={openPostCreateModal} />
       </section>
     </main>
   );
