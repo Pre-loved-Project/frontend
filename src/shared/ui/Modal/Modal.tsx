@@ -4,11 +4,11 @@ import React from "react";
 import cn from "@/shared/lib/cn";
 import Button from "../Button/Button";
 
-interface ModalProps {
+export interface ModalProps {
   message: string;
   buttonText?: string;
   onClick: () => void;
-  className: string;
+  className?: string;
 }
 
 export const Modal = ({
@@ -18,19 +18,19 @@ export const Modal = ({
   className,
 }: ModalProps) => {
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
       <div
         className={cn(
-          "bg-black-900 rounded-lg shadow-lg flex flex-col items-center justify-center gap-10 p-6 text-center",
-          "w-[320px] h-[180px]",
-          "md:w-[420px] md:h-[190px]",
-          "xl:w-[500px] xl:h-[200px]",
+          "bg-black-900 flex flex-col items-center justify-center gap-10 rounded-lg p-6 text-center shadow-lg",
+          "h-[180px] w-[320px]",
+          "md:h-[190px] md:w-[420px]",
+          "xl:h-[200px] xl:w-[500px]",
           className,
         )}
       >
         <p
           className={cn(
-            "text-white whitespace-pre-line",
+            "whitespace-pre-line text-white",
             "text-[14px] md:text-[16px] xl:text-[18px]",
           )}
         >
