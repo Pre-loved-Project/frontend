@@ -13,24 +13,22 @@ import { Navigation } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
+import { apiFetch } from "@/shared/api/fetcher";
+import { uploadImage } from "@/shared/api/uploadImage";
 
-export interface PostAddModalProps {
+export interface PostCreateModalProps {
   className?: string;
   onClose?: () => void;
-  onSubmit?: (data: {
-    images: File[];
-    title: string;
-    price: number;
-    category: string;
-    description: string;
-  }) => void;
+  onCreate?: () => void;
+  onError?: () => void;
 }
 
 export const PostCreateModal = ({
   className,
   onClose,
-  onSubmit,
-}: PostAddModalProps) => {
+  onCreate,
+  onError,
+}: PostCreateModalProps) => {
   const [images, setImages] = useState<File[]>([]);
   const [title, setTitle] = useState("");
   const [price, setPrice] = useState<number | "">("");
@@ -64,9 +62,36 @@ export const PostCreateModal = ({
     setImages((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const handleSubmit = () => {
-    if (!title || !price || !category) return;
-    onSubmit?.({ images, title, price: Number(price), category, description });
+  const handleSubmit = async () => {
+    try {
+      if (!title || !price || !category) return;
+
+      //이미지 URL 배열 생성
+      const uploadedImageUrlArray: string[] = [];
+      for (const file of images) {
+        const uploadedImageUrl = await uploadImage(file);
+        uploadedImageUrlArray.push(uploadedImageUrl);
+      }
+
+      const body = {
+        title,
+        price,
+        content: description,
+        category,
+        images: uploadedImageUrlArray,
+      };
+
+      const res = await apiFetch("/api/postings", {
+        method: "POST",
+        body: JSON.stringify(body),
+      });
+
+      console.log("게시글 생성 성공! : ", res);
+      onCreate?.();
+    } catch (error) {
+      console.error("게시글 생성 실패 : ", error);
+      onError?.();
+    }
   };
 
   const widthClass = "w-[290px] md:w-[510px] xl:w-[540px]";
