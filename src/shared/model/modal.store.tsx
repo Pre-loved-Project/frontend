@@ -8,7 +8,7 @@ import {
 import {
   PostCreateModalProps,
   PostCreateModal,
-} from "@/features/createPost/PostCreateModal";
+} from "@/features/createPost/ui/PostCreateModal/PostCreateModal";
 
 export interface ModalPropsMap {
   normal: ModalProps;

@@ -25,18 +25,6 @@ export const Main: Story = {
 
     const handleClose = () => setOpen(false);
 
-    const handleSubmit = (data: {
-      images: File[];
-      title: string;
-      price: number;
-      category: string;
-      description: string;
-    }) => {
-      console.log("폼 제출 데이터:", data);
-      alert("폼 제출 완료! 콘솔 확인");
-      setOpen(false);
-    };
-
     return (
       <>
         <button
@@ -46,9 +34,7 @@ export const Main: Story = {
           게시물 추가 모달 열기
         </button>
 
-        {open && (
-          <PostCreateModal onClose={handleClose} onSubmit={handleSubmit} />
-        )}
+        {open && <PostCreateModal onClose={handleClose} />}
       </>
     );
   },

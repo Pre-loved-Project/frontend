@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useMemo } from "react";
 import cn from "@/shared/lib/cn";
 import { TextField } from "@/shared/ui/TextField/TextField";
 import { TextBox } from "@/shared/ui/TextBox/TextBox";
@@ -20,7 +20,7 @@ export interface PostCreateModalProps {
   className?: string;
   onClose?: () => void;
   onCreate?: () => void;
-  onError?: () => void;
+  onError?: (message: string) => void;
 }
 
 export const PostCreateModal = ({
@@ -90,11 +90,56 @@ export const PostCreateModal = ({
       onCreate?.();
     } catch (error) {
       console.error("게시글 생성 실패 : ", error);
-      onError?.();
+      if (error instanceof Error) {
+        onError?.(error.message);
+      }
+      onError?.(String(error));
     }
   };
 
   const widthClass = "w-[290px] md:w-[510px] xl:w-[540px]";
+
+  const imageSwiper = useMemo(
+    () => (
+      <Swiper
+        modules={[Navigation]}
+        spaceBetween={0}
+        slidesPerView={3}
+        navigation={true}
+        className="flex flex-1 items-center justify-center rounded-lg"
+      >
+        {images.map((file, idx) => (
+          <SwiperSlide
+            key={idx}
+            className="xl:w-[100px]bg-blue flex h-[70px] w-[70px] items-center justify-center md:h-[100px] md:w-[100px] xl:h-[100px]"
+          >
+            <div className="relative mx-auto h-[70px] w-[70px] md:h-[100px] md:w-[100px] xl:h-[100px] xl:w-[100px]">
+              <Image
+                src={URL.createObjectURL(file)}
+                alt={`preview-${idx}`}
+                fill
+                style={{ objectFit: "cover" }}
+                className="rounded-lg"
+              />
+              <button
+                type="button"
+                className="absolute top-0.5 right-0.5 rounded-full bg-black/50 p-1"
+                onClick={() => handleRemoveImage(idx)}
+              >
+                <Image
+                  src="icons/delete.svg"
+                  alt="삭제"
+                  width={10}
+                  height={10}
+                />
+              </button>
+            </div>
+          </SwiperSlide>
+        ))}
+      </Swiper>
+    ),
+    [images],
+  );
 
   return (
     <div
@@ -139,44 +184,7 @@ export const PostCreateModal = ({
             className="hidden"
           />
 
-          {images.length > 0 && (
-            <Swiper
-              modules={[Navigation]}
-              spaceBetween={0}
-              slidesPerView={3}
-              navigation={true}
-              className="flex flex-1 items-center justify-center rounded-lg"
-            >
-              {images.map((file, idx) => (
-                <SwiperSlide
-                  key={idx}
-                  className="xl:w-[100px]bg-blue flex h-[70px] w-[70px] items-center justify-center md:h-[100px] md:w-[100px] xl:h-[100px]"
-                >
-                  <div className="relative mx-auto h-[70px] w-[70px] md:h-[100px] md:w-[100px] xl:h-[100px] xl:w-[100px]">
-                    <Image
-                      src={URL.createObjectURL(file)}
-                      alt={`preview-${idx}`}
-                      fill
-                      style={{ objectFit: "cover" }}
-                      className="rounded-lg"
-                    />
-                    <button
-                      type="button"
-                      className="absolute top-0.5 right-0.5 rounded-full bg-black/50 p-1"
-                      onClick={() => handleRemoveImage(idx)}
-                    >
-                      <Image
-                        src="icons/delete.svg"
-                        alt="삭제"
-                        width={10}
-                        height={10}
-                      />
-                    </button>
-                  </div>
-                </SwiperSlide>
-              ))}
-            </Swiper>
-          )}
+          {images.length > 0 && imageSwiper}
         </div>
 
         <TextField
