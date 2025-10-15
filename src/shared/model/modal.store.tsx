@@ -5,10 +5,15 @@ import {
   ProfileEditModalProps,
   ProfileEditModal,
 } from "@/features/editProfile/ui/ProfileEditModal/ProfileEditModal";
+import {
+  PostCreateModalProps,
+  PostCreateModal,
+} from "@/features/createPost/PostCreateModal";
 
 export interface ModalPropsMap {
   normal: ModalProps;
   editProfile: ProfileEditModalProps;
+  createPost: PostCreateModalProps;
 }
 
 export type ModalKey = keyof ModalPropsMap;
@@ -19,6 +24,9 @@ export const modalFactory: {
   normal: (props) => <Modal {...(props as ModalProps)} />,
   editProfile: (props) => (
     <ProfileEditModal {...(props as ProfileEditModalProps)} />
+  ),
+  createPost: (props) => (
+    <PostCreateModal {...(props as PostCreateModalProps)} />
   ),
 };
 

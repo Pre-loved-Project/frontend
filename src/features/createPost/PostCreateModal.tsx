@@ -14,7 +14,7 @@ import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
 
-interface PostAddModalProps {
+export interface PostAddModalProps {
   className?: string;
   onClose?: () => void;
   onSubmit?: (data: {
