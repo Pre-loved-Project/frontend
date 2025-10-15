@@ -11,7 +11,7 @@ import Button from "@/shared/ui/Button/Button";
 import { apiFetch } from "@/shared/api/fetcher";
 import { uploadImage } from "@/shared/api/uploadImage";
 
-interface ProfileEditModalProps {
+export interface ProfileEditModalProps {
   imageUrl?: string;
   nickname: string;
   introduction?: string;
