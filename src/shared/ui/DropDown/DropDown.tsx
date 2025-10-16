@@ -3,8 +3,8 @@
 import React, { useState, useRef, useEffect } from "react";
 import cn from "@/shared/lib/cn";
 import Image from "next/image";
-import arrowDown from "@/shared/images/arrow-down.svg";
-import arrowUp from "@/shared/images/arrow-up.svg";
+import ArrowDownIcon from "@/shared/images/arrow-down.svg";
+import ArrowUpIcon from "@/shared/images/arrow-up.svg";
 
 interface Option {
   label: string;
@@ -48,11 +48,11 @@ export const DropDown = ({
       <div
         onClick={() => setOpen((prev) => !prev)}
         className={cn(
-          "flex items-center justify-between rounded-lg border bg-black-800 px-4 cursor-pointer transition-colors",
+          "bg-black-800 flex cursor-pointer items-center justify-between rounded-lg border px-4 transition-colors",
           open ? "border-blue" : "border-gray-400",
-          "w-[335px] h-[55px] text-[14px]",
-          "md:w-[360px] md:h-[60px] md:text-[14px]",
-          "xl:w-[400px] xl:h-[70px] xl:text-[16px]",
+          "h-[55px] w-[335px] text-[14px]",
+          "md:h-[60px] md:w-[360px] md:text-[14px]",
+          "xl:h-[70px] xl:w-[400px] xl:text-[16px]",
           className,
         )}
       >
@@ -61,30 +61,34 @@ export const DropDown = ({
             ? options.find((opt) => opt.value === value)?.label
             : placeholder}
         </span>
-        <Image
-          src={open ? arrowUp : arrowDown}
-          alt="arrow"
-          width={16}
-          height={16}
-          className="w-[12px] h-[12px] md:w-[14px] md:h-[14px] xl:w-[16px] xl:h-[16px]"
-        />
+        {open ? (
+          <ArrowUpIcon
+            aria-label="arrow up"
+            className="h-[12px] w-[12px] md:h-[14px] md:w-[14px] xl:h-[16px] xl:w-[16px]"
+          />
+        ) : (
+          <ArrowDownIcon
+            aria-label="arrow down"
+            className="h-[12px] w-[12px] md:h-[14px] md:w-[14px] xl:h-[16px] xl:w-[16px]"
+          />
+        )}
       </div>
 
       {/* 옵션 리스트 */}
       <ul
         className={cn(
-          "absolute mt-0.5 top-full left-0 z-10 rounded-lg bg-black-800",
+          "bg-black-800 absolute top-full left-0 z-10 mt-0.5 rounded-lg",
           "border border-gray-400",
-          "origin-top overflow-hidden transform-gpu",
+          "origin-top transform-gpu overflow-hidden",
           "transition-[opacity,transform] duration-200",
           "max-h-60 overflow-y-auto",
-          "w-[335px] p-[10px] gap-[5px]",
-          "md:w-[360px] md:p-[10px] md:gap-[5px]",
-          "xl:w-[400px] xl:p-[10px] xl:gap-[5px]",
+          "w-[335px] gap-[5px] p-[10px]",
+          "md:w-[360px] md:gap-[5px] md:p-[10px]",
+          "xl:w-[400px] xl:gap-[5px] xl:p-[10px]",
           className,
           open
-            ? "opacity-100 scale-y-100 pointer-events-auto"
-            : "opacity-0 scale-y-0 pointer-events-none",
+            ? "pointer-events-auto scale-y-100 opacity-100"
+            : "pointer-events-none scale-y-0 opacity-0",
         )}
       >
         {options.map((opt) => (
@@ -95,11 +99,11 @@ export const DropDown = ({
               setOpen(false);
             }}
             className={cn(
-              "mt-1 flex items-center px-2 rounded-md cursor-pointer transition-colors",
-              "text-gray-400 hover:text-white hover:bg-gray-600",
-              "w-[380px] p-[10px] gap-[5px]",
-              "md:w-[360px] md:p-[10px] md:gap-[5px]",
-              "xl:w-[400px] xl:p-[10px] xl:gap-[5px]",
+              "mt-1 flex cursor-pointer items-center rounded-md px-2 transition-colors",
+              "text-gray-400 hover:bg-gray-600 hover:text-white",
+              "w-[380px] gap-[5px] p-[10px]",
+              "md:w-[360px] md:gap-[5px] md:p-[10px]",
+              "xl:w-[400px] xl:gap-[5px] xl:p-[10px]",
               className,
             )}
           >
