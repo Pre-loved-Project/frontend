@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import cn from "@/shared/lib/cn";
-import imageSelectIcon from "@/shared/images/image-select.svg";
+import ImageSelectIcon from "@/shared/images/image-select.svg";
 
 interface ProfileImageChangeInputProps {
   imgUrl?: string;
@@ -32,8 +32,8 @@ export const ProfileImageChangeInput = ({
   return (
     <label
       className={cn(
-        "flex items-center justify-center rounded-lg bg-black-800 overflow-hidden cursor-pointer",
-        "w-[130px] h-[130px] md:w-[135px] md:h-[135px] xl:w-[160px] xl:h-[160px]",
+        "bg-black-800 flex cursor-pointer items-center justify-center overflow-hidden rounded-lg",
+        "h-[130px] w-[130px] md:h-[135px] md:w-[135px] xl:h-[160px] xl:w-[160px]",
         className,
       )}
     >
@@ -43,15 +43,12 @@ export const ProfileImageChangeInput = ({
           alt="Selected Profile"
           width={160}
           height={160}
-          className="object-cover w-full h-full"
+          className="h-full w-full object-cover"
         />
       ) : (
-        <Image
-          src={imageSelectIcon}
-          alt="Upload Icon"
-          width={34}
-          height={34}
-          className="w-[24px] h-[24px] md:w-[25px] md:h-[25px] xl:w-[34px] xl:h-[34px]"
+        <ImageSelectIcon
+          aria-label="Upload Icon"
+          className="h-[24px] w-[24px] md:h-[25px] md:w-[25px] xl:h-[34px] xl:w-[34px]"
         />
       )}
       <input
