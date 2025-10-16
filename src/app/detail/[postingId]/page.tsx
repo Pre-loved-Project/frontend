@@ -9,6 +9,8 @@ import PostCarousel from "@/entities/post/ui/carousel/PostCarousel";
 import Button from "@/shared/ui/Button/Button";
 import LikeButton from "@/features/like/ui/LikeButton";
 
+import { useAuthStore } from "@/features/auth/model/auth.store";
+
 interface PostDetail {
   postingId: number;
   sellerId: number;
@@ -40,6 +42,7 @@ interface PostSummary {
 
 const DetailPage = () => {
   const router = useRouter();
+  const isLogined = useAuthStore((state) => state.isLogined);
   const [post, setPost] = useState<PostDetail | null>(null);
   const [relatedPosts, setRelatedPosts] = useState<PostSummary[]>([]);
   const [loading, setLoading] = useState(true);
@@ -78,6 +81,11 @@ const DetailPage = () => {
   if (!post)
     return <p className="text-center text-white">게시글을 찾을 수 없습니다.</p>;
 
+  const handleChatClick = () => {
+    if (!isLogined) router.push("/login");
+    else router.push("/chat");
+  };
+
   return (
     <main>
       <article className="text-white">
@@ -101,45 +109,45 @@ const DetailPage = () => {
             <div className="mx-[1rem] h-[1px] bg-gray-600 lg:hidden" />
           </section>
 
-          <section className="flex flex-col gap-[1.25rem] py-[1.5rem] md:pt-[2rem] lg:w-1/2 lg:py-0">
-            <div className="flex flex-col gap-[0.5rem] md:gap-[0.75rem]">
-              <h1 className="text-[20px] font-bold">{post.title}</h1>
-              <h3 className="text-[18px] font-bold">
-                {post.price.toLocaleString()}
-              </h3>
+          <section className="flex flex-col justify-between gap-[1.25rem] py-[1.5rem] md:pt-[2rem] lg:w-1/2 lg:pt-0 lg:pb-[88px]">
+            <div className="flex flex-col gap-[1.25rem]">
+              <div className="flex flex-col gap-[0.5rem] md:gap-[0.75rem]">
+                <h1 className="text-[20px] font-bold">{post.title}</h1>
+                <h3 className="text-[18px] font-bold">
+                  {post.price.toLocaleString()}
+                </h3>
+              </div>
+
+              <p className="font-regular text-left text-[16px] whitespace-pre-line md:text-[18px] lg:text-[16px]">
+                {post.content}
+              </p>
             </div>
-
-            <p className="font-regular text-left text-[16px] whitespace-pre-line md:text-[18px] lg:text-[16px]">
-              {post.content}
-            </p>
-
-            <span className="font-regular flex flex-wrap gap-[0.25rem] leading-[1.25rem] font-[0.875rem] text-[#868b94]">
-              <span>채팅 {post.chatCount}</span>
-              <span className="flex gap-[0.25rem]">
-                <span>·</span>관심 {post.likeCount}
+            <div className="flex flex-col gap-[1.25rem]">
+              <span className="font-regular flex flex-wrap gap-[0.25rem] leading-[1.25rem] font-[0.875rem] text-[#868b94]">
+                <span>채팅 {post.chatCount}</span>
+                <span className="flex gap-[0.25rem]">
+                  <span>·</span>관심 {post.likeCount}
+                </span>
+                <span className="flex gap-[0.25rem]">
+                  <span>·</span>조회 {post.viewCount}
+                </span>
               </span>
-              <span className="flex gap-[0.25rem]">
-                <span>·</span>조회 {post.viewCount}
-              </span>
-            </span>
 
-            <div className="flex items-center justify-center gap-[10px]">
-              {post.isOwner ? (
-                <>
-                  <Button className="w-full flex-1">수정하기</Button>
-                  <Button className="w-full flex-1">삭제하기</Button>
-                </>
-              ) : (
-                <>
-                  <Button
-                    className="w-full flex-1"
-                    onClick={() => router.push("/chat")}
-                  >
-                    채팅하기
-                  </Button>
-                  <LikeButton />
-                </>
-              )}
+              <div className="flex items-center justify-center gap-[10px]">
+                {post.isOwner ? (
+                  <>
+                    <Button className="w-full flex-1">수정하기</Button>
+                    <Button className="w-full flex-1">삭제하기</Button>
+                  </>
+                ) : (
+                  <>
+                    <Button className="w-full flex-1" onClick={handleChatClick}>
+                      채팅하기
+                    </Button>
+                    <LikeButton />
+                  </>
+                )}
+              </div>
             </div>
           </section>
         </div>
