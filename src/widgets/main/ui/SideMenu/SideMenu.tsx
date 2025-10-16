@@ -15,11 +15,11 @@ const SideMenu = ({
     <div
       aria-labelledby="category-heading"
       role="listbox"
-      className="flex flex-col gap-[4px] text-white"
+      className="flex flex-col gap-[4px] text-white md:fixed md:top-[80px] md:min-h-screen xl:top-[100px]"
     >
       <h2
         id="category-heading"
-        className="pb-[20px] pl-[20px] text-[14px] leading-none font-normal xl:text-[16px]"
+        className="h-[45px] w-[160px] items-center px-[20px] py-[15px] text-[14px] leading-none font-normal xl:text-[16px]"
       >
         카테고리
       </h2>
@@ -33,7 +33,7 @@ const SideMenu = ({
               className={cn(
                 "flex h-[45px] w-[160px] items-center rounded-[8px] px-[20px] py-[15px]",
                 "text-[14px] leading-none font-medium transition-colors",
-                "focus-visible:ring-2 focus-visible:ring-white focus-visible:outline-none",
+                "hover:cursor-pointer focus-visible:ring-2 focus-visible:ring-white focus-visible:outline-none",
                 "xl:h-[50px] xl:w-[200px] xl:text-[16px]",
                 selectedCategory === category
                   ? "border border-[#353542] bg-[#353542] text-white"
