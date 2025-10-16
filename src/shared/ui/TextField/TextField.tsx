@@ -3,8 +3,8 @@
 import React, { InputHTMLAttributes, useState } from "react";
 import cn from "@/shared/lib/cn";
 import Image from "next/image";
-import eyeIcon from "@/shared/images/eye.svg";
-import eyeOffIcon from "@/shared/images/eye-off.svg";
+import EyeIcon from "@/shared/images/eye.svg";
+import EyeOffIcon from "@/shared/images/eye-off.svg";
 
 interface TextFieldProps extends InputHTMLAttributes<HTMLInputElement> {
   isError?: boolean;
@@ -24,13 +24,13 @@ export const TextField = ({
   return (
     <div
       className={cn(
-        "flex items-center rounded-lg transition-colors bg-black-800 px-[20px] py-[23px]",
+        "bg-black-800 flex items-center rounded-lg px-[20px] py-[23px] transition-colors",
         isError
-          ? "border border-red"
+          ? "border-red border"
           : focused
-            ? "border border-blue"
+            ? "border-blue border"
             : "border border-gray-400",
-        "w-[335px] h-[55px] md:w-[440px] md:h-[55px] xl:w-[640px] xl:h-[70px]",
+        "h-[55px] w-[335px] md:h-[55px] md:w-[440px] xl:h-[70px] xl:w-[640px]",
         className,
       )}
     >
@@ -43,7 +43,7 @@ export const TextField = ({
           rest.onChange?.(e); //text 수정 시 handling
         }}
         className={cn(
-          "flex-1 bg-transparent outline-none text-white",
+          "flex-1 bg-transparent text-white outline-none",
           "text-[14px] md:text-[14px] xl:text-[16px]",
         )}
         onFocus={() => {
@@ -60,11 +60,17 @@ export const TextField = ({
           onClick={() => setHidden((prev) => !prev)}
           className="ml-2"
         >
-          <Image
-            src={hidden ? eyeIcon : eyeOffIcon}
-            alt={hidden ? "hidden" : "visible"}
-            className="w-[22px] h-[22px] md:w-[22px] md:h-[22px] xl:w-[24px] xl:h-[24px]"
-          />
+          {hidden ? (
+            <EyeIcon
+              aria-label="비밀번호 숨김 상태"
+              className="h-[22px] w-[22px] md:h-[22px] md:w-[22px] xl:h-[24px] xl:w-[24px]"
+            />
+          ) : (
+            <EyeOffIcon
+              aria-label="비밀번호 표시 상태"
+              className="h-[22px] w-[22px] md:h-[22px] md:w-[22px] xl:h-[24px] xl:w-[24px]"
+            />
+          )}
         </button>
       )}
     </div>
