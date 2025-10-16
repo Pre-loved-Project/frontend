@@ -23,6 +23,7 @@ export async function apiFetch<T>(
   let res = await fetch(`${BASE_URL}${endpoint}`, {
     headers: { ...defaultHeaders, ...headers },
     cache: "no-store",
+    credentials: "include",
     ...restOptions,
   });
 
@@ -38,6 +39,7 @@ export async function apiFetch<T>(
       res = await fetch(`${BASE_URL}${endpoint}`, {
         headers: { ...defaultHeaders, ...headers },
         cache: "no-store",
+        credentials: "include",
         ...restOptions,
       });
     } else {
