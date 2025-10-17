@@ -7,7 +7,8 @@ import { TextBox } from "@/shared/ui/TextBox/TextBox";
 import { DropDown } from "@/shared/ui/DropDown/DropDown";
 import Button from "@/shared/ui/Button/Button";
 import Image from "next/image";
-import imageSelectIcon from "@/shared/images/image-select.svg";
+import ImageSelectIcon from "@/shared/images/image-select.svg";
+import DeleteIcon from "@/shared/images/delete.svg";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation } from "swiper/modules";
 import "swiper/css";
@@ -24,7 +25,7 @@ const ImageSwiperSlide = (
   return (
     <SwiperSlide
       key={`${url}-${idx}`}
-      className="xl:w-[100px]bg-blue flex h-[70px] w-[70px] items-center justify-center md:h-[100px] md:w-[100px] xl:h-[100px]"
+      className="flex h-[70px] w-[70px] items-center justify-center md:h-[100px] md:w-[100px] xl:h-[100px] xl:w-[100px]"
     >
       <div className="relative mx-auto h-[70px] w-[70px] md:h-[100px] md:w-[100px] xl:h-[100px] xl:w-[100px]">
         <Image
@@ -36,10 +37,13 @@ const ImageSwiperSlide = (
         />
         <button
           type="button"
-          className="absolute top-0.5 right-0.5 rounded-full bg-black/50 p-1"
+          className="absolute top-0.5 right-0.5 flex items-center justify-center rounded-full bg-black/50 p-1"
           onClick={() => onRemoveButtonClick(idx)}
         >
-          <Image src="icons/delete.svg" alt="삭제" width={10} height={10} />
+          <DeleteIcon
+            alt="닫기"
+            className="h-2 w-2 md:h-3 md:w-3 xl:h-3 xl:w-3"
+          />
         </button>
       </div>
     </SwiperSlide>
@@ -180,7 +184,7 @@ export const PostEditModal = ({
           className="absolute top-4 right-4"
           onClick={onClose}
         >
-          <Image src="icons/delete.svg" alt="닫기" width={24} height={24} />
+          <DeleteIcon alt="닫기" width={24} height={24} />
         </button>
 
         <h2 className="text-lg font-semibold text-white">게시물 수정</h2>
@@ -190,13 +194,7 @@ export const PostEditModal = ({
             className="bg-black-800 flex h-[50px] w-[50px] shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-lg md:h-[70px] md:w-[70px] xl:h-[70px] xl:w-[70px]"
             onClick={() => inputRef.current?.click()}
           >
-            <Image
-              src={imageSelectIcon}
-              alt="이미지 선택"
-              className="h-8 w-8"
-              width={32}
-              height={32}
-            />
+            <ImageSelectIcon className="h-8 w-8" width={32} height={32} />
           </label>
           <input
             ref={inputRef}
