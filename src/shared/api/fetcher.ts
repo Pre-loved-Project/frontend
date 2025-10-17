@@ -1,5 +1,6 @@
 import { useAuthStore } from "@/features/auth/model/auth.store";
 import { refreshAccessToken } from "./refresh";
+import { useModalStore } from "@/shared/model/modal.store";
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -9,6 +10,7 @@ export async function apiFetch<T>(
 ): Promise<T> {
   const { headers, noAuth, ...restOptions } = options;
   const { accessToken, setAccessToken, logout } = useAuthStore.getState();
+  const { openModal, closeModal } = useModalStore.getState();
 
   const defaultHeaders: HeadersInit = {
     "Content-Type": "application/json",
@@ -21,6 +23,7 @@ export async function apiFetch<T>(
   let res = await fetch(`${BASE_URL}${endpoint}`, {
     headers: { ...defaultHeaders, ...headers },
     cache: "no-store",
+    credentials: "include",
     ...restOptions,
   });
 
@@ -36,13 +39,22 @@ export async function apiFetch<T>(
       res = await fetch(`${BASE_URL}${endpoint}`, {
         headers: { ...defaultHeaders, ...headers },
         cache: "no-store",
+        credentials: "include",
         ...restOptions,
       });
     } else {
       logout();
-      if (typeof window !== "undefined") {
-        location.replace("/login");
-      }
+      openModal("normal", {
+        message: "세션이 만료되었습니다. 다시 로그인 해주세요.",
+        buttonText: "확인",
+        onClick: () => {
+          closeModal();
+          if (typeof window !== "undefined") {
+            location.replace("/login");
+          }
+        },
+      });
+
       throw new Error("세션이 만료되었습니다. 다시 로그인 해주세요.");
     }
   }
