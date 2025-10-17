@@ -10,7 +10,7 @@ import { DropDown } from "@/shared/ui/DropDown/DropDown";
 import Button from "@/shared/ui/Button/Button";
 import { apiFetch } from "@/shared/api/fetcher";
 import { uploadImage } from "@/shared/api/uploadImage";
-
+import DeleteIcon from "@/shared/images/delete.svg";
 export interface ProfileEditModalProps {
   imageUrl?: string;
   nickname: string;
@@ -106,7 +106,13 @@ export const ProfileEditModal = ({
         onClick={onClose}
         className="absolute top-3 right-3"
       >
-        <Image src="icons/delete.svg" alt="닫기" width={24} height={24} />
+        <DeleteIcon
+          width={24}
+          height={24}
+          aria-label="닫기"
+          className="cursor-pointer"
+          role="img"
+        />
       </button>
 
       <h2 className="mb-6 text-lg font-semibold text-white">프로필 수정</h2>
