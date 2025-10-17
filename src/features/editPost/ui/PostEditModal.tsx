@@ -50,7 +50,7 @@ export interface PostEditModalProps {
   title: string;
   price: number;
   category: string;
-  description: string;
+  content: string;
   images: string[];
   className?: string;
   onClose?: () => void;
@@ -63,7 +63,7 @@ export const PostEditModal = ({
   title: initTitle,
   price: initPrice,
   category: initCategory,
-  description: initDescription,
+  content: initContent,
   images: initImages,
   className,
   onClose,
@@ -75,7 +75,7 @@ export const PostEditModal = ({
   const [title, setTitle] = useState(initTitle);
   const [price, setPrice] = useState<number | "">(initPrice);
   const [category, setCategory] = useState(initCategory);
-  const [description, setDescription] = useState(initDescription);
+  const [content, setContent] = useState(initContent);
 
   const inputRef = useRef<HTMLInputElement>(null);
   const categoryOptions = [
@@ -112,7 +112,7 @@ export const PostEditModal = ({
         !title ||
         !price ||
         !category ||
-        !description ||
+        !content ||
         (imageUrls.length === 0 && images.length === 0)
       )
         return;
@@ -127,7 +127,7 @@ export const PostEditModal = ({
       const body = {
         title,
         price,
-        content: description,
+        content,
         category,
         images: [...imageUrls, ...uploadedImageUrlArray],
       };
@@ -237,15 +237,15 @@ export const PostEditModal = ({
         />
 
         <TextBox
-          value={description}
+          value={content}
           placeholder="상품 설명을 입력하세요..."
-          onChange={(e) => setDescription(e.target.value)}
+          onChange={(e) => setContent(e.target.value)}
           className={widthClass}
         />
 
         <Button
           variant="primary"
-          disabled={!title || !price || !category || !description}
+          disabled={!title || !price || !category || !content}
           onClick={handleSubmit}
           className={cn("mt-4", widthClass)}
         >
