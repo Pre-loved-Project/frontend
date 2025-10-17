@@ -10,6 +10,7 @@ import Button from "@/shared/ui/Button/Button";
 import LikeButton from "@/features/like/ui/LikeButton";
 
 import { useAuthStore } from "@/features/auth/model/auth.store";
+import { usePostEditModal } from "@/features/editPost/lib/usePostEditModal";
 
 interface PostDetail {
   postingId: number;
@@ -46,6 +47,12 @@ const DetailPage = () => {
   const [post, setPost] = useState<PostDetail | null>(null);
   const [relatedPosts, setRelatedPosts] = useState<PostSummary[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const { openPostEditModal } = usePostEditModal({
+    onSuccess: () => {
+      // TODO : 게시글 상세 API 재호출 코드 추가
+    },
+  });
 
   //임시 게시글 상세 API 요청
   useEffect(() => {
@@ -84,6 +91,19 @@ const DetailPage = () => {
   const handleChatClick = () => {
     if (!isLogined) router.push("/login");
     else router.push("/chat");
+  };
+
+  const handleEditClick = () => {
+    if (!post) return;
+
+    openPostEditModal(
+      post.postingId,
+      post.title,
+      post.price,
+      post.category,
+      post.content,
+      post.images,
+    );
   };
 
   return (
@@ -136,7 +156,9 @@ const DetailPage = () => {
               <div className="flex items-center justify-center gap-[10px]">
                 {post.isOwner ? (
                   <>
-                    <Button className="w-full flex-1">수정하기</Button>
+                    <Button className="w-full flex-1" onClick={handleEditClick}>
+                      수정하기
+                    </Button>
                     <Button className="w-full flex-1">삭제하기</Button>
                   </>
                 ) : (
