@@ -9,11 +9,16 @@ import {
   PostCreateModalProps,
   PostCreateModal,
 } from "@/features/createPost/ui/PostCreateModal/PostCreateModal";
+import {
+  PostEditModalProps,
+  PostEditModal,
+} from "@/features/editPost/ui/PostEditModal";
 
 export interface ModalPropsMap {
   normal: ModalProps;
   editProfile: ProfileEditModalProps;
   createPost: PostCreateModalProps;
+  editPost: PostEditModalProps;
 }
 
 export type ModalKey = keyof ModalPropsMap;
@@ -28,6 +33,7 @@ export const modalFactory: {
   createPost: (props) => (
     <PostCreateModal {...(props as PostCreateModalProps)} />
   ),
+  editPost: (props) => <PostEditModal {...(props as PostEditModalProps)} />,
 };
 
 interface ModalState {

@@ -15,8 +15,6 @@ import "swiper/css/navigation";
 import "swiper/css/pagination";
 import { apiFetch } from "@/shared/api/fetcher";
 import { uploadImage } from "@/shared/api/uploadImage";
-import { C } from "vitest/dist/chunks/reporters.d.BFLkQcL6.js";
-import { StaticImport } from "next/dist/shared/lib/get-img-props";
 
 const ImageSwiperSlide = (
   idx: number,
