@@ -19,7 +19,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="kr" className={myFont.className}>
-      <body className="bg-[#1c1c22] pt-[70px] md:pt-[80px] xl:pt-[100px]">
+      <body className="mx-auto max-w-[1200px] bg-[#1c1c22] pt-[70px] md:pt-[80px] xl:pt-[100px]">
         <Header />
         {children}
         <div id="modal-root" />
