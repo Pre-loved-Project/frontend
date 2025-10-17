@@ -132,7 +132,7 @@ export const PostEditModal = ({
         images: [...imageUrls, ...uploadedImageUrlArray],
       };
 
-      const res = await apiFetch(`/api/postings${postId}`, {
+      const res = await apiFetch(`/api/postings/${postId}`, {
         method: "PATCH",
         body: JSON.stringify(body),
       });
