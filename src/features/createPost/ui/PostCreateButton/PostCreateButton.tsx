@@ -1,8 +1,8 @@
 "use client";
 
 import React from "react";
-import Image from "next/image";
 import cn from "@/shared/lib/cn";
+import AddIcon from "@/shared/images/add.svg";
 
 interface PostCreateButtonProps {
   onClick: () => void;
@@ -21,13 +21,7 @@ export const PostCreateButton = ({
         className,
       )}
     >
-      <Image
-        src={"icons/add.svg"}
-        width={25}
-        height={25}
-        alt={"게시글 추가"}
-        className="h-[25px] w-[25px]"
-      />
+      <AddIcon className="h-[25px] w-[25px]" />
     </button>
   );
 };

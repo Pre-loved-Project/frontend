@@ -1,5 +1,8 @@
 import Link from "next/link";
 
+import MenuIcon from "@/shared/images/menu.svg";
+import SearchIcon from "@/shared/images/search.svg";
+
 interface HeaderMobileProps {
   setShowSearch: (value: boolean) => void;
 }
@@ -8,7 +11,7 @@ const HeaderMobile = ({ setShowSearch }: HeaderMobileProps) => {
   return (
     <div className="flex w-full items-center justify-between md:hidden">
       <button aria-label="menu" type="button" className="cursor-pointer">
-        <img src="icons/menu.svg" alt="메뉴" />
+        <MenuIcon className="h-[24px] w-[24px]" />
       </button>
 
       <div className="flex-1 text-center text-white">
@@ -21,7 +24,7 @@ const HeaderMobile = ({ setShowSearch }: HeaderMobileProps) => {
         className="cursor-pointer"
         onClick={() => setShowSearch(true)}
       >
-        <img src="icons/search.svg" alt="검색" />
+        <SearchIcon className="h-[24px] w-[24px]" />
       </button>
     </div>
   );

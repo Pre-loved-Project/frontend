@@ -50,7 +50,7 @@ const Select = ({
         )}
       >
         <span>{selectedLabel || placeholder}</span>
-        {open ? <ArrowUpIcon size={18} /> : <ArrowDownIcon size={18} />}
+        {open ? <ArrowUpIcon /> : <ArrowDownIcon />}
       </button>
 
       <div

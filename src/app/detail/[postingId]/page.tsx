@@ -8,7 +8,7 @@ import PostCard from "@/entities/post/ui/card/PostCard";
 import PostCarousel from "@/entities/post/ui/carousel/PostCarousel";
 import Button from "@/shared/ui/Button/Button";
 import LikeButton from "@/features/like/ui/LikeButton";
-
+import UserIcon from "@/shared/images/user.svg";
 import { useAuthStore } from "@/features/auth/model/auth.store";
 import { usePostEditModal } from "@/features/editPost/lib/usePostEditModal";
 
@@ -115,10 +115,7 @@ const DetailPage = () => {
             <div className="align-center mx-[1em] flex gap-[0.75rem] py-[1rem] md:mx-[1.5rem] lg:mx-0">
               <div className="align-center lg:w-56px] flex h-[48px] w-[48px] justify-center overflow-hidden rounded-full md:h-[64px] md:w-[64px] lg:h-[56px]">
                 <Link href="/my" aria-label="판매자 프로필 페이지">
-                  <img
-                    src="/icons/user.png"
-                    className="h-full w-full object-cover"
-                  />
+                  <UserIcon className="h-full w-full object-cover text-white" />
                 </Link>
               </div>
               <span className="flex items-center justify-center text-[16px] md:text-[20px] lg:text-[16px]">
