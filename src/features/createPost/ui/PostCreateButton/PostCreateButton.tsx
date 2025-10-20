@@ -21,7 +21,7 @@ export const PostCreateButton = ({
         className,
       )}
     >
-      <AddIcon className="h-[25px] w-[25px]" />
+      <AddIcon />
     </button>
   );
 };
