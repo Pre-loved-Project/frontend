@@ -1,6 +1,8 @@
 "use client";
 import { useState, useEffect } from "react";
 import cn from "@/shared/lib/cn";
+import ArrowDownIcon from "@/shared/images/arrow-down.svg";
+import ArrowUpIcon from "@/shared/images/arrow-up.svg";
 import { TabSortProps } from "@/widgets/mypage/model/tabSort.types";
 
 const Tab = ({ options, selected, onChange }: TabSortProps) => {
@@ -28,33 +30,27 @@ const Tab = ({ options, selected, onChange }: TabSortProps) => {
           aria-haspopup="dialog"
           aria-expanded={open}
           aria-controls="sort-options"
-          className="flex items-center justify-between p-[5px] text-[14px] leading-none font-[400] text-white"
+          className="flex items-center justify-between gap-[5px] p-[5px] text-[14px] leading-none font-[400] text-white"
           onClick={() => setOpen((prev) => !prev)}
         >
           {selectedLabel}
-          <img
-            src={open ? "icons/arrow-up.svg" : "icons/arrow-down.svg"}
-            alt="arrow"
-            width={20}
-            height={20}
-          />
+          {open ? <ArrowUpIcon /> : <ArrowDownIcon />}
         </button>
 
         {open && (
           <dialog open className="fixed inset-0 z-50">
             <div
-              className={`absolute inset-0 bg-black/50 transition-opacity duration-300 ${
+              className={`fixed inset-0 bg-black/50 transition-opacity duration-300 ${
                 animate ? "opacity-100" : "opacity-0"
               }`}
               onClick={() => setOpen(false)}
               aria-hidden="true"
             />
-
             <div
               id="sort-options"
               role="listbox"
               aria-label="상품 분류 선택"
-              className={`absolute bottom-0 left-0 w-full rounded-t-2xl bg-[#252530] p-5 transition-transform duration-300 ${
+              className={`fixed bottom-0 left-0 w-full rounded-t-2xl bg-[#252530] p-5 transition-transform duration-300 ${
                 animate ? "translate-y-0" : "translate-y-full"
               }`}
             >
