@@ -210,9 +210,7 @@ export const SignUpForm = ({ onSuccess, onError }: SignUpFormProps) => {
 
       {/* 생년월일 DropDown */}
       <div className="flex flex-col gap-2">
-        <label className="font-medium text-black-900 text-[16px]">
-          생년월일
-        </label>
+        <label className="text-[16px] font-medium text-white">생년월일</label>
         <div className="flex gap-4">
           <DropDown
             options={yearOptions}

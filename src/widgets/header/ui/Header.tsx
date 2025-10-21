@@ -38,7 +38,7 @@ const Header = () => {
   const isLogined = useAuthStore((state) => state.isLogined);
 
   return (
-    <header className="fixed top-0 left-0 h-[70px] w-full bg-[#1C1C22] px-[20px] md:h-[80px] md:px-[30px] xl:h-[100px]">
+    <header className="fixed top-0 left-0 z-50 h-[70px] w-full bg-[#1C1C22] px-[20px] md:h-[80px] md:px-[30px] xl:h-[100px]">
       <div className="flex h-full w-full items-center justify-between lg:mx-auto lg:max-w-[1200px]">
         {!showSearch ? (
           <HeaderMobile setShowSearch={setShowSearch} />

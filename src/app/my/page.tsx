@@ -125,7 +125,7 @@ const Mypage = () => {
   };
 
   return (
-    <main className="m-auto flex max-w-[335px] flex-col items-center justify-center gap-[60px] pt-[30px] md:max-w-[510px] md:pt-[40px] xl:max-w-[1340px] xl:flex-row xl:items-start xl:justify-start xl:gap-[80px] xl:pt-[60px]">
+    <main className="m-auto flex max-w-[335px] flex-col items-center justify-center gap-[60px] py-[30px] md:max-w-[510px] md:py-[40px] xl:max-w-[1340px] xl:flex-row xl:items-start xl:justify-start xl:gap-[80px] xl:py-[60px]">
       {userProfile && <Profile {...userProfile} onEdit={handleEditProfile} />}
 
       <section className="flex flex-col gap-[30px]">
