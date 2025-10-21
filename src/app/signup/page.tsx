@@ -19,8 +19,8 @@ export default function SignUpPage() {
   };
 
   return (
-    <div className="mt-20 flex flex-col items-center justify-center min-h-screen px-4">
-      <h1 className="text-2xl font-bold text-black-900 mb-8">회원가입</h1>
+    <div className="mt-10 mb-20 flex flex-col items-center justify-center px-4">
+      <h1 className="mb-8 text-2xl font-bold text-white">회원가입</h1>
       <SignUpForm onSuccess={handleSuccess} />
 
       {showModal && (

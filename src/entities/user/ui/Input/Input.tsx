@@ -44,7 +44,7 @@ export const Input = ({
       {label && (
         <label
           className={cn(
-            "text-black-800 font-medium",
+            "font-medium text-white",
             "text-[14px] md:text-[16px] xl:text-[16px]",
           )}
         >

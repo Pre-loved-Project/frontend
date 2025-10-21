@@ -11,8 +11,8 @@ export default function SignUpPage() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const { setIsLogined } = useAuthStore();
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen px-4">
-      <h1 className="text-2xl font-bold text-black-900 mb-8">로그인</h1>
+    <div className="flex min-h-[calc(100vh-70px)] flex-col items-center justify-center px-4 md:min-h-[calc(100vh-80px)] xl:min-h-[calc(100vh-100px)]">
+      <h1 className="mb-8 text-2xl font-bold text-white">로그인</h1>
       <LoginForm
         size="lg"
         onSuccess={() => {
