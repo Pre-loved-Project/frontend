@@ -173,7 +173,7 @@ const DetailPage = () => {
 
         <div className="mx-[1rem] h-[1px] bg-gray-600" />
 
-        <section className="mx-[1rem] md:mx-[2.5rem] md:mt-[0.5rem] lg:mx-[4rem] lg:mt-[2.5rem]">
+        <section className="mx-[1rem] my-[0.5rem] md:mx-[2.5rem] lg:mx-[4rem] lg:my-[2.5rem]">
           <h1 className="my-[1.5rem] text-[20px] font-bold lg:text-[24px]">
             판매한 상품
           </h1>
