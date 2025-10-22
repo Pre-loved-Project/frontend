@@ -31,7 +31,7 @@ const PostCard = ({
     <Link href={`/detail/${postingId}`}>
       <article className="w-full rounded-[8px] border border-[#353542] bg-[#252530] p-[10px] md:pb-[20px] xl:pb-[25px]">
         <div className="flex flex-col gap-[10px] md:gap-[20px] xl:gap-[25px]">
-          <div className="relative h-[98px] w-full rounded-[6px] md:h-[160px] xl:h-[220px]">
+          <div className="relative h-[98px] w-full overflow-hidden rounded-[6px] md:h-[160px] xl:h-[220px]">
             <Image
               src={thumbnail || DefaultImage}
               alt="상품 이미지"
