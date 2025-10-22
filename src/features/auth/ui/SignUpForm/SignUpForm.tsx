@@ -121,13 +121,6 @@ export const SignUpForm = ({ onSuccess, onError }: SignUpFormProps) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     console.log("회원가입 요청 폼 제출");
-    const res = await apiFetch<{
-      status: string;
-    }>("/health", {
-      method: "GET",
-      noAuth: true,
-    });
-    console.log(res);
     try {
       const body = {
         email,
@@ -139,14 +132,7 @@ export const SignUpForm = ({ onSuccess, onError }: SignUpFormProps) => {
       };
 
       console.log(body);
-      const res = await apiFetch<{
-        userId: number;
-        email: string;
-        nickname: string;
-        birthDate: string;
-        createdAt: string;
-        updatedAt: string;
-      }>("/auth/signup", {
+      const res = await apiFetch("/api/users/", {
         method: "POST",
         body: JSON.stringify(body),
         noAuth: true,
@@ -158,9 +144,9 @@ export const SignUpForm = ({ onSuccess, onError }: SignUpFormProps) => {
       console.error("회원가입 실패:", error + "\n");
       if (error instanceof Error) {
         // 서버 에러 메시지 처리
-        if (error.message.includes("isEmailUsed")) {
+        if (error.message.includes("EMAIL_DUPLICATE")) {
           setEmailError("이미 사용 중인 이메일입니다.");
-        } else if (error.message.includes("isNicknameUsed")) {
+        } else if (error.message.includes("NICKNAME_DUPLICATE")) {
           setNicknameError("이미 사용 중인 닉네임입니다.");
         } else {
           onError?.("회원가입에 실패했습니다. 잠시 후 다시 시도해주세요.");
