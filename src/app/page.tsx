@@ -14,7 +14,9 @@ import { POST_PAGE_SIZE } from "@/entities/post/model/constants/api";
 import { useInfiniteScroll } from "@/shared/lib/useInfiniteScroll";
 
 export default function Home() {
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string>(
+    CATEGORY_LIST[0],
+  );
   const [selectedSortOption, setSelectedSortOption] = useState(
     SORT_OPTION_LIST[0].value,
   );
@@ -34,7 +36,7 @@ export default function Home() {
         sort: selectedSortOption,
       });
 
-      if (selectedCategory) {
+      if (selectedCategory && selectedCategory !== "전체") {
         query.append("category", selectedCategory);
       }
 

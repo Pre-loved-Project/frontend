@@ -5,6 +5,7 @@ export const SORT_OPTION_LIST = [
   { label: "조회수순", value: "viewCount" },
 ];
 export const CATEGORY_LIST = [
+  "전체",
   "전자제품/가전제품",
   "식료품",
   "의류/패션",
