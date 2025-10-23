@@ -34,28 +34,28 @@ export default function DetailPage() {
   const [hasMore, setHasMore] = useState(true);
   const [isRelatedLoading, setIsRelatedLoading] = useState(false);
 
+  const fetchPost = async () => {
+    try {
+      setIsPostLoading(true);
+      const data = await apiFetch<PostDetail>(`/api/postings/${postingId}`, {
+        method: "GET",
+      });
+      setPost(data);
+    } catch (err) {
+      console.error("게시글 로드 실패:", err);
+    } finally {
+      setIsPostLoading(false);
+    }
+  };
+
   const { openPostEditModal } = usePostEditModal({
     onSuccess: () => {
-      // TODO: 게시글 상세 재호출
+      fetchPost();
     },
   });
 
   useEffect(() => {
     if (!postingId) return;
-
-    const fetchPost = async () => {
-      try {
-        const data = await apiFetch<PostDetail>(`/api/postings/${postingId}`, {
-          method: "GET",
-        });
-        setPost(data);
-      } catch (err) {
-        console.error("게시글 로드 실패:", err);
-      } finally {
-        setIsPostLoading(false);
-      }
-    };
-
     fetchPost();
   }, [postingId]);
 
