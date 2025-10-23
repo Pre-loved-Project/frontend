@@ -1,92 +1,107 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
+
+import { apiFetch } from "@/shared/api/fetcher";
+import { POST_PAGE_SIZE } from "@/entities/post/model/constants/api";
+import { useInfiniteScroll } from "@/shared/lib/useInfiniteScroll";
+
+import { useAuthStore } from "@/features/auth/model/auth.store";
+import { usePostEditModal } from "@/features/editPost/lib/usePostEditModal";
 
 import PostCard from "@/entities/post/ui/card/PostCard";
 import PostCarousel from "@/entities/post/ui/carousel/PostCarousel";
 import Button from "@/shared/ui/Button/Button";
 import LikeButton from "@/features/like/ui/LikeButton";
 import UserIcon from "@/shared/images/user.svg";
-import { useAuthStore } from "@/features/auth/model/auth.store";
-import { usePostEditModal } from "@/features/editPost/lib/usePostEditModal";
 
-interface PostDetail {
-  postingId: number;
-  sellerId: number;
-  title: string;
-  price: number;
-  content: string;
-  category: string;
-  viewCount: number;
-  likeCount: number;
-  chatCount: number;
-  createdAt: string;
-  updatedAt: string;
-  images: string[];
-  isOwner: boolean;
-}
+import type { PostDetail, Post } from "@/entities/post/model/types/post";
 
-interface PostSummary {
-  postingId: number;
-  title: string;
-  price: number;
-  sellerId: number;
-  content: string;
-  createdAt: string;
-  likeCount: number;
-  chatCount: number;
-  viewCount: number;
-  thumbnail: string;
-}
-
-const DetailPage = () => {
+export default function DetailPage() {
   const router = useRouter();
+  const params = useParams();
+  const postingId = params?.postingId as string;
+
   const isLogined = useAuthStore((state) => state.isLogined);
+
   const [post, setPost] = useState<PostDetail | null>(null);
-  const [relatedPosts, setRelatedPosts] = useState<PostSummary[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [isPostLoading, setIsPostLoading] = useState(true);
+
+  const [relatedPosts, setRelatedPosts] = useState<Post[]>([]);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [isRelatedLoading, setIsRelatedLoading] = useState(false);
 
   const { openPostEditModal } = usePostEditModal({
     onSuccess: () => {
-      // TODO : 게시글 상세 API 재호출 코드 추가
+      // TODO: 게시글 상세 재호출
     },
   });
 
-  //임시 게시글 상세 API 요청
   useEffect(() => {
+    if (!postingId) return;
+
     const fetchPost = async () => {
       try {
-        const res = await fetch(`/api/posts/1`, { cache: "no-store" });
-        const data = await res.json();
+        const data = await apiFetch<PostDetail>(`/api/postings/${postingId}`, {
+          method: "GET",
+        });
         setPost(data);
       } catch (err) {
         console.error("게시글 로드 실패:", err);
       } finally {
-        setLoading(false);
+        setIsPostLoading(false);
       }
     };
+
     fetchPost();
-  }, []);
+  }, [postingId]);
 
-  //임시 판매자 판매 목록 API 요청
+  const fetchRelatedPosts = async (pageNum: number, reset = false) => {
+    if (!post?.sellerId || isRelatedLoading) return;
+    setIsRelatedLoading(true);
+
+    try {
+      const query = new URLSearchParams({
+        page: String(pageNum),
+        size: String(POST_PAGE_SIZE),
+      });
+
+      const data = await apiFetch<{ data: Post[] }>(
+        `/api/postings/user/${post.sellerId}?${query.toString()}`,
+        { method: "GET" },
+      );
+
+      if (reset) setRelatedPosts(data.data);
+      else setRelatedPosts((prev) => [...prev, ...data.data]);
+
+      setHasMore(data.data.length === POST_PAGE_SIZE);
+    } catch (err) {
+      console.error("판매한 상품 불러오기 실패:", err);
+    } finally {
+      setIsRelatedLoading(false);
+    }
+  };
+
+  const lastPostRef = useInfiniteScroll(
+    () => setPage((prev) => prev + 1),
+    isRelatedLoading,
+    hasMore,
+  );
+
   useEffect(() => {
-    const fetchRelated = async () => {
-      try {
-        const res = await fetch(`/api/posts`, { cache: "no-store" });
-        const data = await res.json();
-        setRelatedPosts(data);
-      } catch (err) {
-        console.error("판매한 상품 불러오기 실패:", err);
-      }
-    };
-    fetchRelated();
-  }, []);
+    if (!post?.sellerId) return;
+    setPage(1);
+    setHasMore(true);
+    fetchRelatedPosts(1, true);
+  }, [post?.sellerId]);
 
-  if (loading) return <p className="text-center text-white">로딩 중...</p>;
-  if (!post)
-    return <p className="text-center text-white">게시글을 찾을 수 없습니다.</p>;
+  useEffect(() => {
+    if (page === 1) return;
+    fetchRelatedPosts(page);
+  }, [page]);
 
   const handleChatClick = () => {
     if (!isLogined) router.push("/login");
@@ -95,7 +110,6 @@ const DetailPage = () => {
 
   const handleEditClick = () => {
     if (!post) return;
-
     openPostEditModal(
       post.postingId,
       post.title,
@@ -106,27 +120,49 @@ const DetailPage = () => {
     );
   };
 
+  const handleDeleteClick = async () => {
+    if (!post) return;
+
+    // TODO: confirm() → Modal
+    if (!confirm("정말 이 게시물을 삭제하시겠습니까?")) return;
+
+    try {
+      await apiFetch(`/api/postings/${post.postingId}`, { method: "DELETE" });
+
+      // TODO: alert() → Toast
+      alert("게시물이 삭제되었습니다.");
+      router.push("/");
+    } catch (err) {
+      console.error("게시물 삭제 실패:", err);
+    }
+  };
+
+  if (isPostLoading)
+    return <p className="text-center text-white">로딩 중...</p>;
+  if (!post)
+    return <p className="text-center text-white">게시글을 찾을 수 없습니다.</p>;
+
   return (
     <main>
       <article className="text-white">
-        <div className="flex flex-col px-[1rem] md:px-[2.5rem] lg:flex-row lg:gap-[2.5rem] lg:px-[4rem]">
-          <section className="mx-[-1rem] md:mx-[-2.5rem] lg:mx-0 lg:w-1/2">
+        <div className="flex flex-col px-[1rem] md:px-[2.5rem] xl:flex-row xl:gap-[2.5rem] xl:px-[4rem]">
+          <section className="mx-[-1rem] md:mx-[-2.5rem] xl:mx-0 xl:w-1/2">
             <PostCarousel images={post.images} />
-            <div className="align-center mx-[1em] flex gap-[0.75rem] py-[1rem] md:mx-[1.5rem] lg:mx-0">
-              <div className="align-center lg:w-56px] flex h-[48px] w-[48px] justify-center overflow-hidden rounded-full md:h-[64px] md:w-[64px] lg:h-[56px]">
+            <div className="align-center mx-[1em] flex gap-[0.75rem] py-[1rem] md:mx-[1.5rem] xl:mx-0">
+              <div className="align-center flex h-[48px] w-[48px] justify-center overflow-hidden rounded-full md:h-[64px] md:w-[64px] xl:h-[56px] xl:w-[56px]">
                 <Link href="/my" aria-label="판매자 프로필 페이지">
                   <UserIcon className="h-full w-full object-cover text-white" />
                 </Link>
               </div>
-              <span className="flex items-center justify-center text-[16px] md:text-[20px] lg:text-[16px]">
+              <span className="flex items-center justify-center text-[16px] md:text-[20px] xl:text-[16px]">
                 {post.sellerId}
               </span>
             </div>
 
-            <div className="mx-[1rem] h-[1px] bg-gray-600 lg:hidden" />
+            <div className="mx-[1rem] h-[1px] bg-gray-600 xl:hidden" />
           </section>
 
-          <section className="flex flex-col justify-between gap-[1.25rem] py-[1.5rem] md:pt-[2rem] lg:w-1/2 lg:pt-0 lg:pb-[88px]">
+          <section className="flex flex-col justify-between gap-[1.25rem] py-[1.5rem] md:pt-[2rem] xl:w-1/2 xl:pt-0 xl:pb-[88px]">
             <div className="flex flex-col gap-[1.25rem]">
               <div className="flex flex-col gap-[0.5rem] md:gap-[0.75rem]">
                 <h1 className="text-[20px] font-bold">{post.title}</h1>
@@ -135,12 +171,12 @@ const DetailPage = () => {
                 </h3>
               </div>
 
-              <p className="font-regular text-left text-[16px] whitespace-pre-line md:text-[18px] lg:text-[16px]">
+              <p className="font-regular text-left text-[16px] whitespace-pre-line md:text-[18px] xl:text-[16px]">
                 {post.content}
               </p>
             </div>
             <div className="flex flex-col gap-[1.25rem]">
-              <span className="font-regular flex flex-wrap gap-[0.25rem] leading-[1.25rem] font-[0.875rem] text-[#868b94]">
+              <span className="font-regular flex flex-wrap gap-[0.25rem] leading-[1.25rem] text-[#868b94]">
                 <span>채팅 {post.chatCount}</span>
                 <span className="flex gap-[0.25rem]">
                   <span>·</span>관심 {post.likeCount}
@@ -156,7 +192,12 @@ const DetailPage = () => {
                     <Button className="w-full flex-1" onClick={handleEditClick}>
                       수정하기
                     </Button>
-                    <Button className="w-full flex-1">삭제하기</Button>
+                    <Button
+                      className="w-full flex-1"
+                      onClick={handleDeleteClick}
+                    >
+                      삭제하기
+                    </Button>
                   </>
                 ) : (
                   <>
@@ -172,20 +213,27 @@ const DetailPage = () => {
         </div>
 
         <div className="mx-[1rem] h-[1px] bg-gray-600" />
-
-        <section className="mx-[1rem] my-[0.5rem] md:mx-[2.5rem] lg:mx-[4rem] lg:my-[2.5rem]">
-          <h1 className="my-[1.5rem] text-[20px] font-bold lg:text-[24px]">
+        <section className="mx-[1rem] my-[0.5rem] md:mx-[2.5rem] xl:mx-[4rem] xl:my-[2.5rem]">
+          <h1 className="my-[1.5rem] text-[20px] font-bold xl:text-[24px]">
             판매한 상품
           </h1>
-          <div className="- grid w-full grid-cols-2 gap-x-[16px] gap-y-[32px] md:grid-cols-4 md:gap-x-[20px] lg:grid-cols-5 lg:gap-x-[20px]">
-            {relatedPosts.map((post, id) => (
-              <PostCard key={id} {...post} />
-            ))}
+          <div className="grid w-full grid-cols-2 gap-x-[16px] gap-y-[32px] md:grid-cols-4 xl:grid-cols-5">
+            {relatedPosts.map((item, idx) =>
+              relatedPosts.length === idx + 1 ? (
+                <div ref={lastPostRef} key={item.postingId}>
+                  <PostCard {...item} />
+                </div>
+              ) : (
+                <PostCard key={item.postingId} {...item} />
+              ),
+            )}
           </div>
+
+          {isRelatedLoading ? (
+            <p className="mt-4 text-center text-gray-400">불러오는 중...</p>
+          ) : null}
         </section>
       </article>
     </main>
   );
-};
-
-export default DetailPage;
+}
