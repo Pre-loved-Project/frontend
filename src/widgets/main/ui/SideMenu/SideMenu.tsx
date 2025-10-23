@@ -2,7 +2,7 @@ import cn from "@/shared/lib/cn";
 
 interface SideMenuProps {
   categories: string[];
-  selectedCategory: string;
+  selectedCategory: string | null;
   onSelect: (category: string) => void;
 }
 
