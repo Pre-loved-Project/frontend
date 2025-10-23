@@ -1,8 +1,8 @@
 export const SORT_OPTION_LIST = [
   { label: "최신순", value: "latest" },
-  { label: "좋아요 높은순", value: "likes" },
-  { label: "채팅수순", value: "chats" },
-  { label: "조회수순", value: "views" },
+  { label: "좋아요 높은순", value: "likeCount" },
+  { label: "채팅수순", value: "chatCount" },
+  { label: "조회수순", value: "viewCount" },
 ];
 export const CATEGORY_LIST = [
   "전자제품/가전제품",
