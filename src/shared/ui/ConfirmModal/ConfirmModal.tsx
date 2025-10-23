@@ -4,7 +4,7 @@ import React from "react";
 import cn from "@/shared/lib/cn";
 import Button from "../Button/Button";
 
-export interface ModalProps {
+export interface ConfirmModalProps {
   message: string;
   confirmButtonText?: string;
   cancelButtonText?: string;
@@ -20,7 +20,7 @@ export const ConfirmModal = ({
   onConfirm,
   onCancel,
   className,
-}: ModalProps) => {
+}: ConfirmModalProps) => {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
       <div
