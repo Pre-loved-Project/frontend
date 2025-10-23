@@ -2,6 +2,10 @@ import { create } from "zustand";
 import { ReactNode } from "react";
 import { ModalProps, Modal } from "../ui/Modal/Modal";
 import {
+  ConfirmModalProps,
+  ConfirmModal,
+} from "../ui/ConfirmModal/ConfirmModal";
+import {
   ProfileEditModalProps,
   ProfileEditModal,
 } from "@/features/editProfile/ui/ProfileEditModal/ProfileEditModal";
@@ -16,6 +20,7 @@ import {
 
 export interface ModalPropsMap {
   normal: ModalProps;
+  confirm: ConfirmModalProps;
   editProfile: ProfileEditModalProps;
   createPost: PostCreateModalProps;
   editPost: PostEditModalProps;
@@ -27,6 +32,7 @@ export const modalFactory: {
   [K in ModalKey]: (props: unknown) => ReactNode;
 } = {
   normal: (props) => <Modal {...(props as ModalProps)} />,
+  confirm: (props) => <ConfirmModal {...(props as ConfirmModalProps)} />,
   editProfile: (props) => (
     <ProfileEditModal {...(props as ProfileEditModalProps)} />
   ),
