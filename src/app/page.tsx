@@ -11,7 +11,7 @@ import {
 } from "@/widgets/main/model/constants";
 import { apiFetch } from "@/shared/api/fetcher";
 import { POST_PAGE_SIZE } from "@/entities/post/model/constants/api";
-import { useInfiniteScroll } from "@/shared/hooks/useInfiniteScroll";
+import { useInfiniteScroll } from "@/shared/lib/useInfiniteScroll";
 
 export default function Home() {
   const [selectedCategory, setSelectedCategory] = useState(CATEGORY_LIST[0]);
