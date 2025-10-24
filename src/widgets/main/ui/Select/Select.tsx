@@ -37,7 +37,7 @@ const Select = ({
   };
 
   return (
-    <div className="relative w-[160px] text-white">
+    <div className="relative z-50 w-[160px] text-white">
       <button
         type="button"
         aria-haspopup="listbox"

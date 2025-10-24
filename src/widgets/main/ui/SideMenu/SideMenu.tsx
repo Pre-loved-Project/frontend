@@ -34,7 +34,7 @@ const SideMenu = ({
                 "flex h-[45px] w-[160px] items-center rounded-[8px] px-[20px] py-[15px]",
                 "text-[14px] leading-none font-medium transition-colors",
                 "hover:cursor-pointer focus-visible:ring-2 focus-visible:ring-white focus-visible:outline-none",
-                "xl:h-[50px] xl:w-[200px] xl:text-[16px]",
+                "xl:w-[200px] xl:text-[16px]",
                 selectedCategory === category
                   ? "border border-[#353542] bg-[#353542] text-white"
                   : "text-[#6E6E82] hover:border hover:border-[#353542] hover:bg-[#252530] hover:text-white",

@@ -14,7 +14,9 @@ import { POST_PAGE_SIZE } from "@/entities/post/model/constants/api";
 import { useInfiniteScroll } from "@/shared/lib/useInfiniteScroll";
 
 export default function Home() {
-  const [selectedCategory, setSelectedCategory] = useState(CATEGORY_LIST[0]);
+  const [selectedCategory, setSelectedCategory] = useState<string>(
+    CATEGORY_LIST[0],
+  );
   const [selectedSortOption, setSelectedSortOption] = useState(
     SORT_OPTION_LIST[0].value,
   );
@@ -32,8 +34,11 @@ export default function Home() {
         page: String(pageNum),
         size: String(POST_PAGE_SIZE),
         sort: selectedSortOption,
-        category: selectedCategory,
       });
+
+      if (selectedCategory && selectedCategory !== "전체") {
+        query.append("category", selectedCategory);
+      }
 
       const data = await apiFetch<{ data: Post[] }>(
         `/api/postings?${query.toString()}`,
@@ -89,7 +94,7 @@ export default function Home() {
               id="category-heading"
               className="text-[20px] leading-[28px] font-semibold text-white xl:text-[24px]"
             >
-              {selectedCategory}
+              {selectedCategory || "전체 게시물"}
             </h3>
             <SortMenu
               items={SORT_OPTION_LIST}
