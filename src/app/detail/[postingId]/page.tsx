@@ -9,6 +9,7 @@ import { POST_PAGE_SIZE } from "@/entities/post/model/constants/api";
 import { useInfiniteScroll } from "@/shared/lib/useInfiniteScroll";
 
 import { useAuthStore } from "@/features/auth/model/auth.store";
+import { useModalStore } from "@/shared/model/modal.store";
 import { usePostEditModal } from "@/features/editPost/lib/usePostEditModal";
 
 import PostCard from "@/entities/post/ui/card/PostCard";
@@ -25,6 +26,7 @@ export default function DetailPage() {
   const postingId = params?.postingId as string;
 
   const isLogined = useAuthStore((state) => state.isLogined);
+  const { openModal, closeModal } = useModalStore();
 
   const [post, setPost] = useState<PostDetail | null>(null);
   const [isPostLoading, setIsPostLoading] = useState(true);
@@ -124,17 +126,29 @@ export default function DetailPage() {
     if (!post) return;
 
     // TODO: confirm() → Modal
-    if (!confirm("정말 이 게시물을 삭제하시겠습니까?")) return;
-
-    try {
-      await apiFetch(`/api/postings/${post.postingId}`, { method: "DELETE" });
-
-      // TODO: alert() → Toast
-      alert("게시물이 삭제되었습니다.");
-      router.push("/");
-    } catch (err) {
-      console.error("게시물 삭제 실패:", err);
-    }
+    openModal("confirm", {
+      message: "정말 이 게시물을 삭제하시겠습니까?",
+      onConfirm: async () => {
+        try {
+          await apiFetch(`/api/postings/${post.postingId}`, {
+            method: "DELETE",
+          });
+          closeModal();
+          openModal("normal", {
+            message: "삭제가 완료되었습니다.",
+            onClick: () => {
+              closeModal();
+              router.push("/");
+            },
+          });
+        } catch (err) {
+          console.error("게시물 삭제 실패:", err);
+        }
+      },
+      onCancel: () => {
+        closeModal();
+      },
+    });
   };
 
   if (isPostLoading)
