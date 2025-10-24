@@ -25,4 +25,5 @@ export interface PostDetail {
   updatedAt: string;
   images: string[];
   isOwner: boolean;
+  isFavorite: boolean;
 }

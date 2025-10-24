@@ -11,6 +11,7 @@ import { useInfiniteScroll } from "@/shared/lib/useInfiniteScroll";
 import { useAuthStore } from "@/features/auth/model/auth.store";
 import { useModalStore } from "@/shared/model/modal.store";
 import { usePostEditModal } from "@/features/editPost/lib/usePostEditModal";
+import { useLike } from "@/features/like/lib/useLike";
 
 import PostCard from "@/entities/post/ui/card/PostCard";
 import PostCarousel from "@/entities/post/ui/carousel/PostCarousel";
@@ -36,6 +37,15 @@ export default function DetailPage() {
   const [hasMore, setHasMore] = useState(true);
   const [isRelatedLoading, setIsRelatedLoading] = useState(false);
 
+  const [likeCount, setLikeCount] = useState(0);
+  const [liked, setLiked] = useState(false);
+  const { loading, handleLikeToggle } = useLike({
+    postingId: post?.postingId,
+    liked,
+    onLikedChange: setLiked,
+    onCountChange: (delta) => setLikeCount((prev) => prev + delta),
+  });
+
   const fetchPost = async () => {
     try {
       setIsPostLoading(true);
@@ -43,6 +53,8 @@ export default function DetailPage() {
         method: "GET",
       });
       setPost(data);
+      setLikeCount(data.likeCount);
+      setLiked(data.isFavorite);
     } catch (err) {
       console.error("게시글 로드 실패:", err);
     } finally {
@@ -125,7 +137,6 @@ export default function DetailPage() {
   const handleDeleteClick = async () => {
     if (!post) return;
 
-    // TODO: confirm() → Modal
     openModal("confirm", {
       message: "정말 이 게시물을 삭제하시겠습니까?",
       onConfirm: async () => {
@@ -193,7 +204,7 @@ export default function DetailPage() {
               <span className="font-regular flex flex-wrap gap-[0.25rem] leading-[1.25rem] text-[#868b94]">
                 <span>채팅 {post.chatCount}</span>
                 <span className="flex gap-[0.25rem]">
-                  <span>·</span>관심 {post.likeCount}
+                  <span>·</span>관심 {likeCount}
                 </span>
                 <span className="flex gap-[0.25rem]">
                   <span>·</span>조회 {post.viewCount}
@@ -218,7 +229,11 @@ export default function DetailPage() {
                     <Button className="w-full flex-1" onClick={handleChatClick}>
                       채팅하기
                     </Button>
-                    <LikeButton />
+                    <LikeButton
+                      liked={liked}
+                      loading={loading}
+                      onToggle={handleLikeToggle}
+                    />
                   </>
                 )}
               </div>
@@ -243,9 +258,9 @@ export default function DetailPage() {
             )}
           </div>
 
-          {isRelatedLoading ? (
+          {isRelatedLoading && (
             <p className="mt-4 text-center text-gray-400">불러오는 중...</p>
-          ) : null}
+          )}
         </section>
       </article>
     </main>
