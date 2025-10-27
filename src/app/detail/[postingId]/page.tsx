@@ -20,6 +20,7 @@ import LikeButton from "@/features/like/ui/LikeButton";
 import UserIcon from "@/shared/images/user.svg";
 
 import type { PostDetail, Post } from "@/entities/post/model/types/post";
+import type { User } from "@/entities/user/model/types/user";
 
 export default function DetailPage() {
   const router = useRouter();
@@ -45,6 +46,23 @@ export default function DetailPage() {
     onLikedChange: setLiked,
     onCountChange: (delta) => setLikeCount((prev) => prev + delta),
   });
+  const [seller, setSeller] = useState<{
+    userId: number;
+    nickname: string;
+    imageUrl?: string;
+  } | null>(null);
+
+  const fetchSeller = async (userId: number) => {
+    try {
+      const data = await apiFetch<User>(`/api/users/${userId}`, {
+        method: "GET",
+      });
+
+      setSeller(data);
+    } catch (err) {
+      console.error("판매자 정보 조회 실패:", err);
+    }
+  };
 
   const fetchPost = async () => {
     try {
@@ -107,6 +125,7 @@ export default function DetailPage() {
 
   useEffect(() => {
     if (!post?.sellerId) return;
+    fetchSeller(post.sellerId);
     setPage(1);
     setHasMore(true);
     fetchRelatedPosts(1, true);
@@ -175,12 +194,23 @@ export default function DetailPage() {
             <PostCarousel images={post.images} />
             <div className="align-center mx-[1em] flex gap-[0.75rem] py-[1rem] md:mx-[1.5rem] xl:mx-0">
               <div className="align-center flex h-[48px] w-[48px] justify-center overflow-hidden rounded-full md:h-[64px] md:w-[64px] xl:h-[56px] xl:w-[56px]">
-                <Link href="/my" aria-label="판매자 프로필 페이지">
-                  <UserIcon className="h-full w-full object-cover text-white" />
+                <Link
+                  href={`/user/${seller?.userId ?? ""}`}
+                  aria-label="판매자 프로필 페이지"
+                >
+                  {seller?.imageUrl ? (
+                    <img
+                      src={seller.imageUrl}
+                      alt={`${seller.nickname} 프로필`}
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <UserIcon className="h-full w-full object-cover text-white" />
+                  )}
                 </Link>
               </div>
               <span className="flex items-center justify-center text-[16px] md:text-[20px] xl:text-[16px]">
-                {post.sellerId}
+                {seller?.nickname}
               </span>
             </div>
 
