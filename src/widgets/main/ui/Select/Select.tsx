@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import cn from "@/shared/lib/cn";
 
 import ArrowUpIcon from "@/shared/images/arrow-up.svg";
@@ -25,6 +25,7 @@ const Select = ({
   placeholder,
 }: SelectProps) => {
   const [open, setOpen] = useState(false);
+  const selectRef = useRef<HTMLDivElement>(null);
 
   const selectedLabel = items.find(
     (item) => item.value === selectedItem,
@@ -36,8 +37,22 @@ const Select = ({
     setOpen(false);
   };
 
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (selectRef.current && !selectRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
+    if (open) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [open]);
+
   return (
-    <div className="relative z-50 w-[160px] text-white">
+    <div ref={selectRef} className="relative z-20 w-[160px] text-white">
       <button
         type="button"
         aria-haspopup="listbox"
