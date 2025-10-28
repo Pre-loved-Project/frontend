@@ -20,6 +20,8 @@ export const Message = ({ type, content, isMine }: MessageProps) => {
       {type === "image" ? (
         <Image
           src={content}
+          width={200}
+          height={200}
           alt="chat image"
           className="h-auto max-w-[50%] rounded-2xl object-cover"
         />
