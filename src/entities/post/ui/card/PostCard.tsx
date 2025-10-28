@@ -32,12 +32,18 @@ const PostCard = ({
       <article className="w-full rounded-[8px] border border-[#353542] bg-[#252530] p-[10px] md:pb-[20px] xl:pb-[25px]">
         <div className="flex flex-col gap-[10px] md:gap-[20px] xl:gap-[25px]">
           <div className="relative h-[98px] w-full overflow-hidden rounded-[6px] md:h-[160px] xl:h-[220px]">
-            <Image
-              src={thumbnail || DefaultImage}
-              alt="상품 이미지"
-              fill
-              className="object-cover transition-transform duration-200 ease-in-out hover:scale-105"
-            />
+            {thumbnail ? (
+              <Image
+                src={thumbnail}
+                alt={title}
+                fill
+                className="object-cover transition-transform duration-200 ease-in-out hover:scale-105"
+              />
+            ) : (
+              <div className="flex h-full w-full items-center justify-center bg-[#1c1c22] text-gray-500">
+                이미지 없음
+              </div>
+            )}
           </div>
           <div className="flex flex-col gap-[5px] md:gap-[10px]">
             <h1 className="line-clamp-2 h-[28px] text-sm leading-none font-medium text-[#F1F1F5] md:h-[32px] md:text-[16px] xl:h-[36px] xl:text-[18px]">
