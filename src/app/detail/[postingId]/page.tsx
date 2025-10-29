@@ -15,11 +15,11 @@ import { useLike } from "@/features/like/lib/useLike";
 
 import PostCard from "@/entities/post/ui/card/PostCard";
 import PostCarousel from "@/entities/post/ui/carousel/PostCarousel";
-import Button from "@/shared/ui/Button/Button";
-import LikeButton from "@/features/like/ui/LikeButton";
-import UserIcon from "@/shared/images/user.svg";
+import { SellerInfo } from "@/widgets/postDetail/ui/SellerInfo";
+import { PostActionBar } from "@/widgets/postDetail/ui/PostActionBar";
 
 import type { PostDetail, Post } from "@/entities/post/model/types/post";
+import type { User } from "@/entities/user/model/types/user";
 
 export default function DetailPage() {
   const router = useRouter();
@@ -32,18 +32,31 @@ export default function DetailPage() {
   const [post, setPost] = useState<PostDetail | null>(null);
   const [isPostLoading, setIsPostLoading] = useState(true);
 
+  const [likeCount, setLikeCount] = useState(0);
+  const [liked, setLiked] = useState(false);
+
   const [relatedPosts, setRelatedPosts] = useState<Post[]>([]);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [isRelatedLoading, setIsRelatedLoading] = useState(false);
 
-  const [likeCount, setLikeCount] = useState(0);
-  const [liked, setLiked] = useState(false);
+  const [seller, setSeller] = useState<{
+    userId: number;
+    nickname: string;
+    imageUrl?: string;
+  } | null>(null);
+
   const { loading, handleLikeToggle } = useLike({
     postingId: post?.postingId,
     liked,
     onLikedChange: setLiked,
     onCountChange: (delta) => setLikeCount((prev) => prev + delta),
+  });
+
+  const { openPostEditModal } = usePostEditModal({
+    onSuccess: () => {
+      fetchPost();
+    },
   });
 
   const fetchPost = async () => {
@@ -62,16 +75,16 @@ export default function DetailPage() {
     }
   };
 
-  const { openPostEditModal } = usePostEditModal({
-    onSuccess: () => {
-      fetchPost();
-    },
-  });
-
-  useEffect(() => {
-    if (!postingId) return;
-    fetchPost();
-  }, [postingId]);
+  const fetchSeller = async (userId: number) => {
+    try {
+      const data = await apiFetch<User>(`/api/users/${userId}`, {
+        method: "GET",
+      });
+      setSeller(data);
+    } catch (err) {
+      console.error("판매자 정보 조회 실패:", err);
+    }
+  };
 
   const fetchRelatedPosts = async (pageNum: number, reset = false) => {
     if (!post?.sellerId || isRelatedLoading) return;
@@ -97,41 +110,6 @@ export default function DetailPage() {
     } finally {
       setIsRelatedLoading(false);
     }
-  };
-
-  const lastPostRef = useInfiniteScroll(
-    () => setPage((prev) => prev + 1),
-    isRelatedLoading,
-    hasMore,
-  );
-
-  useEffect(() => {
-    if (!post?.sellerId) return;
-    setPage(1);
-    setHasMore(true);
-    fetchRelatedPosts(1, true);
-  }, [post?.sellerId]);
-
-  useEffect(() => {
-    if (page === 1) return;
-    fetchRelatedPosts(page);
-  }, [page]);
-
-  const handleChatClick = () => {
-    if (!isLogined) router.push("/login");
-    else router.push("/chat");
-  };
-
-  const handleEditClick = () => {
-    if (!post) return;
-    openPostEditModal(
-      post.postingId,
-      post.title,
-      post.price,
-      post.category,
-      post.content,
-      post.images,
-    );
   };
 
   const handleDeleteClick = async () => {
@@ -162,6 +140,47 @@ export default function DetailPage() {
     });
   };
 
+  const lastPostRef = useInfiniteScroll(
+    () => setPage((prev) => prev + 1),
+    isRelatedLoading,
+    hasMore,
+  );
+
+  useEffect(() => {
+    if (!postingId) return;
+    fetchPost();
+  }, [postingId]);
+
+  useEffect(() => {
+    if (!post?.sellerId) return;
+    fetchSeller(post.sellerId);
+    setPage(1);
+    setHasMore(true);
+    fetchRelatedPosts(1, true);
+  }, [post?.sellerId]);
+
+  useEffect(() => {
+    if (page === 1) return;
+    fetchRelatedPosts(page);
+  }, [page]);
+
+  const handleChatClick = () => {
+    if (!isLogined) router.push("/login");
+    else router.push("/chat");
+  };
+
+  const handleEditClick = () => {
+    if (!post) return;
+    openPostEditModal(
+      post.postingId,
+      post.title,
+      post.price,
+      post.category,
+      post.content,
+      post.images,
+    );
+  };
+
   if (isPostLoading)
     return <p className="text-center text-white">로딩 중...</p>;
   if (!post)
@@ -173,16 +192,11 @@ export default function DetailPage() {
         <div className="flex flex-col px-[1rem] md:px-[2.5rem] xl:flex-row xl:gap-[2.5rem] xl:px-[4rem]">
           <section className="mx-[-1rem] md:mx-[-2.5rem] xl:mx-0 xl:w-1/2">
             <PostCarousel images={post.images} />
-            <div className="align-center mx-[1em] flex gap-[0.75rem] py-[1rem] md:mx-[1.5rem] xl:mx-0">
-              <div className="align-center flex h-[48px] w-[48px] justify-center overflow-hidden rounded-full md:h-[64px] md:w-[64px] xl:h-[56px] xl:w-[56px]">
-                <Link href="/my" aria-label="판매자 프로필 페이지">
-                  <UserIcon className="h-full w-full object-cover text-white" />
-                </Link>
-              </div>
-              <span className="flex items-center justify-center text-[16px] md:text-[20px] xl:text-[16px]">
-                {post.sellerId}
-              </span>
-            </div>
+            <SellerInfo
+              userId={seller?.userId}
+              nickname={seller?.nickname || ""}
+              imageUrl={seller?.imageUrl}
+            />
 
             <div className="mx-[1rem] h-[1px] bg-gray-600 xl:hidden" />
           </section>
@@ -210,33 +224,15 @@ export default function DetailPage() {
                   <span>·</span>조회 {post.viewCount}
                 </span>
               </span>
-
-              <div className="flex items-center justify-center gap-[10px]">
-                {post.isOwner ? (
-                  <>
-                    <Button className="w-full flex-1" onClick={handleEditClick}>
-                      수정하기
-                    </Button>
-                    <Button
-                      className="w-full flex-1"
-                      onClick={handleDeleteClick}
-                    >
-                      삭제하기
-                    </Button>
-                  </>
-                ) : (
-                  <>
-                    <Button className="w-full flex-1" onClick={handleChatClick}>
-                      채팅하기
-                    </Button>
-                    <LikeButton
-                      liked={liked}
-                      loading={loading}
-                      onToggle={handleLikeToggle}
-                    />
-                  </>
-                )}
-              </div>
+              <PostActionBar
+                isOwner={post.isOwner}
+                liked={liked}
+                loading={loading}
+                onEdit={handleEditClick}
+                onDelete={handleDeleteClick}
+                onChat={handleChatClick}
+                onToggleLike={handleLikeToggle}
+              />
             </div>
           </section>
         </div>
