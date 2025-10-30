@@ -16,6 +16,8 @@ export default function SideMenuWrapper({ selectedCategory }: Props) {
     const params = new URLSearchParams(searchParams.toString());
     if (category === "전체") params.delete("category");
     else params.set("category", category);
+    params.delete("keyword");
+    params.delete("sort");
     router.push(`/?${params.toString()}`);
   };
 
