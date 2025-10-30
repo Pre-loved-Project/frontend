@@ -1,7 +1,6 @@
 "use client";
 import React, { useState, useRef, useEffect } from "react";
-import Image from "next/image";
-import { MessageProps, Message } from "../Message/Message";
+import { Message } from "../Message/Message";
 import Button from "@/shared/ui/Button/Button";
 import { TextField } from "@/shared/ui/TextField/TextField";
 import ImageSelectIcon from "@/shared/images/image-select.svg";
