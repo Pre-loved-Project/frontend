@@ -2,7 +2,7 @@ import React from "react";
 import cn from "@/shared/lib/cn";
 import Image from "next/image";
 
-interface MessageProps {
+export interface MessageProps {
   type: "text" | "image";
   content: string;
   isMine: boolean;
