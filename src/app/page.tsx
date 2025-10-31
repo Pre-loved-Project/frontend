@@ -14,6 +14,7 @@ export default async function HomePage({
   const selectedCategory = params?.category ?? "전체";
   const selectedSortOption = params?.sort ?? "latest";
   const page = Number(params?.page ?? 1);
+  const keyword = (params?.keyword ?? "").trim();
 
   const query = new URLSearchParams({
     page: String(page),
@@ -21,6 +22,7 @@ export default async function HomePage({
     sort: selectedSortOption,
   });
   if (selectedCategory !== "전체") query.append("category", selectedCategory);
+  if (keyword) query.append("keyword", keyword);
 
   const { data: posts } = await serverFetch<{ data: Post[] }>(
     `/api/postings?${query.toString()}`,
@@ -38,6 +40,7 @@ export default async function HomePage({
           initialPosts={posts}
           selectedCategory={selectedCategory}
           selectedSortOption={selectedSortOption}
+          selectedKeyword={keyword}
         />
       </main>
     </div>
