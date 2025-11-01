@@ -9,9 +9,14 @@ interface HeaderDesktopProps {
     icon: React.FC<React.SVGProps<SVGSVGElement>>;
     hasDivider: boolean;
   }[];
+  onOpenChat?: () => void;
 }
 
-const HeaderDesktop = ({ isLogined, navItems }: HeaderDesktopProps) => {
+const HeaderDesktop = ({
+  isLogined,
+  navItems,
+  onOpenChat,
+}: HeaderDesktopProps) => {
   return (
     <div className="hidden w-full items-center justify-between md:flex">
       <div className="text-white">
@@ -32,10 +37,24 @@ const HeaderDesktop = ({ isLogined, navItems }: HeaderDesktopProps) => {
                     : ""
                 } `}
               >
-                <Link href={href} className="flex items-center justify-center">
-                  <Icon className="h-[16px] w-[16px] text-white" />
-                  <p className="ml-1">{label}</p>
-                </Link>
+                {href === "/chat" && onOpenChat ? (
+                  <button
+                    type="button"
+                    onClick={onOpenChat}
+                    className="flex cursor-pointer items-center justify-center"
+                  >
+                    <Icon className="h-[16px] w-[16px] text-white" />
+                    <p className="ml-1">{label}</p>
+                  </button>
+                ) : (
+                  <Link
+                    href={href}
+                    className="flex items-center justify-center"
+                  >
+                    <Icon className="h-[16px] w-[16px] text-white" />
+                    <p className="ml-1">{label}</p>
+                  </Link>
+                )}
               </li>
             ))}
           </ul>

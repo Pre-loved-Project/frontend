@@ -1,16 +1,23 @@
-import Link from "next/link";
+"use client";
 
+import Link from "next/link";
 import MenuIcon from "@/shared/images/menu.svg";
 import SearchIcon from "@/shared/images/search.svg";
 
 interface HeaderMobileProps {
   setShowSearch: (value: boolean) => void;
+  onOpenMenu: () => void;
 }
 
-const HeaderMobile = ({ setShowSearch }: HeaderMobileProps) => {
+const HeaderMobile = ({ setShowSearch, onOpenMenu }: HeaderMobileProps) => {
   return (
     <div className="flex w-full items-center justify-between md:hidden">
-      <button aria-label="menu" type="button" className="cursor-pointer">
+      <button
+        aria-label="menu"
+        type="button"
+        className="cursor-pointer"
+        onClick={onOpenMenu}
+      >
         <MenuIcon className="h-[24px] w-[24px]" />
       </button>
 
