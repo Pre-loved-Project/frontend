@@ -7,8 +7,6 @@ import { TextBox } from "@/shared/ui/TextBox/TextBox";
 import { DropDown } from "@/shared/ui/DropDown/DropDown";
 import Button from "@/shared/ui/Button/Button";
 import Image from "next/image";
-import ImageSelectIcon from "@/shared/images/image-select.svg";
-import DeleteIcon from "@/shared/images/delete.svg";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation } from "swiper/modules";
 import "swiper/css";
@@ -40,8 +38,9 @@ const ImageSwiperSlide = (
           className="absolute top-0.5 right-0.5 flex items-center justify-center rounded-full bg-black/50 p-1"
           onClick={() => onRemoveButtonClick(idx)}
         >
-          <DeleteIcon
-            alt="닫기"
+          <img
+            src="/icons/delete.svg"
+            alt="삭제"
             className="h-2 w-2 md:h-3 md:w-3 xl:h-3 xl:w-3"
           />
         </button>
@@ -49,6 +48,7 @@ const ImageSwiperSlide = (
     </SwiperSlide>
   );
 };
+
 export interface PostEditModalProps {
   postId: number;
   title: string;
@@ -121,7 +121,7 @@ export const PostEditModal = ({
       )
         return;
 
-      //새로 추가한 이미지 URL 배열 생성
+      // 새로 추가한 이미지 URL 배열 생성
       const uploadedImageUrlArray: string[] = [];
       for (const file of images) {
         const uploadedImageUrl = await uploadImage(file);
@@ -149,6 +149,7 @@ export const PostEditModal = ({
       onError?.(message);
     }
   };
+
   const widthClass = "w-[290px] md:w-[510px] xl:w-[540px]";
   const imageSwiper = useMemo(
     () => (
@@ -178,13 +179,17 @@ export const PostEditModal = ({
         className,
       )}
     >
-      <div className="bg-black-900 bg-black-800 relative flex w-[335px] max-w-[620px] flex-col gap-7 rounded-lg p-6 md:w-[590px] md:p-10 xl:w-[620px] xl:p-10">
+      <div className="bg-black-900 relative flex w-[335px] max-w-[620px] flex-col gap-7 rounded-lg p-6 md:w-[590px] md:p-10 xl:w-[620px] xl:p-10">
         <button
           type="button"
           className="absolute top-4 right-4"
           onClick={onClose}
         >
-          <DeleteIcon alt="닫기" width={24} height={24} />
+          <img
+            src="/icons/delete.svg"
+            alt="닫기"
+            className="h-[24px] w-[24px]"
+          />
         </button>
 
         <h2 className="text-lg font-semibold text-white">게시물 수정</h2>
@@ -194,7 +199,11 @@ export const PostEditModal = ({
             className="bg-black-800 flex h-[50px] w-[50px] shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-lg md:h-[70px] md:w-[70px] xl:h-[70px] xl:w-[70px]"
             onClick={() => inputRef.current?.click()}
           >
-            <ImageSelectIcon className="h-8 w-8" width={32} height={32} />
+            <img
+              src="/icons/image-select.svg"
+              alt="이미지 선택"
+              className="h-8 w-8"
+            />
           </label>
           <input
             ref={inputRef}

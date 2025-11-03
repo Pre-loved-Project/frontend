@@ -7,8 +7,6 @@ import { TextBox } from "@/shared/ui/TextBox/TextBox";
 import { DropDown } from "@/shared/ui/DropDown/DropDown";
 import Button from "@/shared/ui/Button/Button";
 import Image from "next/image";
-import DeleteIcon from "@/shared/images/delete.svg";
-import SelectIcon from "@/shared/images/image-select.svg";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation } from "swiper/modules";
 import "swiper/css";
@@ -67,7 +65,6 @@ export const PostCreateModal = ({
     try {
       if (!title || !price || !category) return;
 
-      //이미지 URL 배열 생성
       const uploadedImageUrlArray: string[] = [];
       for (const file of images) {
         const uploadedImageUrl = await uploadImage(file);
@@ -127,7 +124,11 @@ export const PostCreateModal = ({
                 className="absolute top-0.5 right-0.5 rounded-full bg-black/50 p-1"
                 onClick={() => handleRemoveImage(idx)}
               >
-                <DeleteIcon className="h-[10px] w-[10px]" />
+                <img
+                  src="/icons/delete.svg"
+                  alt="삭제"
+                  className="h-[10px] w-[10px]"
+                />
               </button>
             </div>
           </SwiperSlide>
@@ -151,19 +152,25 @@ export const PostCreateModal = ({
           className="absolute top-4 right-4"
           onClick={onClose}
         >
-          <DeleteIcon className="h-[24px] w-[24px] text-gray-600" />
+          <img
+            src="/icons/delete.svg"
+            alt="닫기"
+            className="h-[24px] w-[24px] text-gray-600"
+          />
         </button>
 
         <h2 className="text-lg font-semibold text-white">게시물 추가</h2>
 
-        {/* 이미지 추가 + 미리보기 */}
         <div className="flex items-center gap-4">
-          {/* 이미지 추가 버튼 */}
           <label
             className="bg-black-800 flex h-[50px] w-[50px] shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-lg md:h-[70px] md:w-[70px] xl:h-[70px] xl:w-[70px]"
             onClick={() => inputRef.current?.click()}
           >
-            <SelectIcon className="h-8 w-8" />
+            <img
+              src="/icons/image-select.svg"
+              alt="이미지 선택"
+              className="h-8 w-8"
+            />
           </label>
           <input
             ref={inputRef}
