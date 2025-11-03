@@ -55,14 +55,14 @@ export const TextField = ({
         >
           {hidden ? (
             <img
-              src="/icons/eye.svg"
+              src="icons/eye.svg"
               alt="비밀번호 숨김 상태"
               aria-label="비밀번호 숨김 상태"
               className="h-[22px] w-[22px] md:h-[22px] md:w-[22px] xl:h-[24px] xl:w-[24px]"
             />
           ) : (
             <img
-              src="/icons/eye-off.svg"
+              src="icons/eye-off.svg"
               alt="비밀번호 표시 상태"
               aria-label="비밀번호 표시 상태"
               className="h-[22px] w-[22px] md:h-[22px] md:w-[22px] xl:h-[24px] xl:w-[24px]"

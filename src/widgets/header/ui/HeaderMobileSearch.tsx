@@ -15,7 +15,7 @@ const HeaderMobileSearch = ({ setShowSearch }: HeaderMobileSearchProps) => {
         onClick={() => setShowSearch(false)}
       >
         <img
-          src="/icons/delete.svg"
+          src="icons/delete.svg"
           alt="검색 닫기"
           className="h-[16px] w-[16px]"
         />

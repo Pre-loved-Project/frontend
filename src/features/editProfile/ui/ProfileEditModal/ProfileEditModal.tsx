@@ -104,7 +104,7 @@ export const ProfileEditModal = ({
         className="absolute top-3 right-3"
       >
         <img
-          src="/icons/delete.svg"
+          src="icons/delete.svg"
           alt="닫기"
           aria-label="닫기"
           width={24}

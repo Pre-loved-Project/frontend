@@ -12,19 +12,19 @@ const navItems = [
   {
     href: "/chat",
     label: "채팅하기",
-    icon: "/icons/chats.svg",
+    icon: "icons/chats.svg",
     hasDivider: false,
   },
   {
     href: "/ai",
     label: "분석하기",
-    icon: "/icons/analyze.svg",
+    icon: "icons/analyze.svg",
     hasDivider: true,
   },
   {
     href: "/my",
     label: "마이페이지",
-    icon: "/icons/user.svg",
+    icon: "icons/user.svg",
     hasDivider: false,
   },
 ];

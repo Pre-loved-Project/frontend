@@ -46,7 +46,7 @@ export const ProfileImageChangeInput = ({
         />
       ) : (
         <img
-          src="/icons/image-select.svg"
+          src="icons/image-select.svg"
           alt="Upload Icon"
           aria-label="Upload Icon"
           className="h-[24px] w-[24px] md:h-[25px] md:w-[25px] xl:h-[34px] xl:w-[34px]"
