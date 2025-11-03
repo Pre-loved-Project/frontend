@@ -3,7 +3,6 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import cn from "@/shared/lib/cn";
-import ImageSelectIcon from "@/shared/images/image-select.svg";
 
 interface ProfileImageChangeInputProps {
   imgUrl?: string;
@@ -46,7 +45,9 @@ export const ProfileImageChangeInput = ({
           className="h-full w-full object-cover"
         />
       ) : (
-        <ImageSelectIcon
+        <img
+          src="/icons/image-select.svg"
+          alt="Upload Icon"
           aria-label="Upload Icon"
           className="h-[24px] w-[24px] md:h-[25px] md:w-[25px] xl:h-[34px] xl:w-[34px]"
         />
