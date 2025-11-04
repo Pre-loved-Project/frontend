@@ -9,9 +9,14 @@ interface HeaderDesktopProps {
     icon: string;
     hasDivider: boolean;
   }[];
+  onOpenChat?: () => void;
 }
 
-const HeaderDesktop = ({ isLogined, navItems }: HeaderDesktopProps) => {
+const HeaderDesktop = ({
+  isLogined,
+  navItems,
+  onOpenChat,
+}: HeaderDesktopProps) => {
   return (
     <div className="hidden w-full items-center justify-between md:flex">
       <div className="text-white">

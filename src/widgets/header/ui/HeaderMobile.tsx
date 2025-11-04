@@ -1,10 +1,11 @@
-import Link from "next/link";
+"use client";
 
 interface HeaderMobileProps {
   setShowSearch: (value: boolean) => void;
+  onOpenMenu: () => void;
 }
 
-const HeaderMobile = ({ setShowSearch }: HeaderMobileProps) => {
+const HeaderMobile = ({ setShowSearch, onOpenMenu }: HeaderMobileProps) => {
   return (
     <div className="flex w-full items-center justify-between md:hidden">
       <button aria-label="menu" type="button" className="cursor-pointer">
