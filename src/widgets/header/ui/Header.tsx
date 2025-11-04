@@ -7,11 +7,6 @@ import HeaderMobile from "./HeaderMobile";
 import HeaderMobileSearch from "./HeaderMobileSearch";
 import HeaderDesktop from "./HeaderDesktop";
 
-import ChatIcon from "@/shared/images/chats.svg";
-import AnalyzeIcon from "@/shared/images/analyze.svg";
-import UserIcon from "@/shared/images/user.svg";
-import DeleteIcon from "@/shared/images/delete.svg";
-
 import { useAuthStore } from "@/features/auth/model/auth.store";
 import MobileSideMenu from "./MobileSideMenu";
 import ChatList from "@/features/chatList/ui/ChatList";
@@ -19,16 +14,24 @@ import { ChattingRoom } from "@/entities/chat/ui/ChattingRoom/ChattingRoom";
 import cn from "@/shared/lib/cn";
 
 const navItems = [
-  { href: "/chat", label: "채팅하기", icon: ChatIcon, hasDivider: false },
-  { href: "/ai", label: "분석하기", icon: AnalyzeIcon, hasDivider: true },
-  { href: "/my", label: "마이페이지", icon: UserIcon, hasDivider: false },
-];
-
-type TabKey = "all" | "buyer" | "seller";
-const TABS: { key: TabKey; label: string }[] = [
-  { key: "all", label: "전체" },
-  { key: "buyer", label: "구매" },
-  { key: "seller", label: "판매" },
+  {
+    href: "/chat",
+    label: "채팅하기",
+    icon: "icons/chats.svg",
+    hasDivider: false,
+  },
+  {
+    href: "/ai",
+    label: "분석하기",
+    icon: "icons/analyze.svg",
+    hasDivider: true,
+  },
+  {
+    href: "/my",
+    label: "마이페이지",
+    icon: "icons/user.svg",
+    hasDivider: false,
+  },
 ];
 
 const Header = () => {

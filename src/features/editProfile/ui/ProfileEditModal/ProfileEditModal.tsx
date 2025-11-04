@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState } from "react";
-import Image from "next/image";
 import cn from "@/shared/lib/cn";
 import { ProfileImageChangeInput } from "../ProfileImageChangeInput/ProfileImageChangeInput";
 import { Input } from "@/entities/user/ui/Input/Input";
@@ -10,7 +9,7 @@ import { DropDown } from "@/shared/ui/DropDown/DropDown";
 import Button from "@/shared/ui/Button/Button";
 import { apiFetch } from "@/shared/api/fetcher";
 import { uploadImage } from "@/shared/api/uploadImage";
-import DeleteIcon from "@/shared/images/delete.svg";
+
 export interface ProfileEditModalProps {
   imageUrl?: string;
   nickname: string;
@@ -63,12 +62,10 @@ export const ProfileEditModal = ({
 
       let uploadedImageUrl = imageUrl;
 
-      // 이미지 새로 업로드한 경우
       if (imageFile) {
         uploadedImageUrl = await uploadImage(imageFile);
       }
 
-      // null 아닌 값만 body에 포함
       const updateBody: Record<string, string> = {};
       if (nickname.trim()) updateBody.nickname = nickname;
       if (introduction.trim()) updateBody.introduction = introduction;
@@ -106,12 +103,13 @@ export const ProfileEditModal = ({
         onClick={onClose}
         className="absolute top-3 right-3"
       >
-        <DeleteIcon
+        <img
+          src="icons/delete.svg"
+          alt="닫기"
+          aria-label="닫기"
           width={24}
           height={24}
-          aria-label="닫기"
           className="cursor-pointer"
-          role="img"
         />
       </button>
 

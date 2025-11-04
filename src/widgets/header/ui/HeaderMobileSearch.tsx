@@ -1,7 +1,5 @@
 import SearchForm from "./SearchForm";
 
-import DeleteIcon from "@/shared/images/delete.svg";
-
 interface HeaderMobileSearchProps {
   setShowSearch: (value: boolean) => void;
 }
@@ -16,7 +14,11 @@ const HeaderMobileSearch = ({ setShowSearch }: HeaderMobileSearchProps) => {
         className="cursor-pointer p-3"
         onClick={() => setShowSearch(false)}
       >
-        <DeleteIcon className="h-[16px] w-[16px] text-gray-600" />
+        <img
+          src="icons/delete.svg"
+          alt="검색 닫기"
+          className="h-[16px] w-[16px]"
+        />
       </button>
     </div>
   );
