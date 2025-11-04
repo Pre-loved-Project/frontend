@@ -1,41 +1,45 @@
 "use client";
 import React, { useState, useRef, useEffect } from "react";
+import { MessageRow, MessageRowProps } from "../MessageRow/MessageRow";
 import { Message } from "../Message/Message";
+import { mockMessages } from "../../model/mock";
 import Button from "@/shared/ui/Button/Button";
 import { TextField } from "@/shared/ui/TextField/TextField";
 import ImageSelectIcon from "@/shared/images/image-select.svg";
 import DeleteIcon from "@/shared/images/delete.svg";
 
-interface ChatMessage {
-  id: number;
-  type: "text" | "image";
-  content: string;
-  isMine: boolean;
-}
-
 export const ChattingRoom = () => {
   const number = 50000;
-  const [messages, setMessages] = useState<ChatMessage[]>([
-    {
-      id: 1,
-      type: "text",
-      content: "안녕하세요! 이 물건 아직 있나요?",
-      isMine: false,
-    },
-    { id: 2, type: "text", content: "네, 아직 있습니다 🙂", isMine: true },
-    {
-      id: 3,
-      type: "image",
-      content:
-        "https://chalddackimage.blob.core.windows.net/chalddackimage/150100000286_03.webp",
-      isMine: false,
-    },
-    { id: 4, type: "text", content: "좋아요, 거래 원해요!", isMine: false },
-  ]);
+  const [messages, setMessages] = useState<MessageRowProps[]>([]);
 
   const [text, setText] = useState("");
   const [image, setImage] = useState<File | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const formatTime = (time: string) =>
+    new Date(time).toLocaleTimeString("ko-KR", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    });
+
+  useEffect(() => {
+    const computedMessages: MessageRowProps[] = mockMessages.map((msg, i) => {
+      const prev = mockMessages[i - 1];
+      const next = mockMessages[i + 1];
+
+      const showProfile = !msg.isMine && (!prev || prev.isMine);
+
+      const currentTime = formatTime(msg.sendAt);
+      const nextTime = next ? formatTime(next.sendAt) : null;
+      const showTime =
+        !next || next.isMine !== msg.isMine || nextTime !== currentTime;
+
+      return { message: { ...msg }, showProfile, showTime };
+    });
+
+    setMessages(computedMessages);
+  }, []);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -57,13 +61,51 @@ export const ChattingRoom = () => {
   };
 
   const sendMessage = (type: "text" | "image", content: string) => {
-    const newMessage: ChatMessage = {
-      id: Date.now(),
-      type,
-      content,
-      isMine: true,
-    };
-    setMessages((prev) => [...prev, newMessage]);
+    const now = new Date();
+    const sendAt = now.toISOString();
+
+    setMessages((prev) => {
+      if (prev.length == 0) {
+        const newMessageRow: MessageRowProps = {
+          message: {
+            id: Date.now(),
+            type,
+            content,
+            isMine: true,
+            sendAt,
+          },
+          showProfile: false,
+          showTime: true,
+        };
+        return [newMessageRow];
+      }
+      const last = prev[prev.length - 1].message;
+      const newMsgTime = formatTime(sendAt);
+      const lastMsgTime = formatTime(last.sendAt);
+
+      const newMessageRow: MessageRowProps = {
+        message: {
+          id: Date.now(),
+          type,
+          content,
+          isMine: true,
+          sendAt,
+        },
+        showProfile: false,
+        showTime: true,
+      };
+
+      //직전 메시지가 같은 시간이라면 showTime false로 수정
+      const updatedPrev = [...prev];
+      if (last.isMine === true && lastMsgTime === newMsgTime) {
+        updatedPrev[updatedPrev.length - 1] = {
+          ...updatedPrev[updatedPrev.length - 1],
+          showTime: false,
+        };
+      }
+
+      return [...updatedPrev, newMessageRow];
+    });
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -97,13 +139,8 @@ export const ChattingRoom = () => {
       {/* 메시지 리스트 영역 */}
       <div className="absolute top-[100px] bottom-[100px] left-0 w-full overflow-y-auto p-4">
         <div className="flex flex-col gap-4">
-          {messages.map((message) => (
-            <div
-              key={message.id}
-              className={`flex ${message.isMine ? "justify-end" : "justify-start"} gap-4`}
-            >
-              <Message {...message} />
-            </div>
+          {messages.map((row) => (
+            <MessageRow key={row.message.id} {...row} />
           ))}
         </div>
         <div ref={messagesEndRef} />
