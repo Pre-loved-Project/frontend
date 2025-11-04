@@ -16,6 +16,7 @@ const preview: Preview = {
       // 'off' - skip a11y checks entirely
       test: "todo",
     },
+    nextjs: { appDirectory: true },
   },
 };
 

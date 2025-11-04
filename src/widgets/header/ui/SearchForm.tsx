@@ -3,7 +3,6 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import cn from "@/shared/lib/cn";
-import SearchIcon from "@/shared/images/search.svg";
 
 const SearchForm = ({
   className,
@@ -46,7 +45,12 @@ const SearchForm = ({
       role="search"
     >
       {showIcon && (
-        <SearchIcon aria-hidden="true" className="h-6 w-6 shrink-0" />
+        <img
+          src="icons/search.svg"
+          alt="search"
+          aria-hidden="true"
+          className="h-6 w-6 shrink-0"
+        />
       )}
       <input
         name={name}

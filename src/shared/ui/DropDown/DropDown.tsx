@@ -2,9 +2,6 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import cn from "@/shared/lib/cn";
-import Image from "next/image";
-import ArrowDownIcon from "@/shared/images/arrow-down.svg";
-import ArrowUpIcon from "@/shared/images/arrow-up.svg";
 
 interface Option {
   label: string;
@@ -29,7 +26,6 @@ export const DropDown = ({
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
-  // 외부 클릭 시 닫힘
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (ref.current && !ref.current.contains(e.target as Node)) {
@@ -44,7 +40,6 @@ export const DropDown = ({
 
   return (
     <div className="relative" ref={ref}>
-      {/* 선택 영역 */}
       <div
         onClick={() => setOpen((prev) => !prev)}
         className={cn(
@@ -62,19 +57,22 @@ export const DropDown = ({
             : placeholder}
         </span>
         {open ? (
-          <ArrowUpIcon
+          <img
+            src="icons/arrow-up.svg"
+            alt="arrow up"
             aria-label="arrow up"
             className="h-[12px] w-[12px] md:h-[14px] md:w-[14px] xl:h-[16px] xl:w-[16px]"
           />
         ) : (
-          <ArrowDownIcon
+          <img
+            src="icons/arrow-down.svg"
+            alt="arrow down"
             aria-label="arrow down"
             className="h-[12px] w-[12px] md:h-[14px] md:w-[14px] xl:h-[16px] xl:w-[16px]"
           />
         )}
       </div>
 
-      {/* 옵션 리스트 */}
       <ul
         className={cn(
           "bg-black-800 absolute top-full left-0 z-10 mt-0.5 rounded-lg",
