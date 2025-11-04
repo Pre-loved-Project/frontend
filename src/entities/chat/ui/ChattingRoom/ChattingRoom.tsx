@@ -23,8 +23,16 @@ export const ChattingRoom = () => {
       hour12: false,
     });
 
+  const formatDate = (time: string) => {
+    const date = new Date(time);
+    return `${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일`;
+  };
+
   useEffect(() => {
-    const computedMessages: MessageRowProps[] = mockMessages.map((msg, i) => {
+    const computedMessages: MessageRowProps[] = [];
+    let lastDate: string | null = null;
+
+    mockMessages.forEach((msg, i) => {
       const prev = mockMessages[i - 1];
       const next = mockMessages[i + 1];
 
@@ -35,7 +43,27 @@ export const ChattingRoom = () => {
       const showTime =
         !next || next.isMine !== msg.isMine || nextTime !== currentTime;
 
-      return { message: { ...msg }, showProfile, showTime };
+      const currentDate = formatDate(msg.sendAt);
+      if (lastDate !== currentDate) {
+        computedMessages.push({
+          message: {
+            id: Date.now(),
+            type: "system",
+            content: currentDate,
+            isMine: false,
+            sendAt: msg.sendAt,
+          },
+          showProfile: false,
+          showTime: false,
+        });
+        lastDate = currentDate;
+      }
+
+      computedMessages.push({
+        message: { ...msg },
+        showProfile,
+        showTime,
+      });
     });
 
     setMessages(computedMessages);
@@ -63,25 +91,29 @@ export const ChattingRoom = () => {
   const sendMessage = (type: "text" | "image", content: string) => {
     const now = new Date();
     const sendAt = now.toISOString();
+    const currentDate = formatDate(sendAt);
 
     setMessages((prev) => {
-      if (prev.length == 0) {
-        const newMessageRow: MessageRowProps = {
+      const updatedPrev = [...prev];
+
+      const last = prev[prev.length - 1].message;
+      const lastDate = last ? formatDate(last.sendAt) : null;
+      const newMsgTime = formatTime(sendAt);
+      const lastMsgTime = last ? formatTime(last.sendAt) : null;
+
+      if (lastDate !== currentDate) {
+        updatedPrev.push({
           message: {
-            id: Date.now(),
-            type,
-            content,
-            isMine: true,
+            id: Date.now() + new Date(last?.sendAt).getTime(),
+            type: "system",
+            content: currentDate,
+            isMine: false,
             sendAt,
           },
           showProfile: false,
-          showTime: true,
-        };
-        return [newMessageRow];
+          showTime: false,
+        });
       }
-      const last = prev[prev.length - 1].message;
-      const newMsgTime = formatTime(sendAt);
-      const lastMsgTime = formatTime(last.sendAt);
 
       const newMessageRow: MessageRowProps = {
         message: {
@@ -96,8 +128,7 @@ export const ChattingRoom = () => {
       };
 
       //직전 메시지가 같은 시간이라면 showTime false로 수정
-      const updatedPrev = [...prev];
-      if (last.isMine === true && lastMsgTime === newMsgTime) {
+      if (last?.isMine === true && lastMsgTime === newMsgTime) {
         updatedPrev[updatedPrev.length - 1] = {
           ...updatedPrev[updatedPrev.length - 1],
           showTime: false,

@@ -2,7 +2,7 @@ import { Message } from "../Message/Message";
 
 export interface ChatMessage {
   id: number;
-  type: "text" | "image";
+  type: "text" | "image" | "system";
   content: string;
   isMine: boolean;
   profileImage?: string;
@@ -25,6 +25,16 @@ export const MessageRow = ({
     minute: "2-digit",
     hour12: false,
   });
+
+  if (message.type === "system") {
+    return (
+      <div className="my-5 flex justify-center">
+        <div className="rounded-full bg-gradient-to-r from-[#5097fa] to-[#5363ff] px-4 py-2 text-[13px] font-semibold text-white">
+          {message.content}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div
