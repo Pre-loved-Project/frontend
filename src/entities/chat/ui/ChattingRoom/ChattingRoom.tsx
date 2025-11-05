@@ -5,7 +5,6 @@ import { Message } from "../Message/Message";
 import { mockMessages } from "../../model/mock";
 import Button from "@/shared/ui/Button/Button";
 import { TextField } from "@/shared/ui/TextField/TextField";
-import ImageSelectIcon from "@/shared/images/image-select.svg";
 import DeleteIcon from "@/shared/images/delete.svg";
 
 export const ChattingRoom = () => {
@@ -205,8 +204,9 @@ export const ChattingRoom = () => {
       {/* 메시지 입력 창 영역 */}
       <div className="absolute bottom-0 left-0 flex h-[100px] w-full items-center gap-4 p-4">
         <label className="bg-black-900 cursor-pointer rounded-full p-2">
-          <ImageSelectIcon
-            aria-label="Upload Icon"
+          <img
+            src="/icons/image-select.svg"
+            alt="Upload Icon"
             className="h-[24px] w-[24px] md:h-[25px] md:w-[25px] xl:h-[34px] xl:w-[34px]"
           />
           <input

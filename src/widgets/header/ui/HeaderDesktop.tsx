@@ -6,12 +6,17 @@ interface HeaderDesktopProps {
   navItems: {
     href: string;
     label: string;
-    icon: React.FC<React.SVGProps<SVGSVGElement>>;
+    icon: string;
     hasDivider: boolean;
   }[];
+  onOpenChat?: () => void;
 }
 
-const HeaderDesktop = ({ isLogined, navItems }: HeaderDesktopProps) => {
+const HeaderDesktop = ({
+  isLogined,
+  navItems,
+  onOpenChat,
+}: HeaderDesktopProps) => {
   return (
     <div className="hidden w-full items-center justify-between md:flex">
       <div className="text-white">
@@ -23,7 +28,7 @@ const HeaderDesktop = ({ isLogined, navItems }: HeaderDesktopProps) => {
 
         {isLogined ? (
           <ul className="flex text-sm font-normal text-white">
-            {navItems.map(({ href, label, icon: Icon, hasDivider }) => (
+            {navItems.map(({ href, label, icon, hasDivider }) => (
               <li
                 key={href}
                 className={`flex items-center justify-center px-3 first:pr-3 last:pl-3 ${
@@ -32,10 +37,24 @@ const HeaderDesktop = ({ isLogined, navItems }: HeaderDesktopProps) => {
                     : ""
                 } `}
               >
-                <Link href={href} className="flex items-center justify-center">
-                  <Icon className="h-[16px] w-[16px] text-white" />
-                  <p className="ml-1">{label}</p>
-                </Link>
+                {href === "/chat" && onOpenChat ? (
+                  <button
+                    type="button"
+                    onClick={onOpenChat}
+                    className="flex cursor-pointer items-center justify-center"
+                  >
+                    <img src={icon} alt={label} className="h-[16px] w-[16px]" />
+                    <p className="ml-1">{label}</p>
+                  </button>
+                ) : (
+                  <Link
+                    href={href}
+                    className="flex items-center justify-center"
+                  >
+                    <img src={icon} alt={label} className="h-[16px] w-[16px]" />
+                    <p className="ml-1">{label}</p>
+                  </Link>
+                )}
               </li>
             ))}
           </ul>

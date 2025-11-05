@@ -1,6 +1,6 @@
 import Image from "next/image";
 import type { Chat } from "../model/types";
-import DefaultProfileImage from "@/entities/post/ui/card/assets/product_image.png";
+import Profile from "@/entities/user/ui/card/assets/profile.jpg";
 import { useFormattedTime } from "@/entities/chat/lib/useFormattedTime";
 
 interface ChatItemProps {
@@ -14,11 +14,11 @@ const ChatItem = ({ chat, onClick }: ChatItemProps) => {
   return (
     <button
       onClick={onClick}
-      className="flex w-full items-center gap-3 bg-[#252530] px-4 py-3 text-left"
+      className="flex h-[80px] w-full items-center gap-3 bg-transparent px-4 py-3 text-left"
     >
       <div className="relative h-12 w-12 flex-shrink-0">
         <Image
-          src={chat.otherImage || DefaultProfileImage}
+          src={chat.otherImage || Profile}
           alt={`${chat.otherNick} 프로필`}
           fill
           sizes="48px"

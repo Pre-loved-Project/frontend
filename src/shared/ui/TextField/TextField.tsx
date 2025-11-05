@@ -2,9 +2,6 @@
 
 import React, { InputHTMLAttributes, useState } from "react";
 import cn from "@/shared/lib/cn";
-import Image from "next/image";
-import EyeIcon from "@/shared/images/eye.svg";
-import EyeOffIcon from "@/shared/images/eye-off.svg";
 
 interface TextFieldProps extends InputHTMLAttributes<HTMLInputElement> {
   isError?: boolean;
@@ -19,7 +16,7 @@ export const TextField = ({
 }: TextFieldProps) => {
   const [text, setText] = useState("");
   const [focused, setFocused] = useState(false);
-  const [hidden, setHidden] = useState(isHiddenable); //비밀번호 시 숨겨진 상태로 시작
+  const [hidden, setHidden] = useState(isHiddenable);
 
   return (
     <div
@@ -37,21 +34,17 @@ export const TextField = ({
       <input
         {...rest}
         type={hidden ? "password" : "text"}
-        value={rest.value ?? text} //부모에서 내용 control 가능!
+        value={rest.value ?? text}
         onChange={(e) => {
           setText(e.target.value);
-          rest.onChange?.(e); //text 수정 시 handling
+          rest.onChange?.(e);
         }}
         className={cn(
           "flex-1 bg-transparent text-white outline-none",
           "text-[14px] md:text-[14px] xl:text-[16px]",
         )}
-        onFocus={() => {
-          setFocused(true);
-        }}
-        onBlur={() => {
-          setFocused(false);
-        }}
+        onFocus={() => setFocused(true)}
+        onBlur={() => setFocused(false)}
       />
 
       {isHiddenable && (
@@ -61,12 +54,16 @@ export const TextField = ({
           className="ml-2"
         >
           {hidden ? (
-            <EyeIcon
+            <img
+              src="icons/eye.svg"
+              alt="비밀번호 숨김 상태"
               aria-label="비밀번호 숨김 상태"
               className="h-[22px] w-[22px] md:h-[22px] md:w-[22px] xl:h-[24px] xl:w-[24px]"
             />
           ) : (
-            <EyeOffIcon
+            <img
+              src="icons/eye-off.svg"
+              alt="비밀번호 표시 상태"
               aria-label="비밀번호 표시 상태"
               className="h-[22px] w-[22px] md:h-[22px] md:w-[22px] xl:h-[24px] xl:w-[24px]"
             />

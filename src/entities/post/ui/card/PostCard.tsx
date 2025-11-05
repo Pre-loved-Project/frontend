@@ -1,10 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
 
-import HeartIcon from "@/shared/images/heart.svg";
-import ChatIcon from "@/shared/images/chat.svg";
-import DefaultImage from "./assets/product_image.png";
-
 interface PostCardProps {
   postingId: number;
   title: string;
@@ -60,12 +56,16 @@ const PostCard = ({
                 <span>{viewCount}</span>
               </div>
               <div className="flex items-center gap-[4px]">
-                <ChatIcon width={10} height={10} />
+                <img
+                  src="/icons/chat.svg"
+                  alt="채팅 수"
+                  className="h-[10px] w-[10px]"
+                />
                 <span>{chatCount}</span>
-                <HeartIcon
-                  width={10}
-                  height={10}
-                  className="text-gray-600 [&_path]:fill-current"
+                <img
+                  src="/icons/heart.svg"
+                  alt="좋아요 수"
+                  className="h-[10px] w-[10px]"
                 />
                 <span>{likeCount}</span>
               </div>
