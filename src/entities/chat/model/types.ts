@@ -10,3 +10,18 @@ export interface Chat {
   otherNick: string;
   otherImage: string;
 }
+
+export interface MessageProps {
+  messageId: number;
+  type: "text" | "image" | "system";
+  content: string;
+  sendAt: string;
+  isMine: boolean;
+  isRead: boolean;
+}
+
+export interface MessagesResponse {
+  messages: MessageProps[];
+  hasNext: boolean;
+  nextCursor: number | null;
+}

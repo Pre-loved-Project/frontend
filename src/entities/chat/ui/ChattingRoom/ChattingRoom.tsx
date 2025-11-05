@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useRef, useEffect } from "react";
+import { MessageProps, MessagesResponse } from "../../model/types";
 import { MessageRow, MessageRowProps } from "../MessageRow/MessageRow";
-import { Message } from "../Message/Message";
 import { mockMessages } from "../../model/mock";
 import Button from "@/shared/ui/Button/Button";
 import { TextField } from "@/shared/ui/TextField/TextField";
@@ -46,11 +46,12 @@ export const ChattingRoom = () => {
       if (lastDate !== currentDate) {
         computedMessages.push({
           message: {
-            id: Date.now(),
+            messageId: Date.now(),
             type: "system",
             content: currentDate,
             isMine: false,
             sendAt: msg.sendAt,
+            isRead: true,
           },
           showProfile: false,
           showTime: false,
@@ -103,11 +104,12 @@ export const ChattingRoom = () => {
       if (lastDate !== currentDate) {
         updatedPrev.push({
           message: {
-            id: Date.now() + new Date(last?.sendAt).getTime(),
+            messageId: Date.now() + new Date(last?.sendAt).getTime(),
             type: "system",
             content: currentDate,
             isMine: false,
             sendAt,
+            isRead: true,
           },
           showProfile: false,
           showTime: false,
@@ -116,11 +118,12 @@ export const ChattingRoom = () => {
 
       const newMessageRow: MessageRowProps = {
         message: {
-          id: Date.now(),
+          messageId: Date.now(),
           type,
           content,
           isMine: true,
           sendAt,
+          isRead: true,
         },
         showProfile: false,
         showTime: true,
@@ -170,7 +173,7 @@ export const ChattingRoom = () => {
       <div className="absolute top-[100px] bottom-[100px] left-0 w-full overflow-y-auto p-4">
         <div className="flex flex-col gap-4">
           {messages.map((row) => (
-            <MessageRow key={row.message.id} {...row} />
+            <MessageRow key={row.message.messageId} {...row} />
           ))}
         </div>
         <div ref={messagesEndRef} />

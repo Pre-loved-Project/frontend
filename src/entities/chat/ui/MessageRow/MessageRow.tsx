@@ -1,22 +1,16 @@
+import { MessageProps } from "../../model/types";
 import { Message } from "../Message/Message";
 
-export interface ChatMessage {
-  id: number;
-  type: "text" | "image" | "system";
-  content: string;
-  isMine: boolean;
-  profileImage?: string;
-  sendAt: string;
-}
-
 export interface MessageRowProps {
-  message: ChatMessage;
+  message: MessageProps;
+  profileImage?: string;
   showProfile: boolean;
   showTime: boolean;
 }
 
 export const MessageRow = ({
   message,
+  profileImage,
   showProfile,
   showTime,
 }: MessageRowProps) => {
@@ -45,17 +39,13 @@ export const MessageRow = ({
       <div className="relative flex max-w-[70%] flex-col">
         {!message.isMine && showProfile && (
           <img
-            src={message.profileImage}
+            src={profileImage}
             alt="프로필"
             className="absolute top-0 -left-13 h-9 w-9 rounded-full"
           />
         )}
 
-        <Message
-          type={message.type}
-          content={message.content}
-          isMine={message.isMine}
-        />
+        <Message {...message} />
 
         {showTime && (
           <span
