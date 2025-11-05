@@ -57,13 +57,13 @@ const PostCard = ({
               </div>
               <div className="flex items-center gap-[4px]">
                 <img
-                  src="icons/chat.svg"
+                  src="/icons/chat.svg"
                   alt="채팅 수"
                   className="h-[10px] w-[10px]"
                 />
                 <span>{chatCount}</span>
                 <img
-                  src="icons/heart.svg"
+                  src="/icons/heart.svg"
                   alt="좋아요 수"
                   className="h-[10px] w-[10px]"
                 />
