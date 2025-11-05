@@ -1,3 +1,4 @@
+import { mergeConfig } from "vite";
 import type { StorybookConfig } from "@storybook/nextjs-vite";
 
 const config: StorybookConfig = {
@@ -12,10 +13,26 @@ const config: StorybookConfig = {
     name: "@storybook/nextjs-vite",
     options: {},
   },
-  staticDirs: [{ from: "../public", to: "/" }],
+
+  staticDirs: [{ from: "../public", to: "frontend" }],
+
   viteFinal: async (config) => {
-    config.base = "/frontend/";
-    return config;
+    return mergeConfig(config, {
+      base: "/frontend/",
+
+      build: {
+        assetsInlineLimit: 0,
+      },
+
+      resolve: {
+        alias: {
+          "/icons": "/public/icons",
+          "/images": "/public/images",
+          "/fonts": "/public/fonts",
+        },
+      },
+    });
   },
 };
+
 export default config;

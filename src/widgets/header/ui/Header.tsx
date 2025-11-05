@@ -17,21 +17,28 @@ const navItems = [
   {
     href: "/chat",
     label: "채팅하기",
-    icon: "icons/chats.svg",
+    icon: "/icons/chats.svg",
     hasDivider: false,
   },
   {
     href: "/ai",
     label: "분석하기",
-    icon: "icons/analyze.svg",
+    icon: "/icons/analyze.svg",
     hasDivider: true,
   },
   {
     href: "/my",
     label: "마이페이지",
-    icon: "icons/user.svg",
+    icon: "/icons/user.svg",
     hasDivider: false,
   },
+];
+
+type TabKey = "all" | "buyer" | "seller";
+const TABS: { key: TabKey; label: string }[] = [
+  { key: "all", label: "전체" },
+  { key: "buyer", label: "구매" },
+  { key: "seller", label: "판매" },
 ];
 
 const Header = () => {
@@ -129,10 +136,9 @@ const Header = () => {
                 <h2 className="text-md font-semibold text-white">
                   {selectedChatId ? `채팅방` : "채팅"}
                 </h2>
-                <DeleteIcon
-                  onClick={closeChat}
-                  className="h-4 w-4 cursor-pointer text-white/80"
-                />
+                <button onClick={closeChat} aria-label="닫기">
+                  <img src="/icons/delete.svg" alt="" className="h-4 w-4" />
+                </button>
               </header>
 
               <div className="flex h-[calc(100dvh-60px)] flex-col">
