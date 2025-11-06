@@ -9,7 +9,7 @@ import HeaderDesktop from "./HeaderDesktop";
 
 import { useAuthStore } from "@/features/auth/model/auth.store";
 import MobileSideMenu from "./MobileSideMenu";
-import ChatList from "@/features/chatList/ui/ChatList";
+import ChatList from "@/features/chat/ui/ChatList";
 import { ChattingRoom } from "@/entities/chat/ui/ChattingRoom/ChattingRoom";
 import cn from "@/shared/lib/cn";
 
