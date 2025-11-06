@@ -8,17 +8,20 @@ import Button from "@/shared/ui/Button/Button";
 import { TextField } from "@/shared/ui/TextField/TextField";
 import DeleteIcon from "@/shared/images/delete.svg";
 import { apiFetch } from "@/shared/api/fetcher";
+import { uploadImage } from "@/shared/api/uploadImage";
 import { useModalStore } from "@/shared/model/modal.store";
+import { ChatSocket } from "../../model/socket";
 
 export const ChattingRoom = ({
   postingId,
   otherId,
-  chatId,
+  chatId: initialChatId,
 }: {
   postingId: number;
   otherId: number;
   chatId?: number;
 }) => {
+  const [chatId, setChatId] = useState<number | null>(initialChatId ?? null);
   const [post, setPost] = useState<PostDetail | null>(null);
   const [otherUser, setOtherUser] = useState<User | null>(null);
   const [messages, setMessages] = useState<MessageProps[]>([]);
@@ -30,12 +33,30 @@ export const ChattingRoom = ({
   const [isMessagesLoading, setIsMessagesLoading] = useState(false);
 
   const { openModal, closeModal } = useModalStore();
-  const profileImage =
-    "https://chalddackimage.blob.core.windows.net/chalddackimage/profile_d776b3ca-9871-4ad1-a2f6-e7676ac03052.jpeg";
 
   const [text, setText] = useState("");
   const [image, setImage] = useState<File | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const socketRef = useRef<ChatSocket | null>(null);
+
+  const connectSocket = (id: number): Promise<void> => {
+    return new Promise((resolve) => {
+      if (socketRef.current) socketRef.current.leaveRoom();
+
+      const socket = new ChatSocket(id, {
+        onOpen: () => {
+          console.log("[Socket] connected");
+          resolve();
+        },
+        onMessage: (msg) => setMessages((prev) => [...prev, msg]),
+        onSystem: (sys) => console.log("[System]", sys.message),
+        onClose: (code) => console.log("[Socket] Closed:", code),
+      });
+
+      socket.connect();
+      socketRef.current = socket;
+    });
+  };
 
   const formatTime = (time: string) =>
     new Date(time).toLocaleTimeString("ko-KR", {
@@ -130,7 +151,6 @@ export const ChattingRoom = ({
           method: "GET",
         });
         setOtherUser(res);
-        console.log(otherUser);
       } catch {
         openModal("normal", {
           message: "상대 유저 정보 조회에 실패했습니다.",
@@ -176,19 +196,42 @@ export const ChattingRoom = ({
     [messages],
   );
 
+  //기존 채팅방이 있을 경우 바로 소켓 연결
+  useEffect(() => {
+    if (!socketRef.current && chatId) connectSocket(chatId);
+  }, []);
+
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const handleSend = () => {
+  const handleSend = async () => {
+    //채팅방이 없을 시 새로운 채팅방 생성 후 소켓 연결
     if (!text.trim() && !image) return;
 
-    if (text.trim()) {
-      sendMessage("text", text);
+    if (!chatId) {
+      try {
+        const res = await apiFetch<{ chatId: number; createdAt: string }>(
+          `/api/chat`,
+          {
+            method: "POST",
+            body: JSON.stringify({ postingId }),
+          },
+        );
+        setChatId(res.chatId);
+        await connectSocket(res.chatId);
+      } catch {
+        openModal("normal", {
+          message: "채팅방 생성에 실패했습니다.",
+          onClick: closeModal,
+        });
+      }
     }
 
+    if (text.trim()) sendMessage("text", text);
     if (image) {
-      sendMessage("image", URL.createObjectURL(image)); //TODO : 이미지 업로드
+      const uploadedImageUrl = await uploadImage(image);
+      sendMessage("image", uploadedImageUrl);
     }
 
     setText("");
@@ -198,7 +241,7 @@ export const ChattingRoom = ({
   const sendMessage = (type: "text" | "image", content: string) => {
     const now = new Date();
     const sendAt = now.toISOString();
-
+    socketRef.current?.sendMessage(type, content);
     setMessages((prev) => [
       ...prev,
       {
@@ -247,11 +290,17 @@ export const ChattingRoom = ({
 
       {/* 메시지 리스트 영역 */}
       <div className="absolute top-[100px] bottom-[100px] left-0 w-full overflow-y-auto p-4">
-        <div className="flex flex-col gap-4">
-          {displayMessages.map((row) => (
-            <MessageRow key={row.message.messageId} {...row} />
-          ))}
-        </div>
+        {displayMessages.length === 0 ? (
+          <div className="flex h-full items-center justify-center text-sm text-gray-300">
+            메시지가 없습니다. <br /> 지금 바로 채팅을 시작해보세요!
+          </div>
+        ) : (
+          <div className="flex flex-col gap-4">
+            {displayMessages.map((row) => (
+              <MessageRow key={row.message.messageId} {...row} />
+            ))}
+          </div>
+        )}
         <div ref={messagesEndRef} />
       </div>
 
