@@ -1,11 +1,6 @@
 import React from "react";
 import cn from "@/shared/lib/cn";
-
-export interface MessageProps {
-  type: "text" | "image";
-  content: string;
-  isMine: boolean;
-}
+import { MessageProps } from "../../model/types";
 
 export const Message = ({ type, content, isMine }: MessageProps) => {
   const messageBase = cn(
