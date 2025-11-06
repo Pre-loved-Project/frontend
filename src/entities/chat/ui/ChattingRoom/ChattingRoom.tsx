@@ -1,25 +1,33 @@
 "use client";
 import React, { useState, useRef, useEffect, useMemo } from "react";
-import { MessageProps } from "../../model/types";
+import { User } from "@/entities/user/model/types/user";
+import { PostDetail } from "@/entities/post/model/types/post";
+import { MessageProps, MessagesResponse } from "../../model/types";
 import { MessageRow, MessageRowProps } from "../MessageRow/MessageRow";
-import { mockMessages } from "../../model/mock";
 import Button from "@/shared/ui/Button/Button";
 import { TextField } from "@/shared/ui/TextField/TextField";
 import DeleteIcon from "@/shared/images/delete.svg";
-import { PostDetail } from "@/entities/post/model/types/post";
 import { apiFetch } from "@/shared/api/fetcher";
 import { useModalStore } from "@/shared/model/modal.store";
 
 export const ChattingRoom = ({
   postingId,
+  otherId,
   chatId,
 }: {
   postingId: number;
+  otherId: number;
   chatId?: number;
 }) => {
   const [post, setPost] = useState<PostDetail | null>(null);
+  const [otherUser, setOtherUser] = useState<User | null>(null);
   const [messages, setMessages] = useState<MessageProps[]>([]);
+  const [cursor, setCursor] = useState<number | null>(null);
+  const [hasNext, setHasNext] = useState<boolean>(true);
+
+  const [isOtherUserLoading, setIsOtherUserLoading] = useState(false);
   const [isPostLoading, setIsPostLoading] = useState(false);
+  const [isMessagesLoading, setIsMessagesLoading] = useState(false);
 
   const { openModal, closeModal } = useModalStore();
   const profileImage =
@@ -78,7 +86,12 @@ export const ChattingRoom = ({
 
       result.push({
         message: msg,
-        profileImage: !msg.isMine && showProfile ? profileImage : undefined,
+        profileImage:
+          !msg.isMine && showProfile
+            ? otherUser?.imageUrl
+              ? otherUser.imageUrl
+              : "/icons/user.svg"
+            : undefined,
         showProfile,
         showTime,
       });
@@ -86,8 +99,8 @@ export const ChattingRoom = ({
     return result;
   };
 
+  //게시물 정보 조회하여 렌더링
   useEffect(() => {
-    //게시물 정보 조회하여 렌더링
     async function fetchPost() {
       try {
         setIsPostLoading(true);
@@ -96,17 +109,67 @@ export const ChattingRoom = ({
         });
 
         setPost(res);
-        setIsPostLoading(false);
       } catch {
         openModal("normal", {
           message: "게시물 정보 조회에 실패했습니다.",
           onClick: () => closeModal(),
         });
+      } finally {
+        setIsPostLoading(false);
       }
     }
     fetchPost();
-    setMessages(mockMessages);
+  }, [postingId]);
+
+  //상대방 정보 가져오기
+  useEffect(() => {
+    async function fecthUser() {
+      try {
+        setIsOtherUserLoading(true);
+        const res = await apiFetch<User>(`/api/users/${otherId}`, {
+          method: "GET",
+        });
+        setOtherUser(res);
+        console.log(otherUser);
+      } catch {
+        openModal("normal", {
+          message: "상대 유저 정보 조회에 실패했습니다.",
+          onClick: () => closeModal(),
+        });
+      } finally {
+        setIsOtherUserLoading(false);
+      }
+    }
+    fecthUser();
   }, []);
+
+  useEffect(() => {
+    if (!chatId) return;
+
+    async function fetchInitialMessages() {
+      try {
+        setIsMessagesLoading(true);
+        const res = await apiFetch<MessagesResponse>(
+          `/api/chat/${chatId}?size=20`,
+          { method: "GET" },
+        );
+        const sorted = [...res.messages].sort(
+          (a, b) => new Date(a.sendAt).getTime() - new Date(b.sendAt).getTime(),
+        );
+        setMessages(sorted);
+        setCursor(res.nextCursor);
+        setHasNext(res.hasNext);
+      } catch {
+        openModal("normal", {
+          message: "메시지 조회에 실패했습니다.",
+          onClick: () => closeModal(),
+        });
+      } finally {
+        setIsMessagesLoading(false);
+      }
+    }
+    fetchInitialMessages();
+  }, [chatId]);
 
   const displayMessages = useMemo(
     () => messagesWithComputedProps(messages),
@@ -156,8 +219,12 @@ export const ChattingRoom = ({
     }
   };
 
-  if (isPostLoading)
-    return <p className="text-center text-white">로딩 중...</p>;
+  if (isPostLoading || isOtherUserLoading || isMessagesLoading)
+    return (
+      <div className="flex h-full w-full items-center justify-center">
+        <p className="text-center text-lg font-medium text-white">로딩 중...</p>
+      </div>
+    );
 
   return (
     <div className="relative h-[calc(100vh-70px)] w-full xl:h-[calc(100vh-100px)]">
