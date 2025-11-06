@@ -1,6 +1,6 @@
 "use client";
-import React, { useState, useRef, useEffect } from "react";
-import { MessageProps, MessagesResponse } from "../../model/types";
+import React, { useState, useRef, useEffect, useMemo } from "react";
+import { MessageProps } from "../../model/types";
 import { MessageRow, MessageRowProps } from "../MessageRow/MessageRow";
 import { mockMessages } from "../../model/mock";
 import Button from "@/shared/ui/Button/Button";
@@ -9,7 +9,10 @@ import DeleteIcon from "@/shared/images/delete.svg";
 
 export const ChattingRoom = () => {
   const number = 50000;
-  const [messages, setMessages] = useState<MessageRowProps[]>([]);
+  const profileImage =
+    "https://chalddackimage.blob.core.windows.net/chalddackimage/profile_d776b3ca-9871-4ad1-a2f6-e7676ac03052.jpeg";
+
+  const [messages, setMessages] = useState<MessageProps[]>([]);
 
   const [text, setText] = useState("");
   const [image, setImage] = useState<File | null>(null);
@@ -27,30 +30,33 @@ export const ChattingRoom = () => {
     return `${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일`;
   };
 
-  useEffect(() => {
-    const computedMessages: MessageRowProps[] = [];
+  const messagesWithComputedProps = (
+    msgList: MessageProps[],
+  ): MessageRowProps[] => {
+    const result: MessageRowProps[] = [];
     let lastDate: string | null = null;
 
-    mockMessages.forEach((msg, i) => {
-      const prev = mockMessages[i - 1];
-      const next = mockMessages[i + 1];
+    msgList.forEach((msg, i) => {
+      const prev = msgList[i - 1];
+      const next = msgList[i + 1];
 
-      const showProfile = !msg.isMine && (!prev || prev.isMine);
-
+      const currentDate = formatDate(msg.sendAt);
       const currentTime = formatTime(msg.sendAt);
       const nextTime = next ? formatTime(next.sendAt) : null;
+
+      const showProfile = !msg.isMine && (!prev || prev.isMine);
       const showTime =
         !next || next.isMine !== msg.isMine || nextTime !== currentTime;
 
-      const currentDate = formatDate(msg.sendAt);
+      //날짜가 바뀌면 날짜 구분선 추가
       if (lastDate !== currentDate) {
-        computedMessages.push({
+        result.push({
           message: {
-            messageId: Date.now(),
+            messageId: -i,
             type: "system",
             content: currentDate,
-            isMine: false,
             sendAt: msg.sendAt,
+            isMine: false,
             isRead: true,
           },
           showProfile: false,
@@ -59,15 +65,24 @@ export const ChattingRoom = () => {
         lastDate = currentDate;
       }
 
-      computedMessages.push({
-        message: { ...msg },
+      result.push({
+        message: msg,
+        profileImage: !msg.isMine && showProfile ? profileImage : undefined,
         showProfile,
         showTime,
       });
     });
+    return result;
+  };
 
-    setMessages(computedMessages);
+  useEffect(() => {
+    setMessages(mockMessages);
   }, []);
+
+  const displayMessages = useMemo(
+    () => messagesWithComputedProps(messages),
+    [messages],
+  );
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -91,54 +106,18 @@ export const ChattingRoom = () => {
   const sendMessage = (type: "text" | "image", content: string) => {
     const now = new Date();
     const sendAt = now.toISOString();
-    const currentDate = formatDate(sendAt);
 
-    setMessages((prev) => {
-      const updatedPrev = [...prev];
-
-      const last = prev[prev.length - 1].message;
-      const lastDate = last ? formatDate(last.sendAt) : null;
-      const newMsgTime = formatTime(sendAt);
-      const lastMsgTime = last ? formatTime(last.sendAt) : null;
-
-      if (lastDate !== currentDate) {
-        updatedPrev.push({
-          message: {
-            messageId: Date.now() + new Date(last?.sendAt).getTime(),
-            type: "system",
-            content: currentDate,
-            isMine: false,
-            sendAt,
-            isRead: true,
-          },
-          showProfile: false,
-          showTime: false,
-        });
-      }
-
-      const newMessageRow: MessageRowProps = {
-        message: {
-          messageId: Date.now(),
-          type,
-          content,
-          isMine: true,
-          sendAt,
-          isRead: true,
-        },
-        showProfile: false,
-        showTime: true,
-      };
-
-      //직전 메시지가 같은 시간이라면 showTime false로 수정
-      if (last?.isMine === true && lastMsgTime === newMsgTime) {
-        updatedPrev[updatedPrev.length - 1] = {
-          ...updatedPrev[updatedPrev.length - 1],
-          showTime: false,
-        };
-      }
-
-      return [...updatedPrev, newMessageRow];
-    });
+    setMessages((prev) => [
+      ...prev,
+      {
+        messageId: Date.now(),
+        type,
+        content,
+        isMine: true,
+        sendAt,
+        isRead: true,
+      },
+    ]);
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -172,7 +151,7 @@ export const ChattingRoom = () => {
       {/* 메시지 리스트 영역 */}
       <div className="absolute top-[100px] bottom-[100px] left-0 w-full overflow-y-auto p-4">
         <div className="flex flex-col gap-4">
-          {messages.map((row) => (
+          {displayMessages.map((row) => (
             <MessageRow key={row.message.messageId} {...row} />
           ))}
         </div>
