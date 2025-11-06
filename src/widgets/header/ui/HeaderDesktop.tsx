@@ -9,7 +9,7 @@ interface HeaderDesktopProps {
     icon: string;
     hasDivider: boolean;
   }[];
-  onOpenChat?: () => void;
+  onOpenChat?: (chatId?: number) => void;
 }
 
 const HeaderDesktop = ({
@@ -40,7 +40,7 @@ const HeaderDesktop = ({
                 {href === "/chat" && onOpenChat ? (
                   <button
                     type="button"
-                    onClick={onOpenChat}
+                    onClick={() => onOpenChat()}
                     className="flex cursor-pointer items-center justify-center"
                   >
                     <img src={icon} alt={label} className="h-[16px] w-[16px]" />
