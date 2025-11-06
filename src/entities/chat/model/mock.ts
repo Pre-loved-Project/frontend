@@ -1,4 +1,4 @@
-import { ChatMessage } from "../ui/MessageRow/MessageRow";
+import { MessageProps } from "./types";
 export const chats = [
   {
     chatId: 501,
@@ -62,117 +62,117 @@ export const chats = [
   },
 ];
 
-export const mockMessages: ChatMessage[] = [
+export const mockMessages: MessageProps[] = [
   // 🔹 [1] 첫 메시지 — 상대방 (프로필 보임, 시간 표시)
   {
-    id: 1,
+    messageId: 1,
     type: "text",
     content: "안녕하세요! 이 물건 아직 있나요?",
     isMine: false,
-    profileImage:
-      "https://chalddackimage.blob.core.windows.net/chalddackimage/profile_d776b3ca-9871-4ad1-a2f6-e7676ac03052.jpeg",
     sendAt: "2025-10-31T10:00:00Z",
+    isRead: true,
   },
 
   // 🔹 [2] 내 메시지 (시간 차 있음 → 시간 표시)
   {
-    id: 2,
+    messageId: 2,
     type: "text",
     content: "네, 아직 있습니다 🙂",
     isMine: true,
     sendAt: "2025-10-31T10:01:00Z",
+    isRead: true,
   },
 
   // 🔹 [3] 상대방 이미지 메시지 (같은 유저, 같은 분 안 → 프로필 X, 시간 X)
   {
-    id: 3,
+    messageId: 3,
     type: "image",
     content:
       "https://chalddackimage.blob.core.windows.net/chalddackimage/150100000286_03.webp",
     isMine: false,
-    profileImage:
-      "https://chalddackimage.blob.core.windows.net/chalddackimage/profile_d776b3ca-9871-4ad1-a2f6-e7676ac03052.jpeg",
     sendAt: "2025-10-31T10:01:30Z",
+    isRead: true,
   },
 
   // 🔹 [4] 상대방 텍스트 메시지 (같은 유저, 같은 분 → 프로필 X, 마지막 → 시간 표시)
   {
-    id: 4,
+    messageId: 4,
     type: "text",
     content: "좋아요, 거래 원해요!",
     isMine: false,
-    profileImage:
-      "https://chalddackimage.blob.core.windows.net/chalddackimage/profile_d776b3ca-9871-4ad1-a2f6-e7676ac03052.jpeg",
     sendAt: "2025-10-31T10:02:00Z",
+    isRead: true,
   },
 
   // 🔹 [5] 내 메시지 여러 개 (같은 분 → 앞은 showTime=false, 마지막만 true)
   {
-    id: 5,
+    messageId: 5,
     type: "text",
     content: "좋아요. 어디서 거래할까요?",
     isMine: true,
     sendAt: "2025-10-31T10:03:10Z",
+    isRead: true,
   },
   {
-    id: 6,
+    messageId: 6,
     type: "text",
     content: "저는 강남역 근처 가능합니다.",
     isMine: true,
     sendAt: "2025-10-31T10:03:40Z",
+    isRead: true,
   },
   {
-    id: 7,
+    messageId: 7,
     type: "text",
     content: "시간은 언제쯤 괜찮으세요?",
     isMine: true,
     sendAt: "2025-10-31T10:04:00Z",
+    isRead: true,
   },
 
   // 🔹 [8] 상대방 메시지 (새로운 유저 → 프로필 보임, 시간 표시)
   {
-    id: 8,
+    messageId: 8,
     type: "text",
     content: "오후 3시쯤 어떠세요?",
     isMine: false,
-    profileImage:
-      "https://chalddackimage.blob.core.windows.net/chalddackimage/profile_d776b3ca-9871-4ad1-a2f6-e7676ac03052.jpeg",
     sendAt: "2025-10-31T10:05:00Z",
+    isRead: true,
   },
 
   // 🔹 [9] 내 메시지 (시간 간격 큼 → 시간 표시)
   {
-    id: 9,
+    messageId: 9,
     type: "text",
     content: "좋습니다. 그때 뵐게요!",
     isMine: true,
     sendAt: "2025-10-31T10:10:00Z",
+    isRead: true,
   },
 
   // 🔹 [10] 날짜 변경 (새로운 날짜 → 날짜 구분선 확인용)
   {
-    id: 10,
+    messageId: 10,
     type: "text",
     content: "안녕하세요, 어제 말씀드린 거래건입니다.",
     isMine: false,
-    profileImage:
-      "https://chalddackimage.blob.core.windows.net/chalddackimage/profile_d776b3ca-9871-4ad1-a2f6-e7676ac03052.jpeg",
     sendAt: "2025-11-01T09:55:00Z",
+    isRead: true,
   },
   {
-    id: 11,
+    messageId: 11,
     type: "text",
     content: "오늘 일정 그대로죠?",
     isMine: false,
-    profileImage:
-      "https://chalddackimage.blob.core.windows.net/chalddackimage/profile_d776b3ca-9871-4ad1-a2f6-e7676ac03052.jpeg",
     sendAt: "2025-11-01T09:56:00Z",
+    isRead: true,
   },
   {
-    id: 12,
+    messageId: 12,
     type: "text",
     content: "네, 맞아요! 오후 3시 강남역에서 봬요.",
     isMine: true,
     sendAt: "2025-11-01T09:57:00Z",
+    isRead: true,
   },
 ];
