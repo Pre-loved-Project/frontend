@@ -6,13 +6,24 @@ import { mockMessages } from "../../model/mock";
 import Button from "@/shared/ui/Button/Button";
 import { TextField } from "@/shared/ui/TextField/TextField";
 import DeleteIcon from "@/shared/images/delete.svg";
+import { PostDetail } from "@/entities/post/model/types/post";
+import { apiFetch } from "@/shared/api/fetcher";
+import { useModalStore } from "@/shared/model/modal.store";
 
-export const ChattingRoom = () => {
-  const number = 50000;
+export const ChattingRoom = ({
+  postingId,
+  chatId,
+}: {
+  postingId: number;
+  chatId?: number;
+}) => {
+  const [post, setPost] = useState<PostDetail | null>(null);
+  const [messages, setMessages] = useState<MessageProps[]>([]);
+  const [isPostLoading, setIsPostLoading] = useState(false);
+
+  const { openModal, closeModal } = useModalStore();
   const profileImage =
     "https://chalddackimage.blob.core.windows.net/chalddackimage/profile_d776b3ca-9871-4ad1-a2f6-e7676ac03052.jpeg";
-
-  const [messages, setMessages] = useState<MessageProps[]>([]);
 
   const [text, setText] = useState("");
   const [image, setImage] = useState<File | null>(null);
@@ -76,6 +87,24 @@ export const ChattingRoom = () => {
   };
 
   useEffect(() => {
+    //게시물 정보 조회하여 렌더링
+    async function fetchPost() {
+      try {
+        setIsPostLoading(true);
+        const res = await apiFetch<PostDetail>(`/api/postings/${postingId}`, {
+          method: "GET",
+        });
+
+        setPost(res);
+        setIsPostLoading(false);
+      } catch {
+        openModal("normal", {
+          message: "게시물 정보 조회에 실패했습니다.",
+          onClick: () => closeModal(),
+        });
+      }
+    }
+    fetchPost();
     setMessages(mockMessages);
   }, []);
 
@@ -127,23 +156,24 @@ export const ChattingRoom = () => {
     }
   };
 
+  if (isPostLoading)
+    return <p className="text-center text-white">로딩 중...</p>;
+
   return (
     <div className="relative h-[calc(100vh-70px)] w-full xl:h-[calc(100vh-100px)]">
       {/* 게시글 정보 영역 */}
       <div className="absolute top-0 left-0 flex h-[100px] w-full items-center gap-4 border-b border-gray-500 p-4">
         {/* 게시글 이미지 */}
         <img
-          src="https://chalddackimage.blob.core.windows.net/chalddackimage/bf6828c2-3151-433a-b582-ff954f7be6c1-mid.jpeg"
+          src={post?.images[0]}
           alt="게시글 이미지"
-          className="rounded-full"
-          width={90}
-          height={90}
+          className="h-15 w-15 rounded object-cover"
         />
         {/* 제목과 가격 세로 정렬 */}
         <div className="flex flex-col">
-          <span className="font-bold text-white">아토마 어쩌구 크림</span>
+          <span className="font-bold text-white">{post?.title}</span>
           <span className="text-white">
-            {number.toLocaleString("ko-KR") + " 원"}
+            {post?.price.toLocaleString("ko-KR") + " 원"}
           </span>
         </div>
       </div>
