@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
-import Link from "next/link";
 
 import { apiFetch } from "@/shared/api/fetcher";
 import { POST_PAGE_SIZE } from "@/entities/post/model/constants/api";
@@ -12,6 +11,7 @@ import { useAuthStore } from "@/features/auth/model/auth.store";
 import { useModalStore } from "@/shared/model/modal.store";
 import { usePostEditModal } from "@/features/editPost/lib/usePostEditModal";
 import { useLike } from "@/features/like/lib/useLike";
+import { useChatStore } from "@/features/chat/model/chat.store";
 
 import PostCard from "@/entities/post/ui/card/PostCard";
 import PostCarousel from "@/entities/post/ui/carousel/PostCarousel";
@@ -24,10 +24,11 @@ import type { User } from "@/entities/user/model/types/user";
 export default function DetailPage() {
   const router = useRouter();
   const params = useParams();
-  const postingId = params?.postingId as string;
+  const postingId = Number(params?.postingId);
 
   const isLogined = useAuthStore((state) => state.isLogined);
   const { openModal, closeModal } = useModalStore();
+  const openChat = useChatStore((state) => state.mount);
 
   const [post, setPost] = useState<PostDetail | null>(null);
   const [isPostLoading, setIsPostLoading] = useState(true);
@@ -165,8 +166,12 @@ export default function DetailPage() {
   }, [page]);
 
   const handleChatClick = () => {
-    if (!isLogined) router.push("/login");
-    else router.push("/chat");
+    if (!isLogined) {
+      router.push("/login");
+      return;
+    }
+    if (!post) return;
+    openChat({ postingId, otherId: post.sellerId });
   };
 
   const handleEditClick = () => {

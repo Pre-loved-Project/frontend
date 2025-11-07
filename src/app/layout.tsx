@@ -3,6 +3,7 @@ import localFont from "next/font/local";
 import "@/shared/styles/globals.css";
 import Header from "@/widgets/header/ui/Header";
 import { ModalContainer } from "@/shared/ui/ModalContainer/ModalContainer";
+import ChatContainer from "@/features/chat/ui/ChatContainer";
 const myFont = localFont({
   src: "../shared/fonts/PretendardVariable.woff2",
 });
@@ -23,6 +24,7 @@ export default function RootLayout({
         <Header />
         {children}
         <div id="modal-root" />
+        <ChatContainer />
         <ModalContainer />
       </body>
     </html>

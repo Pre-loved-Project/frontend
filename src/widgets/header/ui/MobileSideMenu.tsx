@@ -9,7 +9,11 @@ export default function MobileSideMenu({
   onOpenChat,
 }: {
   onClose: () => void;
-  onOpenChat: () => void;
+  onOpenChat: (info?: {
+    postingId: number;
+    otherId: number;
+    chatId?: number;
+  }) => void;
 }) {
   const handleOpenChat = () => {
     onOpenChat();
