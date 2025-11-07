@@ -166,8 +166,12 @@ export default function DetailPage() {
   }, [page]);
 
   const handleChatClick = () => {
-    if (!isLogined) router.push("/login");
-    else openChat(postingId);
+    if (!isLogined) {
+      router.push("/login");
+      return;
+    }
+    if (!post) return;
+    openChat({ postingId, otherId: post.sellerId });
   };
 
   const handleEditClick = () => {
