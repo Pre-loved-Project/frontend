@@ -9,7 +9,11 @@ interface HeaderDesktopProps {
     icon: string;
     hasDivider: boolean;
   }[];
-  onOpenChat?: (chatId?: number) => void;
+  onOpenChat: (info?: {
+    postingId: number;
+    otherId: number;
+    chatId?: number;
+  }) => void;
 }
 
 const HeaderDesktop = ({

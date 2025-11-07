@@ -3,25 +3,29 @@ import { create } from "zustand";
 interface ChatState {
   isOpen: boolean;
   isVisible: boolean;
-  activeId: number | null;
+  chatInfo: {
+    postingId: number;
+    otherId: number;
+    chatId?: number;
+  } | null;
 
-  mount: (chatId?: number) => void;
+  mount: (info?: ChatState["chatInfo"]) => void;
   hide: () => void;
   unmount: () => void;
-  setActiveId: (id?: number) => void;
+  setChatInfo: (info?: ChatState["chatInfo"]) => void;
 }
 
 export const useChatStore = create<ChatState>((set) => ({
   isOpen: false,
   isVisible: false,
-  activeId: null,
+  chatInfo: null,
 
-  mount: (chatId) => {
-    set({ isOpen: true, activeId: chatId ?? null });
+  mount: (info) => {
+    set({ isOpen: true, chatInfo: info ?? null });
     requestAnimationFrame(() => set({ isVisible: true }));
   },
 
   hide: () => set({ isVisible: false }),
-  unmount: () => set({ isOpen: false, activeId: null }),
-  setActiveId: (id) => set({ activeId: id ?? null }),
+  unmount: () => set({ isOpen: false, chatInfo: null }),
+  setChatInfo: (info) => set({ chatInfo: info ?? null }),
 }));

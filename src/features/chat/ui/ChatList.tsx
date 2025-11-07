@@ -9,7 +9,11 @@ const ChatList = ({
   onSelect,
   tab,
 }: {
-  onSelect: (id: number) => void;
+  onSelect: (info: {
+    postingId: number;
+    otherId: number;
+    chatId?: number;
+  }) => void;
   tab?: "all" | "buyer" | "seller";
 }) => {
   const [chats, setChats] = useState<Chat[]>([]);
@@ -55,7 +59,13 @@ const ChatList = ({
         <ChatItem
           key={chat.chatId}
           chat={chat}
-          onClick={() => onSelect(chat.chatId)}
+          onClick={() =>
+            onSelect({
+              postingId: chat.postingId,
+              otherId: chat.otherId,
+              chatId: chat.chatId,
+            })
+          }
         />
       ))}
     </div>

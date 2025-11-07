@@ -15,7 +15,7 @@ const TABS: { key: TabKey; label: string }[] = [
 ];
 
 export default function ChatContainer() {
-  const { isOpen, isVisible, activeId, hide, unmount, setActiveId } =
+  const { isOpen, isVisible, hide, unmount, chatInfo, setChatInfo } =
     useChatStore();
 
   const [tab, setTab] = useState<TabKey>("all");
@@ -48,16 +48,16 @@ export default function ChatContainer() {
         }`}
       >
         <header className="flex h-[60px] items-center justify-between border-b border-white/10 px-4 py-3">
-          {activeId && (
+          {chatInfo && (
             <button
-              onClick={() => setActiveId()}
+              onClick={() => setChatInfo(null)}
               className="cursor-pointer rounded px-2 py-1 text-white/80"
             >
               ←
             </button>
           )}
           <h2 className="text-md font-semibold text-white">
-            {activeId ? "채팅방" : "채팅"}
+            {chatInfo ? "채팅방" : "채팅"}
           </h2>
           <button onClick={hide}>
             <img src="/icons/delete.svg" alt="" className="h-4 w-4" />
@@ -65,7 +65,7 @@ export default function ChatContainer() {
         </header>
 
         <div className="flex h-[calc(100dvh-60px)] flex-col">
-          {!activeId && (
+          {!chatInfo && (
             <div className="relative border-b border-white/10 px-2">
               <div className="relative flex gap-1">
                 {TABS.map(({ key, label }) => (
@@ -97,10 +97,14 @@ export default function ChatContainer() {
           )}
 
           <div className="min-h-0 flex-1 overflow-y-auto px-2">
-            {activeId ? (
-              <ChattingRoom />
+            {chatInfo ? (
+              <ChattingRoom
+                postingId={chatInfo.postingId}
+                otherId={chatInfo.otherId}
+                chatId={chatInfo.chatId}
+              />
             ) : (
-              <ChatList tab={tab} onSelect={(id) => setActiveId(id)} />
+              <ChatList tab={tab} onSelect={(info) => setChatInfo(info)} />
             )}
           </div>
         </div>
