@@ -34,7 +34,11 @@ export const Main: Story = {
 
     return (
       <div className="flex flex-col gap-4">
-        <TextBox value {...args} onChange={(e) => setValue(e.target.value)} />
+        <TextBox
+          {...args}
+          value={value}
+          onChange={(e) => setValue(e.target.value)}
+        />
         <div className="text-black-900">현재 입력 값: {value || "없음"}</div>
       </div>
     );
