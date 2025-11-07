@@ -1,9 +1,11 @@
+import { Suspense } from "react";
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "@/shared/styles/globals.css";
 import Header from "@/widgets/header/ui/Header";
 import { ModalContainer } from "@/shared/ui/ModalContainer/ModalContainer";
 import ChatContainer from "@/features/chat/ui/ChatContainer";
+
 const myFont = localFont({
   src: "../shared/fonts/PretendardVariable.woff2",
 });
@@ -22,7 +24,11 @@ export default function RootLayout({
     <html lang="kr" className={myFont.className}>
       <body className="mx-auto max-w-[1200px] bg-[#1c1c22] pt-[70px] md:pt-[80px] xl:pt-[100px]">
         <Header />
-        {children}
+        <Suspense
+          fallback={<div className="p-4 text-gray-400">Loading...</div>}
+        >
+          {children}
+        </Suspense>
         <div id="modal-root" />
         <ChatContainer />
         <ModalContainer />
