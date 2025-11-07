@@ -11,30 +11,26 @@ const meta: Meta<typeof Profile> = {
     },
   },
   argTypes: {
-    imageSrc: { control: "text" },
-    nickname: { control: "text" },
-    bio: { control: "text" },
-    stats: {
-      control: "object",
-      description: "구매내역, 판매내역, 관심 카테고리 정보",
-    },
+    nickname: { control: "text", description: "사용자 닉네임" },
+    introduction: { control: "text", description: "자기소개" },
+    imageUrl: { control: "text", description: "프로필 이미지 경로" },
+    category: { control: "text", description: "관심 카테고리" },
+    sellCount: { control: "number", description: "판매내역 수" },
+    buyCount: { control: "number", description: "구매내역 수" },
+    onEdit: { action: "edit clicked", description: "프로필 수정 버튼 클릭" },
   },
 };
 
 export default meta;
 type Story = StoryObj<typeof Profile>;
 
-const defaultStats = {
-  purchase: 10,
-  sales: 5,
-  category: "패션",
-};
-
 export const Default: Story = {
   args: {
-    imageSrc: "",
-    nickname: "홍길동",
-    bio: "간단한 자기소개만 있는 프로필입니다.",
-    stats: defaultStats,
+    nickname: "닉네임",
+    introduction: "자기 소개",
+    imageUrl: "",
+    category: "뷰티/화장품",
+    sellCount: 0,
+    buyCount: 0,
   },
 };
