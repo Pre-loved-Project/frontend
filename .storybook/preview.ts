@@ -1,4 +1,5 @@
 import type { Preview } from "@storybook/nextjs-vite";
+import "../src/shared/styles/globals.css";
 
 const preview: Preview = {
   parameters: {
@@ -15,6 +16,7 @@ const preview: Preview = {
       // 'off' - skip a11y checks entirely
       test: "todo",
     },
+    nextjs: { appDirectory: true },
   },
 };
 

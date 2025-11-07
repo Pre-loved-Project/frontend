@@ -1,9 +1,48 @@
-import Image from "next/image";
+import SideMenuWrapper from "@/widgets/main/ui/SideMenu/SideMenuWrapper";
+import PostList from "@/entities/post/ui/list/PostList";
+import { serverFetch } from "@/shared/api/fetcher.server";
+import { POST_PAGE_SIZE } from "@/entities/post/model/constants/api";
+import type { Post } from "@/entities/post/model/types/post";
 
-export default function Home() {
+export default async function HomePage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string>>;
+}) {
+  const params = await searchParams;
+
+  const selectedCategory = params?.category ?? "전체";
+  const selectedSortOption = params?.sort ?? "latest";
+  const page = Number(params?.page ?? 1);
+  const keyword = (params?.keyword ?? "").trim();
+
+  const query = new URLSearchParams({
+    page: String(page),
+    size: String(POST_PAGE_SIZE),
+    sort: selectedSortOption,
+  });
+  if (selectedCategory !== "전체") query.append("category", selectedCategory);
+  if (keyword) query.append("keyword", keyword);
+
+  const { data: posts } = await serverFetch<{ data: Post[] }>(
+    `/api/postings?${query.toString()}`,
+    { method: "GET" },
+  );
+
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      Pre-loved Project
+    <div className="flex flex-col gap-[60px] md:block">
+      <aside>
+        <SideMenuWrapper selectedCategory={selectedCategory} />
+      </aside>
+
+      <main className="mb-[30px] md:ml-[160px] md:pr-[30px] md:pl-[25px] lg:pr-[60px] lg:pl-[90px]">
+        <PostList
+          initialPosts={posts}
+          selectedCategory={selectedCategory}
+          selectedSortOption={selectedSortOption}
+          selectedKeyword={keyword}
+        />
+      </main>
     </div>
   );
 }
