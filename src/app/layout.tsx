@@ -17,21 +17,31 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
     <html lang="kr" className={myFont.className}>
       <body className="mx-auto max-w-[1200px] bg-[#1c1c22] pt-[70px] md:pt-[80px] xl:pt-[100px]">
-        <Header />
+        <Suspense fallback={null}>
+          <Header />
+        </Suspense>
+
         <Suspense
           fallback={<div className="p-4 text-gray-400">Loading...</div>}
         >
           {children}
         </Suspense>
+
         <div id="modal-root" />
-        <ChatContainer />
-        <ModalContainer />
+
+        <Suspense fallback={null}>
+          <ChatContainer />
+        </Suspense>
+
+        <Suspense fallback={null}>
+          <ModalContainer />
+        </Suspense>
       </body>
     </html>
   );
