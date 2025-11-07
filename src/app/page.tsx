@@ -1,3 +1,5 @@
+import { Suspense } from "react";
+
 import SideMenuWrapper from "@/widgets/main/ui/SideMenu/SideMenuWrapper";
 import PostList from "@/entities/post/ui/list/PostList";
 import { serverFetch } from "@/shared/api/fetcher.server";
@@ -32,16 +34,20 @@ export default async function HomePage({
   return (
     <div className="flex flex-col gap-[60px] md:block">
       <aside>
-        <SideMenuWrapper selectedCategory={selectedCategory} />
+        <Suspense fallback={<div>Loading menu...</div>}>
+          <SideMenuWrapper selectedCategory={selectedCategory} />
+        </Suspense>
       </aside>
 
       <main className="mb-[30px] md:ml-[160px] md:pr-[30px] md:pl-[25px] lg:pr-[60px] lg:pl-[90px]">
-        <PostList
-          initialPosts={posts}
-          selectedCategory={selectedCategory}
-          selectedSortOption={selectedSortOption}
-          selectedKeyword={keyword}
-        />
+        <Suspense fallback={<div>Loading posts...</div>}>
+          <PostList
+            initialPosts={posts}
+            selectedCategory={selectedCategory}
+            selectedSortOption={selectedSortOption}
+            selectedKeyword={keyword}
+          />
+        </Suspense>
       </main>
     </div>
   );
