@@ -20,12 +20,9 @@ export const useChatMessages = (chatId: number | null) => {
           `/api/chat/${chatId}?size=20`,
           { method: "GET" },
         );
+        console.log(res.messages);
 
-        const sorted = [...res.messages].sort(
-          (a, b) => new Date(a.sendAt).getTime() - new Date(b.sendAt).getTime(),
-        );
-
-        setMessages(sorted);
+        setMessages(res.messages.reverse());
         setCursor(res.nextCursor);
         setHasNext(res.hasNext);
       } catch {
