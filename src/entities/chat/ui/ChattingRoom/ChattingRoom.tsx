@@ -1,16 +1,17 @@
 "use client";
 import React, { useState, useRef, useEffect, useMemo } from "react";
-import { User } from "@/entities/user/model/types/user";
-import { PostDetail } from "@/entities/post/model/types/post";
-import { MessageProps, MessagesResponse } from "../../model/types";
 import { MessageRow, MessageRowProps } from "../MessageRow/MessageRow";
+import { uploadImage } from "@/shared/api/uploadImage";
+import { useModalStore } from "@/shared/model/modal.store";
 import Button from "@/shared/ui/Button/Button";
 import { TextField } from "@/shared/ui/TextField/TextField";
 import DeleteIcon from "@/shared/images/delete.svg";
+
 import { apiFetch } from "@/shared/api/fetcher";
-import { uploadImage } from "@/shared/api/uploadImage";
-import { useModalStore } from "@/shared/model/modal.store";
-import { ChatSocket } from "../../model/socket";
+import { useChatPost } from "../../lib/useChatPost";
+import { useChatOtherUser } from "../../lib/useChatOtherUser";
+import { useChatMessages } from "../../lib/useChatMessages";
+import { useChatSocket } from "../../lib/useChatSocket";
 
 export const ChattingRoom = ({
   postingId,
@@ -22,41 +23,20 @@ export const ChattingRoom = ({
   chatId?: number;
 }) => {
   const [chatId, setChatId] = useState<number | null>(initialChatId ?? null);
-  const [post, setPost] = useState<PostDetail | null>(null);
-  const [otherUser, setOtherUser] = useState<User | null>(null);
-  const [messages, setMessages] = useState<MessageProps[]>([]);
-  const [cursor, setCursor] = useState<number | null>(null);
-  const [hasNext, setHasNext] = useState<boolean>(true);
-
-  const [isOtherUserLoading, setIsOtherUserLoading] = useState(false);
-  const [isPostLoading, setIsPostLoading] = useState(false);
-  const [isMessagesLoading, setIsMessagesLoading] = useState(false);
+  const { post, isLoading: isPostLoading } = useChatPost(postingId);
+  const { otherUser, isLoading: isOtherUserLoading } =
+    useChatOtherUser(otherId);
+  const {
+    messages,
+    setMessages,
+    isLoading: isMessagesLoading,
+  } = useChatMessages(chatId);
+  const { sendMessage } = useChatSocket(chatId, setMessages);
 
   const { openModal, closeModal } = useModalStore();
-
   const [text, setText] = useState("");
   const [image, setImage] = useState<File | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const socketRef = useRef<ChatSocket | null>(null);
-
-  const connectSocket = (id: number): Promise<void> => {
-    return new Promise((resolve) => {
-      if (socketRef.current) socketRef.current.leaveRoom();
-
-      const socket = new ChatSocket(id, {
-        onOpen: () => {
-          console.log("[Socket] connected");
-          resolve();
-        },
-        onMessage: (msg) => setMessages((prev) => [...prev, msg]),
-        onSystem: (sys) => console.log("[System]", sys.message),
-        onClose: (code) => console.log("[Socket] Closed:", code),
-      });
-
-      socket.connect();
-      socketRef.current = socket;
-    });
-  };
 
   const formatTime = (time: string) =>
     new Date(time).toLocaleTimeString("ko-KR", {
@@ -70,15 +50,15 @@ export const ChattingRoom = ({
     return `${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일`;
   };
 
-  const messagesWithComputedProps = (
-    msgList: MessageProps[],
-  ): MessageRowProps[] => {
+  const displayMessages = useMemo((): MessageRowProps[] => {
+    if (!messages.length) return [];
+
     const result: MessageRowProps[] = [];
     let lastDate: string | null = null;
 
-    msgList.forEach((msg, i) => {
-      const prev = msgList[i - 1];
-      const next = msgList[i + 1];
+    messages.forEach((msg, i) => {
+      const prev = messages[i - 1];
+      const next = messages[i + 1];
 
       const currentDate = formatDate(msg.sendAt);
       const currentTime = formatTime(msg.sendAt);
@@ -88,7 +68,6 @@ export const ChattingRoom = ({
       const showTime =
         !next || next.isMine !== msg.isMine || nextTime !== currentTime;
 
-      //날짜가 바뀌면 날짜 구분선 추가
       if (lastDate !== currentDate) {
         result.push({
           message: {
@@ -109,100 +88,19 @@ export const ChattingRoom = ({
         message: msg,
         profileImage:
           !msg.isMine && showProfile
-            ? otherUser?.imageUrl
-              ? otherUser.imageUrl
-              : "/icons/user.svg"
+            ? otherUser?.imageUrl || "/icons/user.svg"
             : undefined,
         showProfile,
         showTime,
       });
     });
+
     return result;
-  };
-
-  //게시물 정보 조회하여 렌더링
-  useEffect(() => {
-    async function fetchPost() {
-      try {
-        setIsPostLoading(true);
-        const res = await apiFetch<PostDetail>(`/api/postings/${postingId}`, {
-          method: "GET",
-        });
-
-        setPost(res);
-      } catch {
-        openModal("normal", {
-          message: "게시물 정보 조회에 실패했습니다.",
-          onClick: () => closeModal(),
-        });
-      } finally {
-        setIsPostLoading(false);
-      }
-    }
-    fetchPost();
-  }, [postingId]);
-
-  //상대방 정보 가져오기
-  useEffect(() => {
-    async function fecthUser() {
-      try {
-        setIsOtherUserLoading(true);
-        const res = await apiFetch<User>(`/api/users/${otherId}`, {
-          method: "GET",
-        });
-        setOtherUser(res);
-      } catch {
-        openModal("normal", {
-          message: "상대 유저 정보 조회에 실패했습니다.",
-          onClick: () => closeModal(),
-        });
-      } finally {
-        setIsOtherUserLoading(false);
-      }
-    }
-    fecthUser();
-  }, []);
+  }, [messages, otherUser]);
 
   useEffect(() => {
-    if (!chatId) return;
-
-    async function fetchInitialMessages() {
-      try {
-        setIsMessagesLoading(true);
-        const res = await apiFetch<MessagesResponse>(
-          `/api/chat/${chatId}?size=20`,
-          { method: "GET" },
-        );
-        const sorted = [...res.messages].sort(
-          (a, b) => new Date(a.sendAt).getTime() - new Date(b.sendAt).getTime(),
-        );
-        setMessages(sorted);
-        setCursor(res.nextCursor);
-        setHasNext(res.hasNext);
-      } catch {
-        openModal("normal", {
-          message: "메시지 조회에 실패했습니다.",
-          onClick: () => closeModal(),
-        });
-      } finally {
-        setIsMessagesLoading(false);
-      }
-    }
-    fetchInitialMessages();
-  }, [chatId]);
-
-  const displayMessages = useMemo(
-    () => messagesWithComputedProps(messages),
-    [messages],
-  );
-
-  //기존 채팅방이 있을 경우 바로 소켓 연결
-  useEffect(() => {
-    if (!socketRef.current && chatId) connectSocket(chatId);
-  }, []);
-
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    const behavior = messages.length > 1 ? "smooth" : "auto";
+    messagesEndRef.current?.scrollIntoView({ behavior });
   }, [messages]);
 
   const handleSend = async () => {
@@ -218,8 +116,7 @@ export const ChattingRoom = ({
             body: JSON.stringify({ postingId }),
           },
         );
-        setChatId(res.chatId);
-        await connectSocket(res.chatId);
+        setChatId(res.chatId); //useChatSocket hook을 통한 소켓 자동 재연결.
       } catch {
         openModal("normal", {
           message: "채팅방 생성에 실패했습니다.",
@@ -236,23 +133,6 @@ export const ChattingRoom = ({
 
     setText("");
     setImage(null);
-  };
-
-  const sendMessage = (type: "text" | "image", content: string) => {
-    const now = new Date();
-    const sendAt = now.toISOString();
-    socketRef.current?.sendMessage(type, content);
-    setMessages((prev) => [
-      ...prev,
-      {
-        messageId: Date.now(),
-        type,
-        content,
-        isMine: true,
-        sendAt,
-        isRead: true,
-      },
-    ]);
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {

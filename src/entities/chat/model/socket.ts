@@ -95,9 +95,17 @@ export class ChatSocket {
 
   leaveRoom() {
     if (!this.socket) return;
-    console.log(this.socket);
-    this.socket.send(JSON.stringify({ event: "leave_room" }));
-    this.socket.close(1000, "User left");
+
+    const state = this.socket.readyState;
+
+    // 아직 연결 중이거나 이미 닫힌 상태에서는 그냥 close()만 호출
+    if (state === WebSocket.OPEN) {
+      this.socket.send(JSON.stringify({ event: "leave_room" }));
+      this.socket.close(1000, "User left");
+    } else {
+      this.socket.close(1000, `User left skipped - ${state.toString()}`);
+    }
+
     this.socket = null;
   }
 }
