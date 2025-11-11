@@ -9,7 +9,7 @@ export async function getPosts({
   page,
 }: {
   category: string;
-  keyword: string;
+  keyword?: string;
   sort?: string;
   page?: number;
 }) {

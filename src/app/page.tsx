@@ -4,7 +4,7 @@ import {
   HydrationBoundary,
 } from "@tanstack/react-query";
 import { getPosts } from "@/entities/post/api/getPosts";
-import HomePageClient from "../widgets/main/ui/Client/HomePage.client";
+import HomePageClient from "@/widgets/main/ui/Client/HomePage.client";
 
 export default async function HomePage({
   searchParams,
@@ -14,34 +14,28 @@ export default async function HomePage({
   const params = await searchParams;
   const initialCategory = params?.category ?? "전체";
   const initialSort = params?.sort ?? "latest";
-  const initialPage = Number(params?.page ?? 1);
   const initialKeyword = (params?.keyword ?? "").trim();
 
   const queryClient = new QueryClient();
-  await queryClient.prefetchQuery({
-    queryKey: [
-      "posts",
-      initialCategory,
-      initialSort,
-      initialPage,
-      initialKeyword,
-    ],
-    queryFn: () =>
+
+  await queryClient.prefetchInfiniteQuery({
+    queryKey: ["posts", initialCategory, initialSort, initialKeyword],
+    queryFn: ({ pageParam = 1 }) =>
       getPosts({
         category: initialCategory,
         sort: initialSort,
-        page: initialPage,
+        page: pageParam,
         keyword: initialKeyword,
       }),
+    initialPageParam: 1,
   });
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
       <HomePageClient
         initialCategory={initialCategory}
-        initialKeyword={initialKeyword}
         initialSort={initialSort}
-        initialPage={initialPage}
+        initialKeyword={initialKeyword}
       />
     </HydrationBoundary>
   );
