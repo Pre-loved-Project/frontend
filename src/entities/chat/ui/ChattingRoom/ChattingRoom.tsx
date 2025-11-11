@@ -12,6 +12,7 @@ import { useChatPost } from "../../lib/useChatPost";
 import { useChatOtherUser } from "../../lib/useChatOtherUser";
 import { useChatMessages } from "../../lib/useChatMessages";
 import { useChatSocket } from "../../lib/useChatSocket";
+import { useInfiniteScroll } from "@/shared/lib/useInfiniteScroll";
 
 export const ChattingRoom = ({
   postingId,
@@ -30,13 +31,25 @@ export const ChattingRoom = ({
     messages,
     setMessages,
     isLoading: isMessagesLoading,
+    hasNext,
+    fetchMoreMessages,
+    scrollContainerRef,
+    messagesEndRef,
   } = useChatMessages(chatId);
-  const { sendMessage } = useChatSocket(chatId, setMessages);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+  const { sendMessage } = useChatSocket(chatId, setMessages, scrollToBottom);
 
   const { openModal, closeModal } = useModalStore();
   const [text, setText] = useState("");
   const [image, setImage] = useState<File | null>(null);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messagesTopRef = useInfiniteScroll<HTMLDivElement>(
+    fetchMoreMessages,
+    isMessagesLoading,
+    hasNext,
+  );
 
   const formatTime = (time: string) =>
     new Date(time).toLocaleTimeString("ko-KR", {
@@ -98,11 +111,6 @@ export const ChattingRoom = ({
     return result;
   }, [messages, otherUser]);
 
-  useEffect(() => {
-    const behavior = messages.length > 1 ? "smooth" : "auto";
-    messagesEndRef.current?.scrollIntoView({ behavior });
-  }, [messages]);
-
   const handleSend = async () => {
     //채팅방이 없을 시 새로운 채팅방 생성 후 소켓 연결
     if (!text.trim() && !image) return;
@@ -142,7 +150,7 @@ export const ChattingRoom = ({
     }
   };
 
-  if (isPostLoading || isOtherUserLoading || isMessagesLoading)
+  if (isPostLoading || isOtherUserLoading)
     return (
       <div className="flex h-full w-full items-center justify-center">
         <p className="text-center text-lg font-medium text-white">로딩 중...</p>
@@ -169,7 +177,16 @@ export const ChattingRoom = ({
       </div>
 
       {/* 메시지 리스트 영역 */}
-      <div className="absolute top-[100px] bottom-[100px] left-0 w-full overflow-y-auto p-4">
+      <div
+        ref={scrollContainerRef}
+        className="absolute top-[100px] bottom-[100px] left-0 w-full overflow-y-auto p-4"
+      >
+        <div ref={messagesTopRef} className="h-[1px]" />
+        {isMessagesLoading && (
+          <div className="py-2 text-center text-sm text-gray-400">
+            이전 메시지를 불러오는 중...
+          </div>
+        )}
         {displayMessages.length === 0 ? (
           <div className="flex h-full items-center justify-center text-sm text-gray-300">
             메시지가 없습니다. <br /> 지금 바로 채팅을 시작해보세요!

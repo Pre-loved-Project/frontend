@@ -5,6 +5,7 @@ import { MessageProps } from "../model/types";
 export const useChatSocket = (
   chatId: number | null,
   setMessages: React.Dispatch<React.SetStateAction<MessageProps[]>>,
+  scrollToBottom?: () => void,
 ) => {
   const socketRef = useRef<ChatSocket | null>(null);
   const isConnectedRef = useRef(false);
@@ -17,7 +18,10 @@ export const useChatSocket = (
         console.log("[Socket] Connected");
         isConnectedRef.current = true;
       },
-      onMessage: (msg) => setMessages((prev) => [...prev, msg]),
+      onMessage: (msg) => {
+        setMessages((prev) => [...prev, msg]);
+        scrollToBottom?.();
+      },
       onSystem: (sys) => console.log("[System]", sys.message),
       onClose: (code) => {
         console.log("[Socket] Closed:", code);
@@ -71,6 +75,8 @@ export const useChatSocket = (
         isRead: true,
       },
     ]);
+
+    scrollToBottom?.();
   };
 
   return { sendMessage };
