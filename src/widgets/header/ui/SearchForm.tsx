@@ -1,8 +1,8 @@
 "use client";
-
-import { useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import cn from "@/shared/lib/cn";
+import { useRouter, usePathname } from "next/navigation";
+import { useSearchStore } from "@/shared/model/search.store";
 
 const SearchForm = ({
   className,
@@ -20,18 +20,30 @@ const SearchForm = ({
   onSubmitted?: () => void;
 }) => {
   const router = useRouter();
-  const sp = useSearchParams();
-  const [value, setValue] = useState(sp.get(name) ?? "");
+  const pathname = usePathname();
+  const { category, keyword, setKeyword } = useSearchStore();
+  const [value, setValue] = useState("");
+
+  useEffect(() => {
+    setValue("");
+    setKeyword("");
+  }, [category]);
 
   const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const params = new URLSearchParams(sp.toString());
-
     const q = value.trim();
-    if (q) params.set(name, q);
-    else params.delete(name);
+    if (q === keyword) return;
 
-    router.replace("/?" + params.toString(), { scroll: true });
+    if (pathname === "/") {
+      setKeyword(q);
+    } else {
+      const params = new URLSearchParams({
+        category,
+        keyword: q,
+      });
+      router.push(`/?${params.toString()}`);
+    }
+
     onSubmitted?.();
   };
 

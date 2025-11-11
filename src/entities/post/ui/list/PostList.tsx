@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
 import { apiFetch } from "@/shared/api/fetcher";
 import { useInfiniteScroll } from "@/shared/lib/useInfiniteScroll";
 import { POST_PAGE_SIZE } from "@/entities/post/model/constants/api";
@@ -14,6 +13,7 @@ interface Props {
   initialPosts: Post[];
   selectedCategory: string;
   selectedSortOption: string;
+  onSortChange: (value: string) => void;
   selectedKeyword?: string;
 }
 
@@ -21,11 +21,9 @@ export default function PostList({
   initialPosts,
   selectedCategory,
   selectedSortOption,
+  onSortChange,
   selectedKeyword,
 }: Props) {
-  const router = useRouter();
-  const sp = useSearchParams();
-
   const [posts, setPosts] = useState<Post[]>(initialPosts);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(
@@ -73,14 +71,6 @@ export default function PostList({
 
   const lastRef = useInfiniteScroll(fetchMore, isLoading, hasMore);
 
-  const handleSortChange = (value: string) => {
-    const params = new URLSearchParams(sp.toString());
-    params.set("sort", value);
-
-    const qs = params.toString();
-    router.replace(qs ? `/?${qs}` : "/", { scroll: true });
-  };
-
   return (
     <section className="flex flex-col gap-[30px] px-[20px]">
       <div className="flex items-center justify-between">
@@ -90,7 +80,7 @@ export default function PostList({
         <SortMenu
           items={SORT_OPTION_LIST}
           selectedItem={selectedSortOption}
-          onSelect={handleSortChange}
+          onSelect={onSortChange}
         />
       </div>
 
