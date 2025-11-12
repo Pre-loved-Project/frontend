@@ -1,15 +1,19 @@
 import { create } from "zustand";
 
 interface SearchState {
-  keyword: string;
   category: string;
-  setKeyword: (v: string) => void;
-  setCategory: (v: string) => void;
+  sort: string;
+  keyword: string;
+  setCategory: (c: string) => void;
+  setSort: (s: string) => void;
+  setKeyword: (k: string) => void;
 }
 
 export const useSearchStore = create<SearchState>((set) => ({
-  keyword: "",
   category: "전체",
-  setKeyword: (v) => set({ keyword: v }),
-  setCategory: (v) => set({ category: v }),
+  sort: "latest",
+  keyword: "",
+  setCategory: (category) => set({ category }),
+  setSort: (sort) => set({ sort }),
+  setKeyword: (keyword) => set({ keyword }),
 }));

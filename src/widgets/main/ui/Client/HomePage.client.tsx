@@ -1,9 +1,9 @@
 "use client";
 
-import { useSearchStore } from "@/shared/model/search.store";
 import SideMenuWrapper from "@/widgets/main/ui/SideMenu/SideMenuWrapper";
 import PostList from "@/entities/post/ui/list/PostList";
-import { useLayoutEffect, useEffect, useState } from "react";
+import { useSearchStore } from "@/shared/model/search.store";
+import { useSearchMediator } from "@/shared/lib/useSearchMediator";
 
 interface Props {
   initialCategory: string;
@@ -16,21 +16,9 @@ export default function HomePageClient({
   initialSort,
   initialKeyword,
 }: Props) {
-  const [sort, setSort] = useState(initialSort);
-  const { category, keyword, setCategory, setKeyword } = useSearchStore();
+  useSearchMediator({ initialCategory, initialSort, initialKeyword });
 
-  useLayoutEffect(() => {
-    setCategory(initialCategory);
-    setKeyword(initialKeyword);
-  }, [initialCategory, initialKeyword, setCategory, setKeyword]);
-
-  useEffect(() => {
-    const params = new URLSearchParams();
-    if (category !== "전체") params.set("category", category);
-    if (sort) params.set("sort", sort);
-    if (keyword) params.set("keyword", keyword);
-    window.history.replaceState(null, "", `/?${params.toString()}`);
-  }, [category, sort, keyword]);
+  const { category, keyword, sort, setSort } = useSearchStore();
 
   return (
     <div className="flex flex-col gap-[60px] md:block">
