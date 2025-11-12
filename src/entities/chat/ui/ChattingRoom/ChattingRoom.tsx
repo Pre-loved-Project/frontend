@@ -7,6 +7,7 @@ import Button from "@/shared/ui/Button/Button";
 import { TextField } from "@/shared/ui/TextField/TextField";
 import DeleteIcon from "@/shared/images/delete.svg";
 import PostStatusBadge from "@/entities/post/ui/badge/PostStatusBadge";
+import DealActionPanel from "@/features/deal/ui/DealActionPanel/DealActionPanel";
 
 import { apiFetch } from "@/shared/api/fetcher";
 import { useChatPost } from "../../lib/useChatPost";
@@ -14,6 +15,16 @@ import { useChatOtherUser } from "../../lib/useChatOtherUser";
 import { useChatMessages } from "../../lib/useChatMessages";
 import { useChatSocket } from "../../lib/useChatSocket";
 import { useInfiniteScroll } from "@/shared/lib/useInfiniteScroll";
+import {
+  SELLING,
+  RESERVED,
+  SOLD,
+} from "@/entities/post/model/types/postStatus";
+import {
+  ACTIVE,
+  RESERVED as DEAL_RESERVED,
+  COMPLETED,
+} from "@/features/deal/model/type/dealStatus";
 
 export const ChattingRoom = ({
   postingId,
@@ -177,6 +188,14 @@ export const ChattingRoom = ({
           <span className="text-white">
             {post?.price.toLocaleString("ko-KR") + " 원"}
           </span>
+        </div>
+
+        <div className="absolute top-4 right-4">
+          <DealActionPanel
+            isOwner={false}
+            postStatus={RESERVED}
+            dealStatus={DEAL_RESERVED}
+          />
         </div>
       </div>
 
