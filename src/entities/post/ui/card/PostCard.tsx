@@ -1,5 +1,12 @@
 import Image from "next/image";
 import Link from "next/link";
+import PostStatusBadge from "../badge/PostStatusBadge";
+import {
+  PostStatus,
+  SELLING,
+  RESERVED,
+  SOLD,
+} from "../../model/types/postStatus";
 
 interface PostCardProps {
   postingId: number;
@@ -23,6 +30,7 @@ const PostCard = ({
   viewCount,
   thumbnail,
 }: PostCardProps) => {
+  const status = SELLING; //TODO : api 호출 결과 props로 전달받는 방식으로 변경
   return (
     <Link href={`/detail/${postingId}`}>
       <article className="w-full rounded-[8px] border border-[#353542] bg-[#252530] p-[10px] md:pb-[20px] xl:pb-[25px]">
@@ -45,6 +53,7 @@ const PostCard = ({
             <h1 className="line-clamp-2 h-[28px] text-sm leading-none font-medium text-[#F1F1F5] md:h-[32px] md:text-[16px] xl:h-[36px] xl:text-[18px]">
               {title}
             </h1>
+            <PostStatusBadge status={status} className="block w-fit" />
             <p className="text-xs text-[#9FA6B2] md:text-sm">
               {price?.toLocaleString()} 원
             </p>

@@ -2,12 +2,17 @@ import { useEffect, useState } from "react";
 import { PostDetail } from "@/entities/post/model/types/post";
 import { apiFetch } from "@/shared/api/fetcher";
 import { useModalStore } from "@/shared/model/modal.store";
-
+import {
+  PostStatus,
+  SELLING,
+  RESERVED,
+  SOLD,
+} from "@/entities/post/model/types/postStatus";
 export const useChatPost = (postingId: number) => {
   const [post, setPost] = useState<PostDetail | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { openModal, closeModal } = useModalStore();
-
+  const status = SOLD;
   useEffect(() => {
     async function fetchPost() {
       try {
@@ -29,5 +34,5 @@ export const useChatPost = (postingId: number) => {
     fetchPost();
   }, [postingId]);
 
-  return { post, isLoading };
+  return { post, status, isLoading };
 };

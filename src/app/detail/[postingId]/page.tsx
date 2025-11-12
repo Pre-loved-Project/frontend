@@ -17,9 +17,15 @@ import PostCard from "@/entities/post/ui/card/PostCard";
 import PostCarousel from "@/entities/post/ui/carousel/PostCarousel";
 import { SellerInfo } from "@/widgets/postDetail/ui/SellerInfo";
 import { PostActionBar } from "@/widgets/postDetail/ui/PostActionBar";
+import PostStatusBadge from "@/entities/post/ui/badge/PostStatusBadge";
 
 import type { PostDetail, Post } from "@/entities/post/model/types/post";
 import type { User } from "@/entities/user/model/types/user";
+import {
+  SELLING,
+  RESERVED,
+  SOLD,
+} from "@/entities/post/model/types/postStatus";
 
 export default function DetailPage() {
   const router = useRouter();
@@ -32,6 +38,7 @@ export default function DetailPage() {
 
   const [post, setPost] = useState<PostDetail | null>(null);
   const [isPostLoading, setIsPostLoading] = useState(true);
+  const status = SOLD; //TODO: api 호출 결과로 변경
 
   const [likeCount, setLikeCount] = useState(0);
   const [liked, setLiked] = useState(false);
@@ -209,7 +216,10 @@ export default function DetailPage() {
           <section className="flex flex-col justify-between gap-[1.25rem] py-[1.5rem] md:pt-[2rem] xl:w-1/2 xl:pt-0 xl:pb-[88px]">
             <div className="flex flex-col gap-[1.25rem]">
               <div className="flex flex-col gap-[0.5rem] md:gap-[0.75rem]">
-                <h1 className="text-[20px] font-bold">{post.title}</h1>
+                <h1 className="text-[20px] font-bold">
+                  {post.title}
+                  <PostStatusBadge status={status} className="ml-2" />
+                </h1>
                 <h3 className="text-[18px] font-bold">
                   {post.price.toLocaleString()}
                 </h3>

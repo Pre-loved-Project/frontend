@@ -6,6 +6,7 @@ import { useModalStore } from "@/shared/model/modal.store";
 import Button from "@/shared/ui/Button/Button";
 import { TextField } from "@/shared/ui/TextField/TextField";
 import DeleteIcon from "@/shared/images/delete.svg";
+import PostStatusBadge from "@/entities/post/ui/badge/PostStatusBadge";
 
 import { apiFetch } from "@/shared/api/fetcher";
 import { useChatPost } from "../../lib/useChatPost";
@@ -24,7 +25,7 @@ export const ChattingRoom = ({
   chatId?: number;
 }) => {
   const [chatId, setChatId] = useState<number | null>(initialChatId ?? null);
-  const { post, isLoading: isPostLoading } = useChatPost(postingId);
+  const { post, status, isLoading: isPostLoading } = useChatPost(postingId);
   const { otherUser, isLoading: isOtherUserLoading } =
     useChatOtherUser(otherId);
   const {
@@ -169,7 +170,10 @@ export const ChattingRoom = ({
         />
         {/* 제목과 가격 세로 정렬 */}
         <div className="flex flex-col">
-          <span className="font-bold text-white">{post?.title}</span>
+          <span className="font-bold text-white">
+            {post?.title}
+            <PostStatusBadge status={status} className="ml-2" />
+          </span>
           <span className="text-white">
             {post?.price.toLocaleString("ko-KR") + " 원"}
           </span>
