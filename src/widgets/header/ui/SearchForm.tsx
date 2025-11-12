@@ -1,8 +1,10 @@
 "use client";
+
 import { useState, useEffect } from "react";
 import cn from "@/shared/lib/cn";
 import { useRouter, usePathname } from "next/navigation";
 import { useSearchStore } from "@/shared/model/search.store";
+import { SearchCommands } from "@/shared/commands/SearchCommands";
 
 const SearchForm = ({
   className,
@@ -21,12 +23,12 @@ const SearchForm = ({
 }) => {
   const router = useRouter();
   const pathname = usePathname();
-  const { category, keyword, setKeyword } = useSearchStore();
+  const { category, keyword } = useSearchStore();
   const [value, setValue] = useState("");
 
   useEffect(() => {
     setValue("");
-    setKeyword("");
+    SearchCommands.changeKeyword("");
   }, [category]);
 
   const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -35,7 +37,7 @@ const SearchForm = ({
     if (q === keyword) return;
 
     if (pathname === "/") {
-      setKeyword(q);
+      SearchCommands.changeKeyword(q);
     } else {
       const params = new URLSearchParams({
         category,
@@ -75,7 +77,6 @@ const SearchForm = ({
         value={value}
         onChange={(e) => setValue(e.target.value)}
       />
-
       <button type="submit" className="sr-only">
         검색
       </button>
