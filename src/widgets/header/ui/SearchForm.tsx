@@ -1,8 +1,10 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import cn from "@/shared/lib/cn";
+import { useRouter, usePathname } from "next/navigation";
+import { useSearchStore } from "@/shared/model/search.store";
+import { SearchCommands } from "@/shared/commands/SearchCommands";
 
 const SearchForm = ({
   className,
@@ -20,18 +22,30 @@ const SearchForm = ({
   onSubmitted?: () => void;
 }) => {
   const router = useRouter();
-  const sp = useSearchParams();
-  const [value, setValue] = useState(sp.get(name) ?? "");
+  const pathname = usePathname();
+  const { category, keyword } = useSearchStore();
+  const [value, setValue] = useState("");
+
+  useEffect(() => {
+    setValue("");
+    SearchCommands.changeKeyword("");
+  }, [category]);
 
   const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const params = new URLSearchParams(sp.toString());
-
     const q = value.trim();
-    if (q) params.set(name, q);
-    else params.delete(name);
+    if (q === keyword) return;
 
-    router.replace("/?" + params.toString(), { scroll: true });
+    if (pathname === "/") {
+      SearchCommands.changeKeyword(q);
+    } else {
+      const params = new URLSearchParams({
+        category,
+        keyword: q,
+      });
+      router.push(`/?${params.toString()}`);
+    }
+
     onSubmitted?.();
   };
 
@@ -63,7 +77,6 @@ const SearchForm = ({
         value={value}
         onChange={(e) => setValue(e.target.value)}
       />
-
       <button type="submit" className="sr-only">
         검색
       </button>
