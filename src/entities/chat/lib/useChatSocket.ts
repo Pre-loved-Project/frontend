@@ -4,7 +4,7 @@ import { MessageProps } from "../model/types";
 
 export const useChatSocket = (
   chatId: number | null,
-  setMessages: React.Dispatch<React.SetStateAction<MessageProps[]>>,
+  pushMessageToCache: (msg: MessageProps) => void,
   scrollToBottom?: () => void,
 ) => {
   const socketRef = useRef<ChatSocket | null>(null);
@@ -19,8 +19,8 @@ export const useChatSocket = (
         isConnectedRef.current = true;
       },
       onMessage: (msg) => {
-        setMessages((prev) => [...prev, msg]);
-        scrollToBottom?.();
+        pushMessageToCache(msg);
+        requestAnimationFrame(() => scrollToBottom?.());
       },
       onSystem: (sys) => console.log("[System]", sys.message),
       onClose: (code) => {
@@ -62,21 +62,17 @@ export const useChatSocket = (
 
     const now = new Date();
     const sendAt = now.toISOString();
+    pushMessageToCache({
+      messageId: Date.now(),
+      type,
+      content,
+      isMine: true,
+      sendAt,
+      isRead: true,
+    });
 
     socketRef.current?.sendMessage(type, content);
-    setMessages((prev) => [
-      ...prev,
-      {
-        messageId: Date.now(),
-        type,
-        content,
-        isMine: true,
-        sendAt,
-        isRead: true,
-      },
-    ]);
-
-    scrollToBottom?.();
+    requestAnimationFrame(() => scrollToBottom?.());
   };
 
   return { sendMessage };

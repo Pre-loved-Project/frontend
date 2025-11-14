@@ -1,89 +1,103 @@
-import { useEffect, useState, useRef } from "react";
+import {
+  InfiniteData,
+  useInfiniteQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
+import { useEffect, useRef, useMemo } from "react";
 import { apiFetch } from "@/shared/api/fetcher";
 import { MessagesResponse, MessageProps } from "../model/types";
 import { useModalStore } from "@/shared/model/modal.store";
 
 export const useChatMessages = (chatId: number | null) => {
-  const [messages, setMessages] = useState<MessageProps[]>([]);
-  const [cursor, setCursor] = useState<number | null>(null);
-  const [hasNext, setHasNext] = useState(true);
-  const [isLoading, setIsLoading] = useState(false);
-  const { openModal, closeModal } = useModalStore();
-
+  const queryClient = useQueryClient();
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
+  const { openModal, closeModal } = useModalStore();
 
-  // 초기 메시지
+  const {
+    data,
+    error,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage: isMessagesLoading,
+    isLoading: isMessagesFirstLoading,
+  } = useInfiniteQuery({
+    queryKey: ["chatMessages", chatId],
+    enabled: !!chatId,
+    initialPageParam: null as number | null,
+
+    queryFn: async ({ pageParam }) => {
+      const url = pageParam
+        ? `/api/chat/${chatId}?cursor=${pageParam}&size=20`
+        : `/api/chat/${chatId}?size=20`;
+
+      return apiFetch<MessagesResponse>(url, { method: "GET" });
+    },
+
+    getNextPageParam: (lastPage) =>
+      lastPage.hasNext ? lastPage.nextCursor : undefined,
+  });
+
   useEffect(() => {
-    if (!chatId) return;
-
-    async function fetchMessages() {
-      try {
-        setIsLoading(true);
-        const res = await apiFetch<MessagesResponse>(
-          `/api/chat/${chatId}?size=20`,
-          { method: "GET" },
-        );
-
-        setMessages(res.messages.reverse());
-        setCursor(res.nextCursor);
-        setHasNext(res.hasNext);
-
-        if (messagesEndRef.current) {
-          messagesEndRef.current.scrollIntoView({ behavior: "auto" });
-        }
-      } catch {
-        openModal("normal", {
-          message: "메시지 조회에 실패했습니다.",
-          onClick: () => closeModal(),
-        });
-      } finally {
-        setIsLoading(false);
-      }
+    if (error) {
+      openModal("normal", {
+        message: "메시지 로딩 중 에러가 발생했습니다.",
+        onClick: closeModal,
+      });
     }
+  }, [error]);
 
-    fetchMessages();
-  }, [chatId]);
+  const messages: MessageProps[] = useMemo(() => {
+    if (!data) return [];
 
-  // 이전 메시지 추가 로드
+    return data.pages
+      .slice()
+      .reverse()
+      .flatMap((page) => [...page.messages].reverse());
+  }, [data]);
+
+  const pushMessageToCache = (newMsg: MessageProps) => {
+    queryClient.setQueryData<InfiniteData<MessagesResponse>>(
+      ["chatMessages", chatId],
+      (oldData) => {
+        if (!oldData) return oldData;
+        const firstPage = oldData.pages[0];
+
+        const updatedFirstPage: MessagesResponse = {
+          ...firstPage,
+          messages: [newMsg, ...firstPage.messages],
+        };
+
+        return {
+          pageParams: oldData.pageParams,
+          pages: [updatedFirstPage, ...oldData.pages.slice(1)],
+        };
+      },
+    );
+  };
+
   const fetchMoreMessages = async () => {
-    if (!chatId || !hasNext || isLoading) return;
-
     const container = scrollContainerRef.current;
     const prevHeight = container?.scrollHeight ?? 0;
 
-    try {
-      setIsLoading(true);
-      const res = await apiFetch<MessagesResponse>(
-        `/api/chat/${chatId}?cursor=${cursor}&size=20`,
-        { method: "GET" },
-      );
-      setMessages((prev) => [...[...res.messages].reverse(), ...prev]);
-      setCursor(res.nextCursor);
-      setHasNext(res.hasNext);
-      //스크롤 높이 조정
-      if (container) {
-        requestAnimationFrame(() => {
-          const newHeight = container.scrollHeight;
-          container.scrollTop += newHeight - prevHeight;
-        });
-      }
-    } catch {
-      openModal("normal", {
-        message: "이전 메시지를 불러오는데 실패했습니다.",
-        onClick: () => closeModal(),
+    await fetchNextPage();
+
+    if (container) {
+      requestAnimationFrame(() => {
+        const newHeight = container.scrollHeight;
+        container.scrollTop = newHeight - prevHeight;
       });
-    } finally {
-      setIsLoading(false);
     }
   };
 
   return {
     messages,
-    setMessages,
-    isLoading,
-    hasNext,
+    pushMessageToCache,
     fetchMoreMessages,
+    hasNextPage,
+    isMessagesFirstLoading,
+    isMessagesLoading,
+    error,
     scrollContainerRef,
     messagesEndRef,
   };

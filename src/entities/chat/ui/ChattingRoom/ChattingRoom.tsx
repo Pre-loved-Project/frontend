@@ -8,11 +8,13 @@ import { TextField } from "@/shared/ui/TextField/TextField";
 import DeleteIcon from "@/shared/images/delete.svg";
 
 import { apiFetch } from "@/shared/api/fetcher";
-import { useChatPost } from "../../lib/useChatPost";
-import { useChatOtherUser } from "../../lib/useChatOtherUser";
 import { useChatMessages } from "../../lib/useChatMessages";
 import { useChatSocket } from "../../lib/useChatSocket";
 import { useInfiniteScroll } from "@/shared/lib/useInfiniteScroll";
+
+import { getPostDetail } from "@/entities/post/api/getPostDetail";
+import { getUser } from "@/entities/user/api/getUser";
+import { useQuery } from "@tanstack/react-query";
 
 export const ChattingRoom = ({
   postingId,
@@ -24,15 +26,31 @@ export const ChattingRoom = ({
   chatId?: number;
 }) => {
   const [chatId, setChatId] = useState<number | null>(initialChatId ?? null);
-  const { post, isLoading: isPostLoading } = useChatPost(postingId);
-  const { otherUser, isLoading: isOtherUserLoading } =
-    useChatOtherUser(otherId);
+  const {
+    data: post,
+    isLoading: isPostLoading,
+    isError: isPostingError,
+  } = useQuery({
+    queryKey: ["postDetail", postingId],
+    queryFn: () => getPostDetail(postingId),
+  });
+
+  const {
+    data: otherUser,
+    isLoading: isOtherUserLoading,
+    isError: isOtherUserError,
+  } = useQuery({
+    queryKey: ["otherUser", otherId],
+    queryFn: () => getUser(otherId),
+  });
+
   const {
     messages,
-    setMessages,
-    isLoading: isMessagesLoading,
-    hasNext,
+    pushMessageToCache,
     fetchMoreMessages,
+    hasNextPage,
+    isMessagesFirstLoading,
+    isMessagesLoading,
     scrollContainerRef,
     messagesEndRef,
   } = useChatMessages(chatId);
@@ -40,7 +58,21 @@ export const ChattingRoom = ({
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
-  const { sendMessage } = useChatSocket(chatId, setMessages, scrollToBottom);
+
+  const initialScrollDone = useRef(false);
+
+  useEffect(() => {
+    if (!initialScrollDone.current && messages.length > 0) {
+      initialScrollDone.current = true;
+      messagesEndRef.current?.scrollIntoView({ behavior: "auto" });
+    }
+  }, [messages]);
+
+  const { sendMessage } = useChatSocket(
+    chatId,
+    pushMessageToCache,
+    scrollToBottom,
+  );
 
   const { openModal, closeModal } = useModalStore();
   const [text, setText] = useState("");
@@ -48,7 +80,7 @@ export const ChattingRoom = ({
   const messagesTopRef = useInfiniteScroll<HTMLDivElement>(
     fetchMoreMessages,
     isMessagesLoading,
-    hasNext,
+    hasNextPage,
   );
 
   const formatTime = (time: string) =>
