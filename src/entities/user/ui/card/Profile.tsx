@@ -6,6 +6,7 @@ import Image from "next/image";
 import { useAuthStore } from "@/features/auth/model/auth.store";
 import Button from "@/shared/ui/Button/Button";
 import DefaultProfileImage from "./assets/profile.jpg";
+import { apiFetch } from "@/shared/api/fetcher";
 
 export interface ProfileProps {
   nickname: string;
@@ -80,7 +81,11 @@ const Profile = ({
           <Button
             variant="tertiary"
             className="w-full md:w-full xl:w-full"
-            onClick={() => {
+            onClick={async () => {
+              await apiFetch("/auth/logout", {
+                method: "POST",
+                credentials: "include",
+              });
               logout();
               router.push("/login");
             }}

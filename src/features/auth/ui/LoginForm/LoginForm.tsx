@@ -39,7 +39,6 @@ export const LoginForm = ({
       }>("/auth/login", {
         method: "POST",
         body: JSON.stringify({ email, password }),
-        noAuth: true,
       });
 
       setAccessToken(res.accessToken);
