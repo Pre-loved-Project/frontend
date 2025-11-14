@@ -2,9 +2,16 @@
 
 import { useState, useEffect } from "react";
 import cn from "@/shared/lib/cn";
-import { useRouter, usePathname } from "next/navigation";
-import { useSearchStore } from "@/shared/model/search.store";
-import { SearchCommands } from "@/shared/commands/SearchCommands";
+import { useRouter, useSearchParams } from "next/navigation";
+
+interface SearchFormProps {
+  className?: string;
+  placeholder?: string;
+  autoFocus?: boolean;
+  showIcon?: boolean;
+  name?: string;
+  onSubmitted?: () => void;
+}
 
 const SearchForm = ({
   className,
@@ -13,39 +20,27 @@ const SearchForm = ({
   showIcon = true,
   name = "keyword",
   onSubmitted,
-}: {
-  className?: string;
-  placeholder?: string;
-  autoFocus?: boolean;
-  showIcon?: boolean;
-  name?: string;
-  onSubmitted?: () => void;
-}) => {
+}: SearchFormProps) => {
   const router = useRouter();
-  const pathname = usePathname();
-  const { category, keyword } = useSearchStore();
-  const [value, setValue] = useState("");
+  const searchParams = useSearchParams();
+
+  const [value, setValue] = useState(searchParams.get("keyword") ?? "");
+  const category = searchParams.get("category") ?? "전체";
 
   useEffect(() => {
     setValue("");
-    SearchCommands.changeKeyword("");
   }, [category]);
 
   const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const q = value.trim();
-    if (q === keyword) return;
+    if (!q) return;
 
-    if (pathname === "/") {
-      SearchCommands.changeKeyword(q);
-    } else {
-      const params = new URLSearchParams({
-        category,
-        keyword: q,
-      });
-      router.push(`/?${params.toString()}`);
-    }
+    const params = new URLSearchParams(searchParams);
+    if (category && category !== "전체") params.set("category", category);
+    params.set("keyword", q);
 
+    router.push(`/?${params.toString()}`);
     onSubmitted?.();
   };
 

@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter, useSearchParams } from "next/navigation";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useInfiniteScroll } from "@/shared/lib/useInfiniteScroll";
 import { getPosts } from "@/entities/post/api/getPosts";
@@ -11,16 +12,17 @@ import PostCard from "@/entities/post/ui/card/PostCard";
 interface Props {
   selectedCategory: string;
   selectedSortOption: string;
-  onSortChange: (value: string) => void;
-  selectedKeyword?: string;
+  selectedKeyword: string;
 }
 
 export default function PostList({
   selectedCategory,
   selectedSortOption,
-  onSortChange,
   selectedKeyword,
 }: Props) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useInfiniteQuery({
       queryKey: [
@@ -41,6 +43,12 @@ export default function PostList({
       initialPageParam: 1,
     });
 
+  const handleSortChange = (sortValue: string) => {
+    const params = new URLSearchParams(searchParams);
+    params.set("sort", sortValue);
+    router.push(`/?${params.toString()}`);
+  };
+
   const posts = data?.pages.flat() ?? [];
   const lastRef = useInfiniteScroll(
     () => fetchNextPage(),
@@ -49,7 +57,7 @@ export default function PostList({
   );
 
   return (
-    <section className="flex flex-col gap-[30px] px-[20px]">
+    <section className="flex flex-col gap-[30px] px-5">
       <div className="flex items-center justify-between">
         <h3 className="text-[20px] font-semibold text-white">
           {selectedCategory || "전체"}
@@ -57,7 +65,7 @@ export default function PostList({
         <SortMenu
           items={SORT_OPTION_LIST}
           selectedItem={selectedSortOption}
-          onSelect={onSortChange}
+          onSelect={handleSortChange}
         />
       </div>
 

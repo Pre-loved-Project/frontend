@@ -1,24 +1,15 @@
 "use client";
 
+import { useSearchParams } from "next/navigation";
 import SideMenuWrapper from "@/widgets/main/ui/SideMenu/SideMenuWrapper";
 import PostList from "@/entities/post/ui/list/PostList";
-import { useSearchStore } from "@/shared/model/search.store";
-import { useSearchMediator } from "@/shared/lib/useSearchMediator";
 
-interface Props {
-  initialCategory: string;
-  initialSort: string;
-  initialKeyword: string;
-}
+export default function HomePageClient() {
+  const searchParams = useSearchParams();
 
-export default function HomePageClient({
-  initialCategory,
-  initialSort,
-  initialKeyword,
-}: Props) {
-  useSearchMediator({ initialCategory, initialSort, initialKeyword });
-
-  const { category, keyword, sort, setSort } = useSearchStore();
+  const category = searchParams.get("category") ?? "전체";
+  const sort = searchParams.get("sort") ?? "latest";
+  const keyword = searchParams.get("keyword") ?? "";
 
   return (
     <div className="flex flex-col gap-[60px] md:block">
@@ -30,7 +21,6 @@ export default function HomePageClient({
         <PostList
           selectedCategory={category}
           selectedSortOption={sort}
-          onSortChange={setSort}
           selectedKeyword={keyword}
         />
       </main>

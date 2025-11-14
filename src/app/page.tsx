@@ -3,7 +3,7 @@ import {
   dehydrate,
   HydrationBoundary,
 } from "@tanstack/react-query";
-import { getPosts } from "@/entities/post/api/getPosts";
+import { getPosts } from "@/entities/post/api/getPosts.server";
 import HomePageClient from "@/widgets/main/ui/Client/HomePage.client";
 
 export default async function HomePage({
@@ -12,6 +12,7 @@ export default async function HomePage({
   searchParams: Promise<Record<string, string>>;
 }) {
   const params = await searchParams;
+
   const initialCategory = params?.category ?? "전체";
   const initialSort = params?.sort ?? "latest";
   const initialKeyword = (params?.keyword ?? "").trim();
@@ -32,11 +33,7 @@ export default async function HomePage({
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      <HomePageClient
-        initialCategory={initialCategory}
-        initialSort={initialSort}
-        initialKeyword={initialKeyword}
-      />
+      <HomePageClient />
     </HydrationBoundary>
   );
 }
