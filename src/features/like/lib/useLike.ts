@@ -1,39 +1,49 @@
-import { useState } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { updateFavorite } from "../api/updateFavorite";
 
-interface UseLikeOptions {
-  postingId?: number;
-  liked: boolean;
-  onLikedChange: (liked: boolean) => void;
-  onCountChange: (delta: number) => void;
-}
+export function useLike(postingId?: number) {
+  const queryClient = useQueryClient();
 
-export function useLike({
-  postingId,
-  liked,
-  onLikedChange,
-  onCountChange,
-}: UseLikeOptions) {
-  const [loading, setLoading] = useState(false);
+  const mutation = useMutation({
+    mutationFn: async (liked: boolean) => {
+      if (!postingId) throw new Error("Invalid postingId");
+      const res = await updateFavorite(postingId, liked);
+      return res.favorited;
+    },
 
-  const handleLikeToggle = async () => {
-    if (!postingId || loading) return;
-    setLoading(true);
+    onMutate: async (newLiked) => {
+      if (!postingId) return;
 
-    const optimisticLiked = !liked;
-    onLikedChange(optimisticLiked);
-    onCountChange(optimisticLiked ? +1 : -1);
+      await queryClient.cancelQueries({ queryKey: ["postDetail", postingId] });
+      const previousData = queryClient.getQueryData<{
+        isFavorite: boolean;
+        likeCount: number;
+      }>(["postDetail", postingId]);
 
-    try {
-      const res = await updateFavorite(postingId, optimisticLiked);
-      onLikedChange(res.favorited);
-    } catch {
-      onLikedChange(!optimisticLiked);
-      onCountChange(optimisticLiked ? -1 : +1);
-    } finally {
-      setLoading(false);
-    }
+      if (previousData) {
+        queryClient.setQueryData(["postDetail", postingId], {
+          ...previousData,
+          isFavorite: newLiked,
+          likeCount: previousData.likeCount + (newLiked ? +1 : -1),
+        });
+      }
+
+      return { previousData };
+    },
+
+    onError: (err, newLiked, context) => {
+      if (!postingId || !context?.previousData) return;
+      queryClient.setQueryData(["postDetail", postingId], context.previousData);
+    },
+
+    onSettled: () => {
+      if (!postingId) return;
+      queryClient.invalidateQueries({ queryKey: ["postDetail", postingId] });
+    },
+  });
+
+  return {
+    toggleLike: (liked: boolean) => mutation.mutate(liked),
+    isLoading: mutation.isPending,
   };
-
-  return { liked, loading, handleLikeToggle };
 }
