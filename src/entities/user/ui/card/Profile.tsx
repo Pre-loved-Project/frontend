@@ -31,21 +31,24 @@ const Profile = ({
   const { logout } = useAuthStore();
 
   return (
-    <article className="flex h-[556px] w-[335px] items-center justify-center rounded-[12px] border border-[#353542] bg-[#252530] px-[20px] py-[30px] md:h-[601px] md:w-[509px] md:px-[30px] xl:h-[753px] xl:w-[340px] xl:px-[20px] xl:pt-[40px]">
+    <article className="flex h-[556px] w-[335px] items-center justify-center rounded-lg border border-[#353542] bg-[#252530] px-5 py-7 md:h-[601px] md:w-[509px] md:px-7 xl:h-[753px] xl:w-[340px] xl:px-5 xl:pt-10">
       <div className="flex h-full w-full flex-col items-center justify-between">
         <Image
           src={imageUrl || DefaultProfileImage}
           alt="프로필"
           width={120}
           height={120}
+          priority
+          fetchPriority="high"
+          sizes="(max-width:1280px) 120px, 180px"
           className="rounded-full xl:h-[180px] xl:w-[180px]"
         />
 
         <div className="w-full">
-          <h1 className="mb-[10px] text-center text-xl leading-7 font-semibold text-white xl:text-[24px]">
+          <h1 className="mb-2.5 text-center text-xl leading-7 font-semibold text-white xl:text-2xl">
             {nickname}
           </h1>
-          <p className="text-sm leading-5 font-normal break-words text-gray-600 xl:font-[16px]">
+          <p className="text-sm leading-5 font-normal break-words text-gray-600 xl:text-base">
             {introduction}
           </p>
         </div>
@@ -53,34 +56,33 @@ const Profile = ({
         <div className="w-full">
           <div className="mb-2 flex justify-between text-center">
             <div className="relative flex-1">
-              <dd className="text-[18px] font-semibold text-[#F1F1F5]">
+              <dd className="text-lg font-semibold text-[#F1F1F5]">
                 {buyCount}
               </dd>
-              <dt className="mt-1 text-[14px] text-[#9FA6B2]">구매내역</dt>
-              <span className="absolute top-0 right-0 h-full w-[1px] bg-[#353542]" />
+              <dt className="mt-1 text-sm text-[#9FA6B2]">구매내역</dt>
+              <span className="absolute top-0 right-0 h-full w-px bg-[#353542]" />
             </div>
             <div className="relative flex-1">
-              <dd className="text-[18px] font-semibold text-[#F1F1F5]">
+              <dd className="text-lg font-semibold text-[#F1F1F5]">
                 {sellCount}
               </dd>
-              <dt className="mt-1 text-[14px] text-[#9FA6B2]">판매내역</dt>
+              <dt className="mt-1 text-sm text-[#9FA6B2]">판매내역</dt>
             </div>
           </div>
         </div>
+
         <div className="w-full text-center">
-          <dd className="text-[18px] font-semibold text-[#F1F1F5]">
-            {category}
-          </dd>
-          <dt className="mt-1 text-[14px] text-[#9FA6B2]">관심 카테고리</dt>
+          <dd className="text-lg font-semibold text-[#F1F1F5]">{category}</dd>
+          <dt className="mt-1 text-sm text-[#9FA6B2]">관심 카테고리</dt>
         </div>
 
-        <div className="flex w-full flex-col gap-[10px] md:gap-[15px] lg:gap-[20px]">
-          <Button className="w-full md:w-full xl:w-full" onClick={onEdit}>
+        <div className="flex w-full flex-col gap-2.5 md:gap-4 lg:gap-5">
+          <Button className="w-full" onClick={onEdit}>
             프로필 편집
           </Button>
           <Button
             variant="tertiary"
-            className="w-full md:w-full xl:w-full"
+            className="w-full"
             onClick={async () => {
               await apiFetch("/auth/logout", {
                 method: "POST",
