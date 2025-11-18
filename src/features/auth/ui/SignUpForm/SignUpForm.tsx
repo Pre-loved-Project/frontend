@@ -135,6 +135,7 @@ export const SignUpForm = ({ onSuccess, onError }: SignUpFormProps) => {
       const res = await apiFetch("/api/users/", {
         method: "POST",
         body: JSON.stringify(body),
+        noAuth: true,
       });
 
       console.log("회원가입 성공:", res);
