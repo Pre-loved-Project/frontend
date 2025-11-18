@@ -1,5 +1,7 @@
+import { error } from "console";
 import { MessageProps } from "./types";
 import { useAuthStore } from "@/features/auth/model/auth.store";
+import { refreshAccessToken } from "@/shared/api/refresh";
 
 export interface ChatSocketEvents {
   onOpen?: () => void;
@@ -64,7 +66,13 @@ export class ChatSocket {
         }
       };
 
-      this.socket.onclose = (event) => {
+      this.socket.onclose = async (event) => {
+        if (event.code === 4001) {
+          console.warn("[Socket] Token expired (4001)");
+
+          const newToken = await refreshAccessToken();
+          this.reconnect();
+        }
         console.warn("[Socket] Closed:", event.code);
         this.events.onClose?.(event.code, event.reason);
         this.socket = null;
@@ -76,6 +84,12 @@ export class ChatSocket {
         reject(err);
       };
     });
+  }
+
+  private reconnect() {
+    console.log("[Socket] Reconnecting after refresh…");
+    this.socket = null;
+    this.connect();
   }
 
   sendMessage(type: "text" | "image", content: string) {
