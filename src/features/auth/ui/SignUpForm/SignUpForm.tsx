@@ -6,13 +6,14 @@ import { DropDown } from "@/shared/ui/DropDown/DropDown";
 import Button from "@/shared/ui/Button/Button";
 import { apiFetch } from "@/shared/api/fetcher";
 import cn from "@/shared/lib/cn";
+import { handleError } from "@/shared/error/errorHandler";
+import { ServerError } from "@/shared/error/error";
 
 interface SignUpFormProps {
   onSuccess?: () => void;
-  onError?: (msg: string) => void;
 }
 
-export const SignUpForm = ({ onSuccess, onError }: SignUpFormProps) => {
+export const SignUpForm = ({ onSuccess }: SignUpFormProps) => {
   //input text 상태
   const [email, setEmail] = useState("");
   const [nickname, setNickname] = useState("");
@@ -149,7 +150,11 @@ export const SignUpForm = ({ onSuccess, onError }: SignUpFormProps) => {
         } else if (error.message.includes("NICKNAME_DUPLICATE")) {
           setNicknameError("이미 사용 중인 닉네임입니다.");
         } else {
-          onError?.("회원가입에 실패했습니다. 잠시 후 다시 시도해주세요.");
+          handleError(
+            new ServerError(
+              "회원가입 중 에러가 발생했습니다.\n잠시후 다시 시도해주세요.",
+            ),
+          );
         }
       }
     }

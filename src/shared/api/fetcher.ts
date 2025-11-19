@@ -1,6 +1,7 @@
 import { useAuthStore } from "@/features/auth/model/auth.store";
 import { refreshAccessToken } from "./refresh";
 import { useModalStore } from "@/shared/model/modal.store";
+import { NotFoundError, ServerError } from "../error/error";
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -45,15 +46,23 @@ export async function apiFetch<T>(
   }
 
   if (!res.ok) {
-    let message = `API Error ${res.status}`;
-    try {
-      const data = await res.json();
-      message = data.message ?? data.detail ?? message;
-    } catch {
-      const text = await res.text();
-      if (text) message = text;
+    // 분기처리
+    if (res.status === 404) {
+      throw new NotFoundError("요청한 리소스를 찾을 수 없습니다.", () => {
+        location.replace("/");
+      });
     }
-    throw new Error(message);
+
+    if (res.status >= 500) {
+      throw new ServerError("서버 오류가 발생했습니다.", () => {
+        location.replace("/");
+      });
+    }
+
+    // 기타 오류 → 500 취급
+    throw new ServerError("알 수 없는 서버 오류", () => {
+      location.replace("/");
+    });
   }
 
   return res.json() as Promise<T>;

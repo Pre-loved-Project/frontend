@@ -1,5 +1,6 @@
 import { useAuthStore } from "@/features/auth/model/auth.store";
 import { useModalStore } from "@/shared/model/modal.store";
+import { AuthorizationError } from "../error/error";
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -33,16 +34,11 @@ export async function refreshAccessToken(): Promise<string | null> {
 
     return newToken;
   } catch (err) {
-    logout();
-    openModal("normal", {
-      message: "세션이 만료되었습니다. 다시 로그인 해주세요.",
-      buttonText: "확인",
-      onClick: () => {
-        closeModal();
+    throw new AuthorizationError(
+      "세션이 만료되었습니다.\n다시 로그인 해주세요",
+      () => {
         location.replace("/login");
       },
-    });
-
-    return null;
+    );
   }
 }

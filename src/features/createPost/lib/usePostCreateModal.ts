@@ -24,17 +24,6 @@ export const usePostCreateModal = (handlers?: {
           });
         }, 100);
       },
-      onError: (message: string) => {
-        closeModal();
-
-        handlers?.onFailure?.();
-
-        openModal("normal", {
-          message: "게시물 등록 중 오류가 발생했습니다. " + message,
-          buttonText: "확인",
-          onClick: () => closeModal(),
-        });
-      },
     });
   };
 

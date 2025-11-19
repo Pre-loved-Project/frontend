@@ -16,6 +16,7 @@ import { usePostEditModal } from "@/features/editPost/lib/usePostEditModal";
 import { useChatStore } from "@/features/chat/model/chat.store";
 import { useModalStore } from "@/shared/model/modal.store";
 import { PostDetail } from "@/entities/post/model/types/post";
+import { handleError } from "@/shared/error/errorHandler";
 
 export function PostDetailSection({ post }: { post: PostDetail }) {
   const router = useRouter();
@@ -76,7 +77,7 @@ export function PostDetailSection({ post }: { post: PostDetail }) {
             },
           });
         } catch (err) {
-          console.error("게시물 삭제 실패:", err);
+          handleError(err, "게시물 삭제 도중 오류가 발생했습니다.");
         }
       },
       onCancel: closeModal,

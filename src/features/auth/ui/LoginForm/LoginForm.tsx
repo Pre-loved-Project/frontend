@@ -5,19 +5,19 @@ import { Input } from "@/entities/user/ui/Input/Input";
 import Button from "@/shared/ui/Button/Button";
 import { useAuthStore } from "../../model/auth.store";
 import { apiFetch } from "@/shared/api/fetcher";
+import { handleError } from "@/shared/error/errorHandler";
+import { AuthorizationError } from "@/shared/error/error";
 
 type FormSize = "sm" | "md" | "lg";
 
 interface LoginFormProps {
   size?: FormSize;
   onSuccess?: () => void;
-  onError?: (msg: string) => void;
 }
 
 export const LoginForm = ({
   size = "lg",
   onSuccess,
-  onError,
   ...props
 }: LoginFormProps) => {
   const [email, setEmail] = useState("");
@@ -44,8 +44,12 @@ export const LoginForm = ({
 
       setAccessToken(res.accessToken);
       onSuccess?.();
-    } catch {
-      onError?.("로그인에 실패하였습니다.\n이메일과 비밀번호를 확인해주세요.");
+    } catch (error) {
+      handleError(
+        new AuthorizationError(
+          "로그인에 실패하였습니다.\n이메일과 비밀번호를 확인해주세요.",
+        ),
+      );
     }
   };
 

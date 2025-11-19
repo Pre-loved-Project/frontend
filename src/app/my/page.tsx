@@ -7,7 +7,7 @@ import Tab from "@/widgets/mypage/ui/Tab.tsx/Tab";
 import { apiFetch } from "@/shared/api/fetcher";
 import { useModalStore } from "@/shared/model/modal.store";
 import { usePostCreateModal } from "@/features/createPost/lib/usePostCreateModal";
-
+import { handleError } from "@/shared/error/errorHandler";
 const options = [
   { label: "판매중 상품", value: "selling" },
   { label: "판매완료 상품", value: "sold" },
@@ -48,7 +48,7 @@ const Mypage = () => {
       });
       setUserProfile(data);
     } catch (error) {
-      console.error("유저 정보 로딩 실패: ", error);
+      handleError(error, "유저 프로필을 불러오는 중 오류가 발생했습니다.");
     }
   }
 
@@ -68,7 +68,7 @@ const Mypage = () => {
       );
       setPosts(res.data);
     } catch (error) {
-      console.error("현재 유저 관련 게시글 불러오기 실패 : ", error);
+      handleError(error, "현재 유저 게시물을 불러오는 중 오류가 발생했습니다.");
       setPosts([]);
     } finally {
       setLoading(false);

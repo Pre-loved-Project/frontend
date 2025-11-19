@@ -1,7 +1,8 @@
-import { error } from "console";
 import { MessageProps } from "./types";
 import { useAuthStore } from "@/features/auth/model/auth.store";
 import { refreshAccessToken } from "@/shared/api/refresh";
+import { handleError } from "@/shared/error/errorHandler";
+import { ServerError } from "@/shared/error/error";
 
 export interface ChatSocketEvents {
   onOpen?: () => void;
@@ -62,7 +63,11 @@ export class ChatSocket {
             this.events.onMessage?.(msg);
           }
         } catch (err) {
-          console.error("[Socket] Message parse error:", err);
+          handleError(
+            new ServerError(undefined, () => {
+              location.replace("/");
+            }),
+          );
         }
       };
 
@@ -79,7 +84,11 @@ export class ChatSocket {
       };
 
       this.socket.onerror = (err) => {
-        console.error("[Socket] Error:", err);
+        handleError(
+          new ServerError(undefined, () => {
+            location.replace("/");
+          }),
+        );
         this.events.onError?.(err);
         reject(err);
       };

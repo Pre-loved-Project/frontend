@@ -14,19 +14,18 @@ import "swiper/css/navigation";
 import "swiper/css/pagination";
 import { apiFetch } from "@/shared/api/fetcher";
 import { uploadImage } from "@/shared/api/uploadImage";
+import { handleError } from "@/shared/error/errorHandler";
 
 export interface PostCreateModalProps {
   className?: string;
   onClose?: () => void;
   onCreate?: () => void;
-  onError?: (message: string) => void;
 }
 
 export const PostCreateModal = ({
   className,
   onClose,
   onCreate,
-  onError,
 }: PostCreateModalProps) => {
   const [images, setImages] = useState<File[]>([]);
   const [title, setTitle] = useState("");
@@ -87,11 +86,7 @@ export const PostCreateModal = ({
       console.log("게시글 생성 성공! : ", res);
       onCreate?.();
     } catch (error) {
-      console.error("게시글 생성 실패 : ", error);
-      if (error instanceof Error) {
-        onError?.(error.message);
-      }
-      onError?.(String(error));
+      handleError(error, "게시글 생성 중 오류가 발생했습니다.");
     }
   };
 

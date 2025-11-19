@@ -9,6 +9,7 @@ import { DropDown } from "@/shared/ui/DropDown/DropDown";
 import Button from "@/shared/ui/Button/Button";
 import { apiFetch } from "@/shared/api/fetcher";
 import { uploadImage } from "@/shared/api/uploadImage";
+import { handleError } from "@/shared/error/errorHandler";
 
 export interface ProfileEditModalProps {
   imageUrl?: string;
@@ -79,10 +80,7 @@ export const ProfileEditModal = ({
 
       onSave?.();
     } catch (error) {
-      if (error instanceof Error) {
-        console.error("프로필 수정 실패:", error);
-        onError?.(error);
-      } else onError?.(new Error(String(error)));
+      handleError(error, "프로필 수정 중 오류가 발생했습니다.");
     } finally {
       setLoading(false);
     }

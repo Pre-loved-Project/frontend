@@ -1,3 +1,5 @@
+import { ServerError } from "../error/error";
+
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export async function uploadImage(imageFile: File): Promise<string> {
@@ -20,17 +22,16 @@ export async function uploadImage(imageFile: File): Promise<string> {
         const text = await res.text();
         if (text) errorMessage = text;
       }
-      throw new Error(errorMessage);
+      throw new ServerError(errorMessage, () => location.replace("/"));
     }
 
     // 정상 응답 처리
     const data = await res.json();
     return data.imageUrl;
   } catch (err) {
-    console.error("이미지 업로드 중 오류 발생:", err);
-    if (err instanceof Error) {
-      throw new Error(err.message);
-    }
-    throw new Error("알 수 없는 오류가 발생했습니다.");
+    throw new ServerError(
+      "이미지 업로드 중 네트워크 오류가 발생했습니다.",
+      () => location.replace("/"),
+    );
   }
 }

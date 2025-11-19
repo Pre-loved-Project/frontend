@@ -14,6 +14,7 @@ import "swiper/css/navigation";
 import "swiper/css/pagination";
 import { apiFetch } from "@/shared/api/fetcher";
 import { uploadImage } from "@/shared/api/uploadImage";
+import { handleError } from "@/shared/error/errorHandler";
 
 const ImageSwiperSlide = (
   idx: number,
@@ -144,9 +145,7 @@ export const PostEditModal = ({
       console.log("게시글 수정 성공! : ", res);
       onEdit?.();
     } catch (error) {
-      console.error("게시글 수정 실패 : ", error);
-      const message = error instanceof Error ? error.message : String(error);
-      onError?.(message);
+      handleError(error, "게시글 수정 중 오류가 발생했습니다.");
     }
   };
 

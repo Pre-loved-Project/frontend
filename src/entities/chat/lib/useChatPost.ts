@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { PostDetail } from "@/entities/post/model/types/post";
 import { apiFetch } from "@/shared/api/fetcher";
 import { useModalStore } from "@/shared/model/modal.store";
+import { handleError } from "@/shared/error/errorHandler";
 
 export const useChatPost = (postingId: number) => {
   const [post, setPost] = useState<PostDetail | null>(null);
@@ -16,11 +17,8 @@ export const useChatPost = (postingId: number) => {
           method: "GET",
         });
         setPost(res);
-      } catch {
-        openModal("normal", {
-          message: "게시물 정보 조회에 실패했습니다.",
-          onClick: () => closeModal(),
-        });
+      } catch (error) {
+        handleError(error, "게시물 정보 조회 중 오류가 발생했습니다.");
       } finally {
         setIsLoading(false);
       }

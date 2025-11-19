@@ -15,6 +15,7 @@ import { useInfiniteScroll } from "@/shared/lib/useInfiniteScroll";
 import { getPostDetail } from "@/entities/post/api/getPostDetail";
 import { getUser } from "@/entities/user/api/getUser";
 import { useQuery } from "@tanstack/react-query";
+import { handleError } from "@/shared/error/errorHandler";
 
 export const ChattingRoom = ({
   postingId,
@@ -157,11 +158,8 @@ export const ChattingRoom = ({
           },
         );
         setChatId(res.chatId); //useChatSocket hook을 통한 소켓 자동 재연결.
-      } catch {
-        openModal("normal", {
-          message: "채팅방 생성에 실패했습니다.",
-          onClick: closeModal,
-        });
+      } catch (error) {
+        handleError(error, "채팅방 생성 중 오류가 발생했습니다.");
       }
     }
 
