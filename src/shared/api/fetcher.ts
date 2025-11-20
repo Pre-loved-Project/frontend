@@ -1,7 +1,7 @@
 import { useAuthStore } from "@/features/auth/model/auth.store";
 import { refreshAccessToken } from "./refresh";
 import { useModalStore } from "@/shared/model/modal.store";
-import { NotFoundError, ServerError } from "../error/error";
+import { AuthorizationError, NotFoundError, ServerError } from "../error/error";
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -10,8 +10,7 @@ export async function apiFetch<T>(
   options: RequestInit & { noAuth?: boolean },
 ): Promise<T> {
   const { headers, noAuth, ...restOptions } = options;
-  const { accessToken, setAccessToken, logout } = useAuthStore.getState();
-  const { openModal, closeModal } = useModalStore.getState();
+  const { accessToken } = useAuthStore.getState();
 
   const defaultHeaders: HeadersInit = {
     "Content-Type": "application/json",
@@ -32,7 +31,11 @@ export async function apiFetch<T>(
   if (res.status === 401 && !noAuth) {
     const newToken = await refreshAccessToken();
 
-    if (!newToken) throw new Error("세션 만료");
+    if (!newToken)
+      throw new AuthorizationError(
+        "세션이 만료되었습니다.\n다시 로그인해주세요",
+        () => location.replace("/login"),
+      );
 
     defaultHeaders["Authorization"] = `Bearer ${newToken}`;
 

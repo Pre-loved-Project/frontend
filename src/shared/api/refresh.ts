@@ -13,17 +13,9 @@ export async function refreshAccessToken(): Promise<string | null> {
       method: "POST",
       credentials: "include",
     });
+    console.log(res);
 
     if (!res.ok) {
-      logout();
-      openModal("normal", {
-        message: "세션이 만료되었습니다. 다시 로그인 해주세요.",
-        buttonText: "확인",
-        onClick: () => {
-          closeModal();
-          location.replace("/login");
-        },
-      });
       return null;
     }
 

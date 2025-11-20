@@ -9,7 +9,6 @@ const meta: Meta<typeof SignUpForm> = {
   },
   argTypes: {
     onSuccess: { action: "success" },
-    onError: { action: "error" },
   },
 };
 
