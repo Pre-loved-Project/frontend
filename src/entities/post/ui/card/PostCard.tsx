@@ -1,12 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import PostStatusBadge from "../badge/PostStatusBadge";
-import {
-  PostStatus,
-  SELLING,
-  RESERVED,
-  SOLD,
-} from "../../model/types/postStatus";
+import { PostStatus } from "../../model/types/post";
 
 interface PostCardProps {
   postingId: number;
@@ -19,6 +14,7 @@ interface PostCardProps {
   chatCount: number;
   viewCount: number;
   thumbnail: string;
+  status: PostStatus;
 }
 
 const PostCard = ({
@@ -29,8 +25,8 @@ const PostCard = ({
   chatCount,
   viewCount,
   thumbnail,
+  status,
 }: PostCardProps) => {
-  const status = SELLING; //TODO : api 호출 결과 props로 전달받는 방식으로 변경
   return (
     <Link href={`/detail/${postingId}`}>
       <article className="w-full rounded-[8px] border border-[#353542] bg-[#252530] p-[10px] md:pb-[20px] xl:pb-[25px]">

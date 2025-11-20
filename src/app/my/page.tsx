@@ -7,6 +7,7 @@ import Tab from "@/widgets/mypage/ui/Tab.tsx/Tab";
 import { apiFetch } from "@/shared/api/fetcher";
 import { useModalStore } from "@/shared/model/modal.store";
 import { usePostCreateModal } from "@/features/createPost/lib/usePostCreateModal";
+import { PostStatus } from "@/entities/post/model/types/post";
 
 const options = [
   { label: "판매중 상품", value: "selling" },
@@ -27,6 +28,7 @@ interface PostListItem {
   chatCount: number;
   viewCount: number;
   thumbnail: string;
+  status: PostStatus;
 }
 
 const Mypage = () => {

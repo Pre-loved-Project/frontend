@@ -16,6 +16,7 @@ import { usePostEditModal } from "@/features/editPost/lib/usePostEditModal";
 import { useChatStore } from "@/features/chat/model/chat.store";
 import { useModalStore } from "@/shared/model/modal.store";
 import { PostDetail } from "@/entities/post/model/types/post";
+import PostStatusBadge from "@/entities/post/ui/badge/PostStatusBadge";
 
 export function PostDetailSection({ post }: { post: PostDetail }) {
   const router = useRouter();
@@ -111,12 +112,16 @@ export function PostDetailSection({ post }: { post: PostDetail }) {
         <div className="mx-4 h-px bg-gray-600 xl:hidden" />
       </div>
       <div className="flex flex-col justify-between gap-5 py-6 md:pt-8 xl:w-1/2 xl:pt-0 xl:pb-[88px]">
-        <div className="flex flex-col gap-5">
+        <div className="relative flex flex-col gap-5">
           <h1 className="text-xl font-bold">{post.title}</h1>
           <h3 className="text-lg font-bold">{post.price.toLocaleString()}</h3>
           <p className="text-base whitespace-pre-line md:text-lg xl:text-base">
             {post.content}
           </p>
+          <PostStatusBadge
+            status={post.status}
+            className="absolute top-1 right-5"
+          />
         </div>
         <div className="flex flex-col gap-5">
           <span className="flex flex-wrap gap-1 text-[#868b94]">

@@ -13,16 +13,7 @@ import { apiFetch } from "@/shared/api/fetcher";
 import { useChatMessages } from "../../lib/useChatMessages";
 import { useChatSocket } from "../../lib/useChatSocket";
 import { useInfiniteScroll } from "@/shared/lib/useInfiniteScroll";
-import {
-  SELLING,
-  RESERVED,
-  SOLD,
-} from "@/entities/post/model/types/postStatus";
-import {
-  ACTIVE,
-  RESERVED as DEAL_RESERVED,
-  COMPLETED,
-} from "@/features/deal/model/type/dealStatus";
+import { DealStatus } from "../../model/types";
 
 import { getPostDetail } from "@/entities/post/api/getPostDetail";
 import { getUser } from "@/entities/user/api/getUser";
@@ -32,10 +23,12 @@ export const ChattingRoom = ({
   postingId,
   otherId,
   chatId: initialChatId,
+  status: dealStatus,
 }: {
   postingId: number;
   otherId: number;
   chatId?: number;
+  status?: DealStatus;
 }) => {
   const [chatId, setChatId] = useState<number | null>(initialChatId ?? null);
   const {
@@ -215,7 +208,7 @@ export const ChattingRoom = ({
         <div className="flex flex-col">
           <span className="font-bold text-white">
             {post?.title}
-            <PostStatusBadge status={status} className="ml-2" />
+            {post && <PostStatusBadge status={post.status} className="ml-2" />}
           </span>
           <span className="text-white">
             {post?.price.toLocaleString("ko-KR") + " 원"}
@@ -223,11 +216,13 @@ export const ChattingRoom = ({
         </div>
 
         <div className="absolute top-4 right-4">
-          <DealActionPanel
-            isOwner={false}
-            postStatus={RESERVED}
-            dealStatus={DEAL_RESERVED}
-          />
+          {post && (
+            <DealActionPanel
+              isOwner={!(otherId === post.sellerId)}
+              postStatus={post.status}
+              dealStatus={dealStatus ?? "ACTIVE"}
+            />
+          )}
         </div>
       </div>
 
