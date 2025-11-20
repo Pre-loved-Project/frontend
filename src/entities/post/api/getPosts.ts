@@ -1,4 +1,5 @@
 import { serverFetch } from "@/shared/api/fetcher.server";
+import { apiFetch } from "@/shared/api/fetcher";
 import { POST_PAGE_SIZE } from "@/entities/post/model/constants/api";
 import type { Post } from "@/entities/post/model/types/post";
 
@@ -22,7 +23,7 @@ export async function getPosts({
   if (keyword) query.append("keyword", keyword);
   if (sort) query.append("sort", sort);
 
-  const { data } = await serverFetch<{ data: Post[] }>(
+  const { data } = await apiFetch<{ data: Post[] }>(
     `/api/postings?${query.toString()}`,
     { method: "GET" },
   );

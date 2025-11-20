@@ -1,279 +1,32 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter, useParams } from "next/navigation";
+import { useParams } from "next/navigation";
+import { useQuery } from "@tanstack/react-query";
+import { getPostDetail } from "@/entities/post/api/getPostDetail";
+import { PostDetailSection } from "@/widgets/postDetail/ui/PostDetailSection";
+import { SellerPostsSection } from "@/widgets/postDetail/ui/SellerPostsSection";
 
-import { apiFetch } from "@/shared/api/fetcher";
-import { POST_PAGE_SIZE } from "@/entities/post/model/constants/api";
-import { useInfiniteScroll } from "@/shared/lib/useInfiniteScroll";
+export default function PostDetailPage() {
+  const { postingId } = useParams<{ postingId: string }>();
+  const id = Number(postingId);
 
-import { useAuthStore } from "@/features/auth/model/auth.store";
-import { useModalStore } from "@/shared/model/modal.store";
-import { usePostEditModal } from "@/features/editPost/lib/usePostEditModal";
-import { useLike } from "@/features/like/lib/useLike";
-import { useChatStore } from "@/features/chat/model/chat.store";
-
-import PostCard from "@/entities/post/ui/card/PostCard";
-import PostCarousel from "@/entities/post/ui/carousel/PostCarousel";
-import { SellerInfo } from "@/widgets/postDetail/ui/SellerInfo";
-import { PostActionBar } from "@/widgets/postDetail/ui/PostActionBar";
-import PostStatusBadge from "@/entities/post/ui/badge/PostStatusBadge";
-
-import type { PostDetail, Post } from "@/entities/post/model/types/post";
-import type { User } from "@/entities/user/model/types/user";
-import {
-  SELLING,
-  RESERVED,
-  SOLD,
-} from "@/entities/post/model/types/postStatus";
-
-export default function DetailPage() {
-  const router = useRouter();
-  const params = useParams();
-  const postingId = Number(params?.postingId);
-
-  const isLogined = useAuthStore((state) => state.isLogined);
-  const { openModal, closeModal } = useModalStore();
-  const openChat = useChatStore((state) => state.mount);
-
-  const [post, setPost] = useState<PostDetail | null>(null);
-  const [isPostLoading, setIsPostLoading] = useState(true);
-  const status = SOLD; //TODO: api 호출 결과로 변경
-
-  const [likeCount, setLikeCount] = useState(0);
-  const [liked, setLiked] = useState(false);
-
-  const [relatedPosts, setRelatedPosts] = useState<Post[]>([]);
-  const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
-  const [isRelatedLoading, setIsRelatedLoading] = useState(false);
-
-  const [seller, setSeller] = useState<{
-    userId: number;
-    nickname: string;
-    imageUrl?: string;
-  } | null>(null);
-
-  const { loading, handleLikeToggle } = useLike({
-    postingId: post?.postingId,
-    liked,
-    onLikedChange: setLiked,
-    onCountChange: (delta) => setLikeCount((prev) => prev + delta),
+  const {
+    data: post,
+    isLoading,
+    isError,
+  } = useQuery({
+    queryKey: ["postDetail", id],
+    queryFn: () => getPostDetail(id),
   });
 
-  const { openPostEditModal } = usePostEditModal({
-    onSuccess: () => {
-      fetchPost();
-    },
-  });
-
-  const fetchPost = async () => {
-    try {
-      setIsPostLoading(true);
-      const data = await apiFetch<PostDetail>(`/api/postings/${postingId}`, {
-        method: "GET",
-      });
-      setPost(data);
-      setLikeCount(data.likeCount);
-      setLiked(data.isFavorite);
-    } catch (err) {
-      console.error("게시글 로드 실패:", err);
-    } finally {
-      setIsPostLoading(false);
-    }
-  };
-
-  const fetchSeller = async (userId: number) => {
-    try {
-      const data = await apiFetch<User>(`/api/users/${userId}`, {
-        method: "GET",
-      });
-      setSeller(data);
-    } catch (err) {
-      console.error("판매자 정보 조회 실패:", err);
-    }
-  };
-
-  const fetchRelatedPosts = async (pageNum: number, reset = false) => {
-    if (!post?.sellerId || isRelatedLoading) return;
-    setIsRelatedLoading(true);
-
-    try {
-      const query = new URLSearchParams({
-        page: String(pageNum),
-        size: String(POST_PAGE_SIZE),
-      });
-
-      const data = await apiFetch<{ data: Post[] }>(
-        `/api/postings/user/${post.sellerId}?${query.toString()}`,
-        { method: "GET" },
-      );
-
-      if (reset) setRelatedPosts(data.data);
-      else setRelatedPosts((prev) => [...prev, ...data.data]);
-
-      setHasMore(data.data.length === POST_PAGE_SIZE);
-    } catch (err) {
-      console.error("판매한 상품 불러오기 실패:", err);
-    } finally {
-      setIsRelatedLoading(false);
-    }
-  };
-
-  const handleDeleteClick = async () => {
-    if (!post) return;
-
-    openModal("confirm", {
-      message: "정말 이 게시물을 삭제하시겠습니까?",
-      onConfirm: async () => {
-        try {
-          await apiFetch(`/api/postings/${post.postingId}`, {
-            method: "DELETE",
-          });
-          closeModal();
-          openModal("normal", {
-            message: "삭제가 완료되었습니다.",
-            onClick: () => {
-              closeModal();
-              router.push("/");
-            },
-          });
-        } catch (err) {
-          console.error("게시물 삭제 실패:", err);
-        }
-      },
-      onCancel: () => {
-        closeModal();
-      },
-    });
-  };
-
-  const lastPostRef = useInfiniteScroll(
-    () => setPage((prev) => prev + 1),
-    isRelatedLoading,
-    hasMore,
-  );
-
-  useEffect(() => {
-    if (!postingId) return;
-    fetchPost();
-  }, [postingId]);
-
-  useEffect(() => {
-    if (!post?.sellerId) return;
-    fetchSeller(post.sellerId);
-    setPage(1);
-    setHasMore(true);
-    fetchRelatedPosts(1, true);
-  }, [post?.sellerId]);
-
-  useEffect(() => {
-    if (page === 1) return;
-    fetchRelatedPosts(page);
-  }, [page]);
-
-  const handleChatClick = () => {
-    if (!isLogined) {
-      router.push("/login");
-      return;
-    }
-    if (!post) return;
-    openChat({ postingId, otherId: post.sellerId });
-  };
-
-  const handleEditClick = () => {
-    if (!post) return;
-    openPostEditModal(
-      post.postingId,
-      post.title,
-      post.price,
-      post.category,
-      post.content,
-      post.images,
-    );
-  };
-
-  if (isPostLoading)
-    return <p className="text-center text-white">로딩 중...</p>;
-  if (!post)
+  if (isLoading) return <p className="text-center text-white">로딩 중...</p>;
+  if (isError || !post)
     return <p className="text-center text-white">게시글을 찾을 수 없습니다.</p>;
 
   return (
-    <main>
-      <article className="text-white">
-        <div className="flex flex-col px-[1rem] md:px-[2.5rem] xl:flex-row xl:gap-[2.5rem] xl:px-[4rem]">
-          <section className="mx-[-1rem] md:mx-[-2.5rem] xl:mx-0 xl:w-1/2">
-            <PostCarousel images={post.images} />
-            <SellerInfo
-              userId={seller?.userId}
-              nickname={seller?.nickname || ""}
-              imageUrl={seller?.imageUrl}
-            />
-
-            <div className="mx-[1rem] h-[1px] bg-gray-600 xl:hidden" />
-          </section>
-
-          <section className="flex flex-col justify-between gap-[1.25rem] py-[1.5rem] md:pt-[2rem] xl:w-1/2 xl:pt-0 xl:pb-[88px]">
-            <div className="flex flex-col gap-[1.25rem]">
-              <div className="flex flex-col gap-[0.5rem] md:gap-[0.75rem]">
-                <h1 className="text-[20px] font-bold">
-                  {post.title}
-                  <PostStatusBadge status={status} className="ml-2" />
-                </h1>
-                <h3 className="text-[18px] font-bold">
-                  {post.price.toLocaleString()}
-                </h3>
-              </div>
-
-              <p className="font-regular text-left text-[16px] whitespace-pre-line md:text-[18px] xl:text-[16px]">
-                {post.content}
-              </p>
-            </div>
-            <div className="flex flex-col gap-[1.25rem]">
-              <span className="font-regular flex flex-wrap gap-[0.25rem] leading-[1.25rem] text-[#868b94]">
-                <span>채팅 {post.chatCount}</span>
-                <span className="flex gap-[0.25rem]">
-                  <span>·</span>관심 {likeCount}
-                </span>
-                <span className="flex gap-[0.25rem]">
-                  <span>·</span>조회 {post.viewCount}
-                </span>
-              </span>
-              <PostActionBar
-                isOwner={post.isOwner}
-                liked={liked}
-                loading={loading}
-                onEdit={handleEditClick}
-                onDelete={handleDeleteClick}
-                onChat={handleChatClick}
-                onToggleLike={handleLikeToggle}
-              />
-            </div>
-          </section>
-        </div>
-
-        <div className="mx-[1rem] h-[1px] bg-gray-600" />
-        <section className="mx-[1rem] my-[0.5rem] md:mx-[2.5rem] xl:mx-[4rem] xl:my-[2.5rem]">
-          <h1 className="my-[1.5rem] text-[20px] font-bold xl:text-[24px]">
-            판매한 상품
-          </h1>
-          <div className="grid w-full grid-cols-2 gap-x-[16px] gap-y-[32px] md:grid-cols-4 xl:grid-cols-5">
-            {relatedPosts.map((item, idx) =>
-              relatedPosts.length === idx + 1 ? (
-                <div ref={lastPostRef} key={item.postingId}>
-                  <PostCard {...item} />
-                </div>
-              ) : (
-                <PostCard key={item.postingId} {...item} />
-              ),
-            )}
-          </div>
-
-          {isRelatedLoading && (
-            <p className="mt-4 text-center text-gray-400">불러오는 중...</p>
-          )}
-        </section>
-      </article>
+    <main className="text-white">
+      <PostDetailSection post={post} />
+      <SellerPostsSection sellerId={post.sellerId} />
     </main>
   );
 }

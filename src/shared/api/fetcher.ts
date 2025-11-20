@@ -31,32 +31,17 @@ export async function apiFetch<T>(
   if (res.status === 401 && !noAuth) {
     const newToken = await refreshAccessToken();
 
-    if (newToken) {
-      setAccessToken(newToken);
-      defaultHeaders["Authorization"] = `Bearer ${newToken}`;
+    if (!newToken) throw new Error("세션 만료");
 
-      //동일한 경로에 요청 재시도
-      res = await fetch(`${BASE_URL}${endpoint}`, {
-        headers: { ...defaultHeaders, ...headers },
-        cache: "no-store",
-        credentials: "include",
-        ...restOptions,
-      });
-    } else {
-      logout();
-      openModal("normal", {
-        message: "세션이 만료되었습니다. 다시 로그인 해주세요.",
-        buttonText: "확인",
-        onClick: () => {
-          closeModal();
-          if (typeof window !== "undefined") {
-            location.replace("/login");
-          }
-        },
-      });
+    defaultHeaders["Authorization"] = `Bearer ${newToken}`;
 
-      throw new Error("세션이 만료되었습니다. 다시 로그인 해주세요.");
-    }
+    //동일한 경로에 요청 재시도
+    res = await fetch(`${BASE_URL}${endpoint}`, {
+      headers: { ...defaultHeaders, ...headers },
+      cache: "no-store",
+      credentials: "include",
+      ...restOptions,
+    });
   }
 
   if (!res.ok) {

@@ -6,6 +6,7 @@ import Link from "next/link";
 import DeleteIcon from "@/shared/images/delete.svg";
 import { useAuthStore } from "@/features/auth/model/auth.store";
 import cn from "@/shared/lib/cn";
+import { apiFetch } from "@/shared/api/fetcher";
 
 export default function MobileSideMenu({
   onClose,
@@ -105,7 +106,11 @@ export default function MobileSideMenu({
                 <li>
                   <button
                     type="button"
-                    onClick={() => {
+                    onClick={async () => {
+                      await apiFetch("/auth/logout", {
+                        method: "POST",
+                        credentials: "include",
+                      });
                       logout();
                       handleClose();
                       router.push("/");
