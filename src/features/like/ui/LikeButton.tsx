@@ -1,7 +1,7 @@
 "use client";
 
 import cn from "@/shared/lib/cn";
-import HeartIcon from "@/shared/images/heart.svg";
+import HeartIcon from "@/shared/icons/heart.svg";
 
 interface LikeButtonProps {
   liked: boolean;

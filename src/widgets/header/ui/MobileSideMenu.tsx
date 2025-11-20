@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import DeleteIcon from "@/shared/images/delete.svg";
 import { useAuthStore } from "@/features/auth/model/auth.store";
 import cn from "@/shared/lib/cn";
 import { apiFetch } from "@/shared/api/fetcher";
@@ -46,7 +45,7 @@ export default function MobileSideMenu({
     <div>
       <div
         className={cn(
-          "fixed inset-0 z-[900] bg-black/40 transition-opacity md:hidden",
+          "fixed inset-0 z-900 bg-black/40 transition-opacity md:hidden",
           isVisible ? "opacity-100" : "opacity-0",
         )}
         onTransitionEnd={handleTransitionEnd}
@@ -57,15 +56,17 @@ export default function MobileSideMenu({
         role="dialog"
         aria-modal="true"
         className={cn(
-          "fixed top-0 left-0 z-[901] h-dvh w-[78%] max-w-[320px] transform bg-[#1C1C22] shadow-2xl transition-transform ease-out md:hidden",
+          "fixed top-0 left-0 z-901 h-dvh w-[78%] max-w-[320px] transform bg-[#1C1C22] shadow-2xl transition-transform ease-out md:hidden",
           isVisible ? "translate-x-0" : "-translate-x-full",
         )}
       >
         <header className="flex items-center justify-between border-b border-white/10 px-4 py-3">
           <h2 className="text-base font-semibold text-white">메뉴</h2>
-          <DeleteIcon
+          <img
+            src="/icons/delete.svg"
+            alt="닫기"
             onClick={handleClose}
-            className="h-6 w-6 cursor-pointer text-white/80 hover:bg-white/10"
+            className="cursor-pointe h-6 w-6"
           />
         </header>
 

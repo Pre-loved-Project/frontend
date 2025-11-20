@@ -8,7 +8,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import PostCarousel from "@/entities/post/ui/carousel/PostCarousel";
 import LikeButton from "@/features/like/ui/LikeButton";
 import Button from "@/shared/ui/Button/Button";
-import UserIcon from "@/shared/images/user.svg";
+import UserIcon from "@/shared/icons/user.svg";
 import Link from "next/link";
 
 import { useLike } from "@/features/like/lib/useLike";

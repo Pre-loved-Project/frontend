@@ -39,7 +39,7 @@ const ImageSwiperSlide = (
           onClick={() => onRemoveButtonClick(idx)}
         >
           <img
-            src="icons/delete.svg"
+            src="/icons/delete.svg"
             alt="삭제"
             className="h-2 w-2 md:h-3 md:w-3 xl:h-3 xl:w-3"
           />
@@ -185,11 +185,7 @@ export const PostEditModal = ({
           className="absolute top-4 right-4"
           onClick={onClose}
         >
-          <img
-            src="icons/delete.svg"
-            alt="닫기"
-            className="h-[24px] w-[24px]"
-          />
+          <img src="/icons/delete.svg" alt="닫기" className="h-6 w-6" />
         </button>
 
         <h2 className="text-lg font-semibold text-white">게시물 수정</h2>
@@ -200,7 +196,7 @@ export const PostEditModal = ({
             onClick={() => inputRef.current?.click()}
           >
             <img
-              src="icons/image-select.svg"
+              src="/icons/image-select.svg"
               alt="이미지 선택"
               className="h-8 w-8"
             />
