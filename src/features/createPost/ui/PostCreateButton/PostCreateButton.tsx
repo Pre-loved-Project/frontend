@@ -2,7 +2,6 @@
 
 import React from "react";
 import cn from "@/shared/lib/cn";
-import AddIcon from "@/shared/images/add.svg";
 
 interface PostCreateButtonProps {
   onClick: () => void;
@@ -17,11 +16,11 @@ export const PostCreateButton = ({
     <button
       onClick={onClick}
       className={cn(
-        `fixed right-8 bottom-8 flex h-[60px] w-[60px] items-center justify-center rounded-full bg-gradient-to-r from-[#5097fa] to-[#5363ff] shadow-lg shadow-blue-400/30 transition-all duration-200 hover:scale-105 active:scale-95`,
+        `fixed right-8 bottom-8 flex h-[60px] w-[60px] items-center justify-center rounded-full bg-linear-to-r from-[#5097fa] to-[#5363ff] shadow-lg shadow-blue-400/30 transition-all duration-200 hover:scale-105 active:scale-95`,
         className,
       )}
     >
-      <AddIcon />
+      <img src="/icons/add.svg" alt="게시글 작성" />
     </button>
   );
 };
