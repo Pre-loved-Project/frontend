@@ -12,6 +12,7 @@ import DealActionPanel from "@/features/deal/ui/DealActionPanel/DealActionPanel"
 import { apiFetch } from "@/shared/api/fetcher";
 import { useChatMessages } from "../../lib/useChatMessages";
 import { useChatSocket } from "../../lib/useChatSocket";
+import { useDealStatus } from "../../lib/useDealStatus";
 import { useInfiniteScroll } from "@/shared/lib/useInfiniteScroll";
 import { DealStatus } from "../../model/types";
 
@@ -59,6 +60,17 @@ export const ChattingRoom = ({
     scrollContainerRef,
     messagesEndRef,
   } = useChatMessages(chatId);
+
+  const {
+    dealStatus: currentDealStatus,
+    postStatus: currentPostStatus,
+    isLoading: isDealLoading,
+    onDealChange,
+  } = useDealStatus(
+    chatId ?? null,
+    dealStatus ?? "ACTIVE",
+    post?.status ?? "SELLING",
+  );
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -193,6 +205,7 @@ export const ChattingRoom = ({
         <p className="text-center text-lg font-medium text-white">로딩 중...</p>
       </div>
     );
+  console.log(currentPostStatus, currentDealStatus);
 
   return (
     <div className="relative h-[calc(100vh-70px)] w-full xl:h-[calc(100vh-100px)]">
@@ -219,8 +232,10 @@ export const ChattingRoom = ({
           {post && (
             <DealActionPanel
               isOwner={!(otherId === post.sellerId)}
-              postStatus={post.status}
-              dealStatus={dealStatus ?? "ACTIVE"}
+              postStatus={currentPostStatus}
+              dealStatus={currentDealStatus}
+              onDealChange={onDealChange}
+              isLoading={isDealLoading}
             />
           )}
         </div>
