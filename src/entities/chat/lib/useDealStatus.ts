@@ -41,9 +41,13 @@ export const useDealStatus = (
       });
     },
     onSuccess: (res) => {
-      queryClient.invalidateQueries({ queryKey: ["chats"] });
+      //optimistic update
       setPostStatus(res.postStatus);
       setDealStatus(res.dealStatus);
+      queryClient.invalidateQueries({ queryKey: ["chats"] });
+      queryClient.invalidateQueries({
+        queryKey: ["postDetail", res.postingId],
+      });
       //TODO: 소켓을 통한 시스템 메시지 송/수신 및 상대방 postStatus, dealStatus update
       openModal("normal", {
         message: "거래 상태가 변경되었습니다.",

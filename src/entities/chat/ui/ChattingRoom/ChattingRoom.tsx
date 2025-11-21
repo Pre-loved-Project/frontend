@@ -220,7 +220,9 @@ export const ChattingRoom = ({
         <div className="flex flex-col">
           <span className="font-bold text-white">
             {post?.title}
-            {post && <PostStatusBadge status={post.status} className="ml-2" />}
+            {post && (
+              <PostStatusBadge status={currentPostStatus} className="ml-2" />
+            )}
           </span>
           <span className="text-white">
             {post?.price.toLocaleString("ko-KR") + " 원"}
