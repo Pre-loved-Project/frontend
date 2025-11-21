@@ -1,10 +1,8 @@
 "use client";
 
-import SideMenuWrapper from "@/widgets/main/ui/SideMenu/SideMenuWrapper";
+import SideMenu from "@/widgets/main/ui/SideMenu/SideMenu";
 import PostList from "@/entities/post/ui/list/PostList";
-import { useSearchStore } from "@/shared/model/search.store";
-import { useSearchMediator } from "@/shared/lib/useSearchMediator";
-
+import { CATEGORY_LIST } from "../../model/constants";
 interface Props {
   initialCategory: string;
   initialSort: string;
@@ -16,22 +14,20 @@ export default function HomePageClient({
   initialSort,
   initialKeyword,
 }: Props) {
-  useSearchMediator({ initialCategory, initialSort, initialKeyword });
-
-  const { category, keyword, sort, setSort } = useSearchStore();
-
   return (
     <div className="flex flex-col gap-[60px] md:block">
       <aside>
-        <SideMenuWrapper selectedCategory={category} />
+        <SideMenu
+          categories={CATEGORY_LIST}
+          selectedCategory={initialCategory}
+        />
       </aside>
 
       <main className="mb-[30px] md:ml-40 md:pr-[30px] md:pl-[25px] lg:pr-[60px] lg:pl-[90px]">
         <PostList
-          selectedCategory={category}
-          selectedSortOption={sort}
-          onSortChange={setSort}
-          selectedKeyword={keyword}
+          selectedCategory={initialCategory}
+          selectedSortOption={initialSort}
+          selectedKeyword={initialKeyword}
         />
       </main>
     </div>

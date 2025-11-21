@@ -6,7 +6,7 @@ import {
 import { getPosts } from "@/entities/post/api/getPosts";
 import HomePageClient from "@/widgets/main/ui/Client/HomePage.client";
 
-export default async function HomePage({
+export default async function Page({
   searchParams,
 }: {
   searchParams: Promise<Record<string, string>>;

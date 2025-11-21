@@ -7,20 +7,23 @@ import { POST_PAGE_SIZE } from "@/entities/post/model/constants/api";
 import { SORT_OPTION_LIST } from "@/widgets/main/model/constants";
 import SortMenu from "@/widgets/main/ui/Select/Select";
 import PostCard from "@/entities/post/ui/card/PostCard";
+import { useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 
 interface Props {
   selectedCategory: string;
   selectedSortOption: string;
-  onSortChange: (value: string) => void;
   selectedKeyword?: string;
 }
 
 export default function PostList({
   selectedCategory,
   selectedSortOption,
-  onSortChange,
   selectedKeyword,
 }: Props) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useInfiniteQuery({
       queryKey: [
@@ -48,8 +51,14 @@ export default function PostList({
     hasNextPage,
   );
 
+  const handleSortChange = (value: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("sort", value);
+    router.push(`/?${params.toString()}`);
+  };
+
   return (
-    <section className="flex flex-col gap-[30px] px-[20px]">
+    <section className="flex flex-col gap-[30px] px-5">
       <div className="flex items-center justify-between">
         <h3 className="text-[20px] font-semibold text-white">
           {selectedCategory || "전체"}
@@ -57,7 +66,7 @@ export default function PostList({
         <SortMenu
           items={SORT_OPTION_LIST}
           selectedItem={selectedSortOption}
-          onSelect={onSortChange}
+          onSelect={handleSortChange}
         />
       </div>
 

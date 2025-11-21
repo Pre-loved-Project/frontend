@@ -2,9 +2,7 @@
 
 import { useState, useEffect } from "react";
 import cn from "@/shared/lib/cn";
-import { useRouter, usePathname } from "next/navigation";
-import { useSearchStore } from "@/shared/model/search.store";
-import { SearchCommands } from "@/shared/commands/SearchCommands";
+import { useRouter, useSearchParams } from "next/navigation";
 
 const SearchForm = ({
   className,
@@ -22,29 +20,27 @@ const SearchForm = ({
   onSubmitted?: () => void;
 }) => {
   const router = useRouter();
-  const pathname = usePathname();
-  const { category, keyword } = useSearchStore();
+  const searchParams = useSearchParams();
+  const currentKeyword = searchParams.get("keyword") ?? "";
   const [value, setValue] = useState("");
 
   useEffect(() => {
     setValue("");
-    SearchCommands.changeKeyword("");
-  }, [category]);
+  }, [searchParams.get("category")]);
 
   const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const q = value.trim();
-    if (q === keyword) return;
+    if (q === currentKeyword) return;
 
-    if (pathname === "/") {
-      SearchCommands.changeKeyword(q);
+    const params = new URLSearchParams(searchParams.toString());
+
+    if (q) {
+      params.set("keyword", q);
     } else {
-      const params = new URLSearchParams({
-        category,
-        keyword: q,
-      });
-      router.push(`/?${params.toString()}`);
+      params.delete("keyword");
     }
+    router.push(`/?${params.toString()}`);
 
     onSubmitted?.();
   };

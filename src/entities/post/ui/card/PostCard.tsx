@@ -1,5 +1,10 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
+import { useQueryClient } from "@tanstack/react-query";
+import { getPostDetail } from "@/entities/post/api/getPostDetail";
+import { useDebouncedCallback } from "@/shared/lib/useDebouncedCallback";
 
 interface PostCardProps {
   postingId: number;
@@ -23,8 +28,26 @@ const PostCard = ({
   viewCount,
   thumbnail,
 }: PostCardProps) => {
+  const queryClient = useQueryClient();
+
+  const { debouncedCallback: handleMouseEnter, cancel: handleMouseLeave } =
+    useDebouncedCallback(() => {
+      const cached = queryClient.getQueryData(["postDetail", postingId]);
+      if (cached) return;
+
+      queryClient.prefetchQuery({
+        queryKey: ["postDetail", postingId],
+        queryFn: () => getPostDetail(postingId),
+        staleTime: 1000 * 60 * 3,
+      });
+    }, 200);
+
   return (
-    <Link href={`/detail/${postingId}`}>
+    <Link
+      href={`/detail/${postingId}`}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
       <article className="w-full rounded-lg border border-[#353542] bg-[#252530] p-2.5 md:pb-5 xl:pb-6">
         <div className="flex flex-col gap-2.5 md:gap-5 xl:gap-6">
           <div className="relative h-24 w-full overflow-hidden rounded-md md:h-40 xl:h-56">
@@ -49,14 +72,12 @@ const PostCard = ({
             </h1>
 
             <p className="text-xs text-[#9FA6B2] md:text-sm">
-              {price?.toLocaleString()} 원
+              {price.toLocaleString()} 원
             </p>
 
             <div className="flex w-full flex-col gap-1.5 text-xs leading-none font-light text-[#6E6E82] md:flex-row md:justify-between md:text-sm xl:text-base">
               <div className="flex gap-1.5">
-                <span aria-label="조회 수" title="조회 수">
-                  조회
-                </span>
+                <span>조회</span>
                 <span>{viewCount}</span>
               </div>
 
