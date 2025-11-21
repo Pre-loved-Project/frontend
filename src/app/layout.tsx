@@ -6,7 +6,6 @@ import Header from "@/widgets/header/ui/Header";
 import { ModalContainer } from "@/shared/ui/ModalContainer/ModalContainer";
 import ChatContainer from "@/features/chat/ui/ChatContainer";
 import { ReactQueryProvider } from "@/shared/lib/provider";
-import { ClientLayout } from "@/shared/lib/ClientLayout";
 
 const myFont = localFont({
   src: "../shared/fonts/PretendardVariable.woff2",
@@ -24,29 +23,23 @@ export default function RootLayout({
 }) {
   return (
     <html lang="kr" className={myFont.className}>
-      <body className="mx-auto max-w-[1200px] bg-[#1c1c22] pt-[70px] md:pt-[80px] xl:pt-[100px]">
+      <body className="mx-auto max-w-[1200px] bg-[#1c1c22] pt-[70px] md:pt-20 xl:pt-[100px]">
         <ReactQueryProvider>
-          <ClientLayout>
-            <Suspense fallback={null}>
-              <Header />
-            </Suspense>
+          <Suspense fallback={null}>
+            <Header />
+          </Suspense>
 
-            <Suspense
-              fallback={<div className="p-4 text-gray-400">Loading...</div>}
-            >
-              {children}
-            </Suspense>
+          {children}
 
-            <div id="modal-root" />
+          <div id="modal-root" />
 
-            <Suspense fallback={null}>
-              <ChatContainer />
-            </Suspense>
+          <Suspense fallback={null}>
+            <ChatContainer />
+          </Suspense>
 
-            <Suspense fallback={null}>
-              <ModalContainer />
-            </Suspense>
-          </ClientLayout>
+          <Suspense fallback={null}>
+            <ModalContainer />
+          </Suspense>
         </ReactQueryProvider>
       </body>
     </html>
