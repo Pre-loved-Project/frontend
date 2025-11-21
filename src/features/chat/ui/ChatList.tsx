@@ -4,12 +4,14 @@ import ChatItem from "@/entities/chat/ui/ChatItem";
 import { fetchChatList } from "../model/chat.api";
 import type { Chat } from "@/entities/chat/model/types";
 import { useQuery } from "@tanstack/react-query";
+import { DealStatus } from "@/entities/chat/model/types";
 
 interface ChatListProps {
   onSelect: (info: {
     postingId: number;
     otherId: number;
     chatId?: number;
+    status?: DealStatus;
   }) => void;
   tab?: "all" | "buyer" | "seller";
 }
@@ -52,6 +54,7 @@ const ChatList = ({ onSelect, tab = "all" }: ChatListProps) => {
               postingId: chat.postingId,
               otherId: chat.otherId,
               chatId: chat.chatId,
+              status: chat.status,
             })
           }
         />

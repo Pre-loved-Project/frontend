@@ -62,14 +62,14 @@ export const ChattingRoom = ({
   } = useChatMessages(chatId);
 
   const {
-    dealStatus: currentDealStatus,
     postStatus: currentPostStatus,
+    dealStatus: currentDealStatus,
     isLoading: isDealLoading,
     onDealChange,
   } = useDealStatus(
     chatId ?? null,
-    dealStatus ?? "ACTIVE",
     post?.status ?? "SELLING",
+    dealStatus ?? "ACTIVE",
   );
 
   const scrollToBottom = () => {
@@ -205,7 +205,6 @@ export const ChattingRoom = ({
         <p className="text-center text-lg font-medium text-white">로딩 중...</p>
       </div>
     );
-  console.log(currentPostStatus, currentDealStatus);
 
   return (
     <div className="relative h-[calc(100vh-70px)] w-full xl:h-[calc(100vh-100px)]">

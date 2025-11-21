@@ -18,12 +18,12 @@ interface DealResponse {
 
 export const useDealStatus = (
   chatId: number | null,
-  initialDealStatus: DealStatus,
   initialPostStatus: PostStatus,
+  initialDealStatus: DealStatus,
 ) => {
   const queryClient = useQueryClient();
-  const [dealStatus, setDealStatus] = useState<DealStatus>(initialDealStatus);
   const [postStatus, setPostStatus] = useState<PostStatus>(initialPostStatus);
+  const [dealStatus, setDealStatus] = useState<DealStatus>(initialDealStatus);
 
   const { openModal, closeModal } = useModalStore();
   const { mutate: onDealChange, isPending: isLoading } = useMutation<
@@ -42,8 +42,8 @@ export const useDealStatus = (
     },
     onSuccess: (res) => {
       queryClient.invalidateQueries({ queryKey: ["chats"] });
-      setDealStatus(res.dealStatus);
       setPostStatus(res.postStatus);
+      setDealStatus(res.dealStatus);
       //TODO: 소켓을 통한 시스템 메시지 송/수신 및 상대방 postStatus, dealStatus update
       openModal("normal", {
         message: "거래 상태가 변경되었습니다.",
@@ -59,8 +59,8 @@ export const useDealStatus = (
   });
 
   return {
-    dealStatus,
     postStatus,
+    dealStatus,
     isLoading,
     onDealChange,
   };
