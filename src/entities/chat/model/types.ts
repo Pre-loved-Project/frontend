@@ -3,11 +3,11 @@ export interface Chat {
   postingId: number;
   postingTitle: string;
   role: string;
-  lastMessage: string;
+  lastMessage: MessageProps;
   createdAt: string;
   status: string;
   otherId: number;
-  otherNick: string;
+  otherNickname: string;
   otherImage: string;
 }
 
