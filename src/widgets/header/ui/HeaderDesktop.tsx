@@ -1,5 +1,10 @@
+"use client";
+
 import Link from "next/link";
 import SearchForm from "./SearchForm";
+import { useQueryClient } from "@tanstack/react-query";
+import { getMyProfile } from "@/entities/user/api/mypage";
+import { useDebouncedCallback } from "@/shared/lib/useDebouncedCallback";
 
 interface HeaderDesktopProps {
   isLogined: boolean;
@@ -21,6 +26,18 @@ const HeaderDesktop = ({
   navItems,
   onOpenChat,
 }: HeaderDesktopProps) => {
+  const queryClient = useQueryClient();
+
+  const handleProfilePrefetch = () => {
+    queryClient.prefetchQuery({
+      queryKey: ["userProfile"],
+      queryFn: getMyProfile,
+    });
+  };
+
+  const { debouncedCallback: debouncedPrefetch, cancel: cancelPrefetch } =
+    useDebouncedCallback(handleProfilePrefetch, 500);
+
   return (
     <div className="hidden w-full items-center justify-between md:flex">
       <div className="text-white">
@@ -37,7 +54,7 @@ const HeaderDesktop = ({
                 key={href}
                 className={`flex items-center justify-center px-3 first:pr-3 last:pl-3 ${
                   hasDivider
-                    ? "relative before:absolute before:left-0 before:h-4 before:w-[1px] before:bg-white after:absolute after:right-0 after:h-4 after:w-[1px] after:bg-white"
+                    ? "relative before:absolute before:left-0 before:h-4 before:w-px before:bg-white after:absolute after:right-0 after:h-4 after:w-px after:bg-white"
                     : ""
                 } `}
               >
@@ -47,15 +64,19 @@ const HeaderDesktop = ({
                     onClick={() => onOpenChat()}
                     className="flex cursor-pointer items-center justify-center"
                   >
-                    <img src={icon} alt={label} className="h-[16px] w-[16px]" />
+                    <img src={icon} alt={label} className="h-4 w-4" />
                     <p className="ml-1">{label}</p>
                   </button>
                 ) : (
                   <Link
                     href={href}
                     className="flex items-center justify-center"
+                    onMouseEnter={
+                      href === "/my" ? debouncedPrefetch : undefined
+                    }
+                    onMouseLeave={href === "/my" ? cancelPrefetch : undefined}
                   >
-                    <img src={icon} alt={label} className="h-[16px] w-[16px]" />
+                    <img src={icon} alt={label} className="h-4 w-4" />
                     <p className="ml-1">{label}</p>
                   </Link>
                 )}

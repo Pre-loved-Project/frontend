@@ -31,7 +31,7 @@ const Profile = ({
   const { logout } = useAuthStore();
 
   return (
-    <article className="flex h-[556px] w-[335px] items-center justify-center rounded-lg border border-[#353542] bg-[#252530] px-5 py-7 md:h-[601px] md:w-[509px] md:px-7 xl:h-[753px] xl:w-[340px] xl:px-5 xl:pt-10">
+    <article className="flex h-[556px] w-[335px] shrink-0 items-center justify-center rounded-lg border border-[#353542] bg-[#252530] px-5 py-7 md:h-[601px] md:w-[509px] md:px-7 xl:h-[753px] xl:w-[340px] xl:px-5 xl:pt-10">
       <div className="flex h-full w-full flex-col items-center justify-between">
         <Image
           src={imageUrl || DefaultProfileImage}
@@ -77,12 +77,12 @@ const Profile = ({
         </div>
 
         <div className="flex w-full flex-col gap-2.5 md:gap-4 lg:gap-5">
-          <Button className="w-full" onClick={onEdit}>
+          <Button className="w-full!" onClick={onEdit}>
             프로필 편집
           </Button>
           <Button
             variant="tertiary"
-            className="w-full"
+            className="w-full!"
             onClick={async () => {
               await apiFetch("/auth/logout", {
                 method: "POST",
