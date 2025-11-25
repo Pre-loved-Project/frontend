@@ -5,8 +5,11 @@ export async function fetchChatList(role?: "buyer" | "seller") {
   const query = new URLSearchParams();
   if (role) query.set("role", role);
 
-  const data = await apiFetch<Chat[]>(`/api/chat/me?${query.toString()}`, {
-    method: "GET",
-  });
-  return data;
+  const data = await apiFetch<{ chats: Chat[] }>(
+    `/api/chat/me?${query.toString()}`,
+    {
+      method: "GET",
+    },
+  );
+  return data.chats;
 }
