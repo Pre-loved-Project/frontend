@@ -3,9 +3,6 @@
 import { useState, useRef, useEffect } from "react";
 import cn from "@/shared/lib/cn";
 
-import ArrowUpIcon from "@/shared/images/arrow-up.svg";
-import ArrowDownIcon from "@/shared/images/arrow-down.svg";
-
 interface Item {
   label: string;
   value: string;
@@ -52,7 +49,7 @@ const Select = ({
   }, [open]);
 
   return (
-    <div ref={selectRef} className="relative z-20 w-[160px] text-white">
+    <div ref={selectRef} className="relative z-20 w-40 text-white">
       <button
         type="button"
         aria-haspopup="listbox"
@@ -65,7 +62,19 @@ const Select = ({
         )}
       >
         <span>{selectedLabel || placeholder}</span>
-        {open ? <ArrowUpIcon /> : <ArrowDownIcon />}
+        {open ? (
+          <img
+            src="/icons/arrow-up.svg"
+            alt="Arrow Up"
+            className="h-auto w-auto"
+          />
+        ) : (
+          <img
+            src="/icons/arrow-down.svg"
+            alt="Arrow Down"
+            className="h-auto w-auto"
+          />
+        )}
       </button>
 
       <div

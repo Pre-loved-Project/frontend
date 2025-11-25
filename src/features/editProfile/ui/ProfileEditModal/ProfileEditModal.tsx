@@ -93,7 +93,7 @@ export const ProfileEditModal = ({
       className={cn(
         "bg-black-900 relative flex flex-col rounded-lg",
         "w-[300px] gap-[15px] p-5",
-        "md:w-[520px] md:gap-[20px] md:p-10",
+        "md:w-[520px] md:gap-5 md:p-10",
         "xl:w-[620px] xl:gap-[30px] xl:p-10",
         className,
       )}
@@ -104,7 +104,7 @@ export const ProfileEditModal = ({
         className="absolute top-3 right-3"
       >
         <img
-          src="icons/delete.svg"
+          src="/icons/delete.svg"
           alt="닫기"
           aria-label="닫기"
           width={24}

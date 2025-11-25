@@ -31,8 +31,8 @@ export const ProfileImageChangeInput = ({
   return (
     <label
       className={cn(
-        "bg-black-800 flex cursor-pointer items-center justify-center overflow-hidden rounded-lg",
-        "h-[130px] w-[130px] md:h-[135px] md:w-[135px] xl:h-[160px] xl:w-[160px]",
+        "flex cursor-pointer items-center justify-center overflow-hidden rounded-lg bg-gray-800",
+        "h-32 w-32 md:h-36 md:w-36 xl:h-40 xl:w-40",
         className,
       )}
     >
@@ -46,10 +46,10 @@ export const ProfileImageChangeInput = ({
         />
       ) : (
         <img
-          src="icons/image-select.svg"
+          src="/icons/image-select.svg"
           alt="Upload Icon"
           aria-label="Upload Icon"
-          className="h-[24px] w-[24px] md:h-[25px] md:w-[25px] xl:h-[34px] xl:w-[34px]"
+          className="h-6 w-6 md:h-6 md:w-6 xl:h-8 xl:w-8"
         />
       )}
       <input

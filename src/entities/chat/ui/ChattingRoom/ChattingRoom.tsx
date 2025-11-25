@@ -5,7 +5,7 @@ import { uploadImage } from "@/shared/api/uploadImage";
 import { useModalStore } from "@/shared/model/modal.store";
 import Button from "@/shared/ui/Button/Button";
 import { TextField } from "@/shared/ui/TextField/TextField";
-import DeleteIcon from "@/shared/images/delete.svg";
+import DeleteIcon from "@/shared/icons/delete.svg";
 import PostStatusBadge from "@/entities/post/ui/badge/PostStatusBadge";
 import DealActionPanel from "@/features/deal/ui/DealActionPanel/DealActionPanel";
 
@@ -247,7 +247,7 @@ export const ChattingRoom = ({
         ref={scrollContainerRef}
         className="absolute top-[100px] bottom-[100px] left-0 w-full overflow-y-auto p-4"
       >
-        <div ref={messagesTopRef} className="h-[1px]" />
+        <div ref={messagesTopRef} className="h-px" />
         {isMessagesLoading && (
           <div className="py-2 text-center text-sm text-gray-400">
             이전 메시지를 불러오는 중...
@@ -269,7 +269,7 @@ export const ChattingRoom = ({
 
       {image && (
         <div className="absolute bottom-[100px] left-0 px-8">
-          <div className="relative flex items-center justify-center rounded-md bg-gradient-to-r from-[rgba(80,151,250,0.4)] to-[rgba(83,99,255,0.4)] p-8 px-20">
+          <div className="relative flex items-center justify-center rounded-md bg-linear-to-r from-[rgba(80,151,250,0.4)] to-[rgba(83,99,255,0.4)] p-8 px-20">
             <img
               src={URL.createObjectURL(image)}
               alt="Selected image"
@@ -298,7 +298,7 @@ export const ChattingRoom = ({
           <img
             src="/icons/image-select.svg"
             alt="Upload Icon"
-            className="h-[24px] w-[24px] md:h-[25px] md:w-[25px] xl:h-[34px] xl:w-[34px]"
+            className="h-6 w-6 md:h-[25px] md:w-[25px] xl:h-[34px] xl:w-[34px]"
           />
           <input
             type="file"
