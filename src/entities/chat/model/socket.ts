@@ -27,6 +27,10 @@ export class ChatSocket {
     this.events = events;
   }
 
+  isOpen(): boolean {
+    return this.socket !== null && this.socket.readyState === WebSocket.OPEN;
+  }
+
   connect(): Promise<void> {
     return new Promise((resolve, reject) => {
       if (this.socket) {
