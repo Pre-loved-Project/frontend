@@ -5,7 +5,7 @@ import {
 } from "@tanstack/react-query";
 import { useEffect, useRef, useMemo } from "react";
 import { apiFetch } from "@/shared/api/fetcher";
-import { MessagesResponse, MessageProps } from "../model/types";
+import { MessagesResponse, MessageProps, Chat } from "../model/types";
 import { useModalStore } from "@/shared/model/modal.store";
 
 export const useChatMessages = (chatId: number | null) => {
@@ -57,6 +57,7 @@ export const useChatMessages = (chatId: number | null) => {
   }, [data]);
 
   const pushMessageToCache = (newMsg: MessageProps) => {
+    //메시지 리스트 업데이트
     queryClient.setQueryData<InfiniteData<MessagesResponse>>(
       ["chatMessages", chatId],
       (oldData) => {
@@ -74,6 +75,29 @@ export const useChatMessages = (chatId: number | null) => {
         };
       },
     );
+
+    //chats list의 lastMessage 업데이트
+    const roles = [undefined, "buyer", "seller"];
+    roles.forEach((role) => {
+      queryClient.setQueryData<Chat[]>(["chats", role], (oldChats) => {
+        if (!oldChats) return oldChats;
+
+        const updatedChats = oldChats.map((chat) =>
+          chat.chatId === chatId
+            ? {
+                ...chat,
+                lastMessage: newMsg,
+              }
+            : chat,
+        );
+
+        return updatedChats.sort(
+          (a, b) =>
+            new Date(b.lastMessage?.sendAt ?? 0).getTime() -
+            new Date(a.lastMessage?.sendAt ?? 0).getTime(),
+        );
+      });
+    });
   };
 
   const fetchMoreMessages = async () => {

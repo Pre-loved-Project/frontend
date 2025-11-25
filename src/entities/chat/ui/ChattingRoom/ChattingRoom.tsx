@@ -8,8 +8,6 @@ import { TextField } from "@/shared/ui/TextField/TextField";
 import DeleteIcon from "@/shared/icons/delete.svg";
 import PostStatusBadge from "@/entities/post/ui/badge/PostStatusBadge";
 import DealActionPanel from "@/features/deal/ui/DealActionPanel/DealActionPanel";
-
-import { apiFetch } from "@/shared/api/fetcher";
 import { useChatMessages } from "../../lib/useChatMessages";
 import { useChatSocket } from "../../lib/useChatSocket";
 import { useDealStatus } from "../../lib/useDealStatus";
@@ -18,7 +16,8 @@ import { DealStatus } from "../../model/types";
 
 import { getPostDetail } from "@/entities/post/api/getPostDetail";
 import { getUser } from "@/entities/user/api/getUser";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { createChattingRoom } from "@/features/chat/api/createChattingRoom";
 
 export const ChattingRoom = ({
   postingId,
@@ -32,6 +31,7 @@ export const ChattingRoom = ({
   status?: DealStatus;
 }) => {
   const [chatId, setChatId] = useState<number | null>(initialChatId ?? null);
+  const queryClient = useQueryClient();
   const {
     data: post,
     isLoading: isPostLoading,
@@ -168,14 +168,9 @@ export const ChattingRoom = ({
 
     if (!chatId) {
       try {
-        const res = await apiFetch<{ chatId: number; createdAt: string }>(
-          `/api/chat`,
-          {
-            method: "POST",
-            body: JSON.stringify({ postingId }),
-          },
-        );
+        const res = await createChattingRoom(postingId);
         setChatId(res.chatId); //useChatSocket hook을 통한 소켓 자동 재연결.
+        queryClient.invalidateQueries({ queryKey: ["chats"] });
       } catch {
         openModal("normal", {
           message: "채팅방 생성에 실패했습니다.",
