@@ -25,6 +25,14 @@ export const useDealStatus = (
   const [postStatus, setPostStatus] = useState<PostStatus>(initialPostStatus);
   const [dealStatus, setDealStatus] = useState<DealStatus>(initialDealStatus);
 
+  const applyUpdate = (update: {
+    postStatus: PostStatus;
+    dealStatus: DealStatus;
+  }) => {
+    setPostStatus(update.postStatus);
+    setDealStatus(update.dealStatus);
+  };
+
   const { openModal, closeModal } = useModalStore();
   const { mutate: onDealChange, isPending: isLoading } = useMutation<
     DealResponse,
@@ -67,5 +75,6 @@ export const useDealStatus = (
     dealStatus,
     isLoading,
     onDealChange,
+    applyUpdate,
   };
 };

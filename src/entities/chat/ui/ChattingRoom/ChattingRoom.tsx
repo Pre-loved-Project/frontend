@@ -66,6 +66,7 @@ export const ChattingRoom = ({
     dealStatus: currentDealStatus,
     isLoading: isDealLoading,
     onDealChange,
+    applyUpdate,
   } = useDealStatus(
     chatId ?? null,
     post?.status ?? "SELLING",
@@ -89,6 +90,7 @@ export const ChattingRoom = ({
     chatId,
     pushMessageToCache,
     scrollToBottom,
+    applyUpdate,
   );
 
   const { openModal, closeModal } = useModalStore();
