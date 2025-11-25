@@ -1,3 +1,4 @@
+import { DealStatus } from "@/entities/chat/model/types";
 import { create } from "zustand";
 
 interface ChatState {
@@ -7,6 +8,7 @@ interface ChatState {
     postingId: number;
     otherId: number;
     chatId?: number;
+    status?: DealStatus;
   } | null;
 
   mount: (info?: ChatState["chatInfo"]) => void;

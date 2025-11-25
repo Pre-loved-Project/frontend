@@ -1,3 +1,5 @@
+export type DealStatus = "ACTIVE" | "RESERVED" | "COMPLETED";
+
 export interface Chat {
   chatId: number;
   postingId: number;
@@ -5,7 +7,7 @@ export interface Chat {
   role: string;
   lastMessage: MessageProps;
   createdAt: string;
-  status: string;
+  status: DealStatus;
   otherId: number;
   otherNickname: string;
   otherImage: string;
