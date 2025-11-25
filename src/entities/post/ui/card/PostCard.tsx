@@ -5,6 +5,8 @@ import Link from "next/link";
 import { useQueryClient } from "@tanstack/react-query";
 import { getPostDetail } from "@/entities/post/api/getPostDetail";
 import { useDebouncedCallback } from "@/shared/lib/useDebouncedCallback";
+import PostStatusBadge from "../badge/PostStatusBadge";
+import { PostStatus } from "../../model/types/post";
 
 interface PostCardProps {
   postingId: number;
@@ -17,6 +19,7 @@ interface PostCardProps {
   chatCount: number;
   viewCount: number;
   thumbnail: string;
+  status: PostStatus;
 }
 
 const PostCard = ({
@@ -27,6 +30,7 @@ const PostCard = ({
   chatCount,
   viewCount,
   thumbnail,
+  status,
 }: PostCardProps) => {
   const queryClient = useQueryClient();
 
@@ -70,7 +74,7 @@ const PostCard = ({
             <h1 className="line-clamp-2 h-7 text-sm leading-none font-medium text-[#F1F1F5] md:h-8 md:text-base xl:h-9 xl:text-lg">
               {title}
             </h1>
-
+            <PostStatusBadge status={status} className="block w-fit" />
             <p className="text-xs text-[#9FA6B2] md:text-sm">
               {price.toLocaleString()} 원
             </p>

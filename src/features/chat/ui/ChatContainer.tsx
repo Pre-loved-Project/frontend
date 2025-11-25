@@ -102,6 +102,7 @@ export default function ChatContainer() {
                 postingId={chatInfo.postingId}
                 otherId={chatInfo.otherId}
                 chatId={chatInfo.chatId}
+                status={chatInfo.status}
               />
             ) : (
               <ChatList tab={tab} onSelect={(info) => setChatInfo(info)} />

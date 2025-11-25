@@ -1,12 +1,18 @@
 import { error } from "console";
-import { MessageProps } from "./types";
+import { DealStatus, MessageProps } from "./types";
 import { useAuthStore } from "@/features/auth/model/auth.store";
 import { refreshAccessToken } from "@/shared/api/refresh";
+import { PostStatus } from "@/entities/post/model/types/post";
 
 export interface ChatSocketEvents {
   onOpen?: () => void;
   onMessage?: (message: MessageProps) => void;
   onSystem?: (system: { type: string; message: string }) => void;
+  onDealUpdate?: (update: {
+    postStatus: PostStatus;
+    dealStatus: DealStatus;
+    message: string;
+  }) => void;
   onClose?: (code: number, reason?: string) => void;
   onError?: (event: Event) => void;
 }
@@ -45,6 +51,15 @@ export class ChatSocket {
       this.socket.onmessage = (event) => {
         try {
           const data = JSON.parse(event.data);
+          if (data.type === "deal_update") {
+            this.events.onDealUpdate?.({
+              dealStatus: data.dealStatus,
+              postStatus: data.postStatus,
+              message: data.systemMessage,
+            });
+            return;
+          }
+
           if (["welcome", "system", "read"].includes(data.type)) {
             this.events.onSystem?.(data);
             return;

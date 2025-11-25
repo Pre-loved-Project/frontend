@@ -1,11 +1,16 @@
 import { useEffect, useRef } from "react";
 import { ChatSocket } from "../model/socket";
-import { MessageProps } from "../model/types";
+import { DealStatus, MessageProps } from "../model/types";
+import { PostStatus } from "@/entities/post/model/types/post";
 
 export const useChatSocket = (
   chatId: number | null,
   pushMessageToCache: (msg: MessageProps) => void,
   scrollToBottom?: () => void,
+  onDealUpdate?: (update: {
+    postStatus: PostStatus;
+    dealStatus: DealStatus;
+  }) => void,
 ) => {
   const socketRef = useRef<ChatSocket | null>(null);
   const isConnectedRef = useRef(false);
@@ -20,6 +25,21 @@ export const useChatSocket = (
       },
       onMessage: (msg) => {
         pushMessageToCache(msg);
+        requestAnimationFrame(() => scrollToBottom?.());
+      },
+      onDealUpdate: (update) => {
+        onDealUpdate?.({
+          postStatus: update.postStatus,
+          dealStatus: update.dealStatus,
+        });
+        pushMessageToCache({
+          messageId: Date.now(),
+          type: "system",
+          content: update.message,
+          isMine: false,
+          sendAt: new Date().toISOString(),
+          isRead: true,
+        });
         requestAnimationFrame(() => scrollToBottom?.());
       },
       onSystem: (sys) => console.log("[System]", sys.message),

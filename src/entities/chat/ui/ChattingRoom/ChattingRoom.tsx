@@ -6,11 +6,15 @@ import { useModalStore } from "@/shared/model/modal.store";
 import Button from "@/shared/ui/Button/Button";
 import { TextField } from "@/shared/ui/TextField/TextField";
 import DeleteIcon from "@/shared/icons/delete.svg";
+import PostStatusBadge from "@/entities/post/ui/badge/PostStatusBadge";
+import DealActionPanel from "@/features/deal/ui/DealActionPanel/DealActionPanel";
 
 import { apiFetch } from "@/shared/api/fetcher";
 import { useChatMessages } from "../../lib/useChatMessages";
 import { useChatSocket } from "../../lib/useChatSocket";
+import { useDealStatus } from "../../lib/useDealStatus";
 import { useInfiniteScroll } from "@/shared/lib/useInfiniteScroll";
+import { DealStatus } from "../../model/types";
 
 import { getPostDetail } from "@/entities/post/api/getPostDetail";
 import { getUser } from "@/entities/user/api/getUser";
@@ -20,10 +24,12 @@ export const ChattingRoom = ({
   postingId,
   otherId,
   chatId: initialChatId,
+  status: dealStatus,
 }: {
   postingId: number;
   otherId: number;
   chatId?: number;
+  status?: DealStatus;
 }) => {
   const [chatId, setChatId] = useState<number | null>(initialChatId ?? null);
   const {
@@ -55,6 +61,18 @@ export const ChattingRoom = ({
     messagesEndRef,
   } = useChatMessages(chatId);
 
+  const {
+    postStatus: currentPostStatus,
+    dealStatus: currentDealStatus,
+    isLoading: isDealLoading,
+    onDealChange,
+    applyUpdate,
+  } = useDealStatus(
+    chatId ?? null,
+    post?.status ?? "SELLING",
+    dealStatus ?? "ACTIVE",
+  );
+
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
@@ -72,6 +90,7 @@ export const ChattingRoom = ({
     chatId,
     pushMessageToCache,
     scrollToBottom,
+    applyUpdate,
   );
 
   const { openModal, closeModal } = useModalStore();
@@ -201,10 +220,27 @@ export const ChattingRoom = ({
         />
         {/* 제목과 가격 세로 정렬 */}
         <div className="flex flex-col">
-          <span className="font-bold text-white">{post?.title}</span>
+          <span className="font-bold text-white">
+            {post?.title}
+            {post && (
+              <PostStatusBadge status={currentPostStatus} className="ml-2" />
+            )}
+          </span>
           <span className="text-white">
             {post?.price.toLocaleString("ko-KR") + " 원"}
           </span>
+        </div>
+
+        <div className="absolute top-4 right-4">
+          {post && (
+            <DealActionPanel
+              isOwner={!(otherId === post.sellerId)}
+              postStatus={currentPostStatus}
+              dealStatus={currentDealStatus}
+              onDealChange={onDealChange}
+              isLoading={isDealLoading}
+            />
+          )}
         </div>
       </div>
 

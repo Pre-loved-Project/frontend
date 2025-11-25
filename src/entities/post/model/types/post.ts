@@ -1,3 +1,4 @@
+export type PostStatus = "SELLING" | "RESERVED" | "SOLD";
 export interface Post {
   postingId: number;
   title: string;
@@ -9,6 +10,7 @@ export interface Post {
   chatCount: number;
   viewCount: number;
   thumbnail: string;
+  status: PostStatus;
 }
 
 export interface PostDetail {
@@ -26,4 +28,5 @@ export interface PostDetail {
   images: string[];
   isOwner: boolean;
   isFavorite: boolean;
+  status: PostStatus;
 }

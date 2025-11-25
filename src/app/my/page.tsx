@@ -11,6 +11,7 @@ import { useModalStore } from "@/shared/model/modal.store";
 import { usePostCreateModal } from "@/features/createPost/lib/usePostCreateModal";
 import { getMyPosts, getMyProfile } from "@/entities/user/api/mypage";
 import type { Post } from "@/entities/post/model/types/post";
+import { PostStatus } from "@/entities/post/model/types/post";
 
 const options = [
   { label: "판매중 상품", value: "selling" },
@@ -25,6 +26,20 @@ const emptyMessageMap: Record<string, string> = {
   purchased: "구매 완료된 상품이 없습니다.",
   favorite: "즐겨찾기한 상품이 없습니다.",
 };
+interface PostListItem {
+  postingId: number;
+  sellerId: number;
+  title: string;
+  price: number;
+  content: string;
+  category: string;
+  createdAt: string;
+  likeCount: number;
+  chatCount: number;
+  viewCount: number;
+  thumbnail: string;
+  status: PostStatus;
+}
 
 export default function Page() {
   const [selectedTab, setSelectedTab] = useState(options[0].value);
