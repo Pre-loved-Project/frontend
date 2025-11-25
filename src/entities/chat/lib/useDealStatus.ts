@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQueryClient, useMutation } from "@tanstack/react-query";
 import { apiFetch } from "@/shared/api/fetcher";
-import { DealStatus } from "../model/types";
-import { PostStatus } from "@/entities/post/model/types/post";
+import { Chat, DealStatus } from "../model/types";
+import { PostStatus, PostDetail } from "@/entities/post/model/types/post";
 import { useModalStore } from "@/shared/model/modal.store";
+1;
 
 interface DealResponse {
   chatId: number;
@@ -24,6 +25,14 @@ export const useDealStatus = (
   const queryClient = useQueryClient();
   const [postStatus, setPostStatus] = useState<PostStatus>(initialPostStatus);
   const [dealStatus, setDealStatus] = useState<DealStatus>(initialDealStatus);
+
+  useEffect(() => {
+    setPostStatus(initialPostStatus);
+  }, [initialPostStatus]);
+
+  useEffect(() => {
+    setDealStatus(initialDealStatus);
+  }, [initialDealStatus]);
 
   const applyUpdate = (update: {
     postStatus: PostStatus;
@@ -50,16 +59,34 @@ export const useDealStatus = (
     },
     onSuccess: (res) => {
       //optimistic update
-      setPostStatus(res.postStatus);
-      setDealStatus(res.dealStatus);
-      queryClient.invalidateQueries({ queryKey: ["chats"] });
-      queryClient.invalidateQueries({
-        queryKey: ["postDetail", res.postingId],
+      const {
+        postStatus: updatedPostStatus,
+        dealStatus: updatedDealStatus,
+        postingId,
+        sellerId,
+      } = res;
+
+      setPostStatus(updatedPostStatus);
+      setDealStatus(updatedDealStatus);
+      queryClient.setQueryData<PostDetail>(["postDetail", postingId], (old) => {
+        if (!old) return old;
+        return {
+          ...old,
+          status: updatedPostStatus,
+        };
       });
-      //TODO: 소켓을 통한 시스템 메시지 송/수신 및 상대방 postStatus, dealStatus update
-      openModal("normal", {
-        message: "거래 상태가 변경되었습니다.",
-        onClick: closeModal,
+
+      const roles = [undefined, "buyer", "seller"];
+      roles.forEach((role) => {
+        queryClient.setQueryData<Chat[]>(["chats", role], (oldChats) => {
+          if (!oldChats) return oldChats;
+
+          return oldChats.map((chat) =>
+            chat.postingId === postingId
+              ? { ...chat, status: updatedDealStatus }
+              : chat,
+          );
+        });
       });
     },
     onError: () => {
