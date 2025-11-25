@@ -21,8 +21,9 @@ const DealActionPanel = ({
   isLoading,
 }: DealActionPanelProps) => {
   const buttonClass =
-    "w-[70px] text-[14px] md:py-2 md:w-[70px] md:text-[14px] md:py-2 xl:w-[70px] xl:text-[14px] xl:py-2";
-
+    "w-[70px] text-[14px] py-2 md:w-[70px] md:text-[14px] md:py-2 xl:w-[70px] xl:text-[14px] xl:py-2";
+  const doubleButtonClass =
+    "w-[50px] text-[12px] py-5 md:w-[50px] md:text-[12px] md:py-5 xl:w-[50px] xl:text-[12px] xl:py-5";
   const action = resolveDealAction(isOwner, postStatus, dealStatus);
   const getLoadingText = (s: DealStatus) => {
     switch (s) {
@@ -62,7 +63,7 @@ const DealActionPanel = ({
         <Button
           variant={"primary"}
           disabled={isLoading}
-          className={buttonClass}
+          className={doubleButtonClass}
           onClick={() => handleClick(action.nextA)}
         >
           {isLoading ? getLoadingText(action.nextA) : action.labelA}
@@ -71,7 +72,7 @@ const DealActionPanel = ({
         <Button
           variant={"tertiary"}
           disabled={isLoading}
-          className={buttonClass}
+          className={doubleButtonClass}
           onClick={() => handleClick(action.nextB)}
         >
           {isLoading ? getLoadingText(action.nextB) : action.labelB}
