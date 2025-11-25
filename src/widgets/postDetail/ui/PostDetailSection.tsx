@@ -15,12 +15,15 @@ import { useLike } from "@/features/like/lib/useLike";
 import { usePostEditModal } from "@/features/editPost/lib/usePostEditModal";
 import { useChatStore } from "@/features/chat/model/chat.store";
 import { useModalStore } from "@/shared/model/modal.store";
+import { useAuthStore } from "@/features/auth/model/auth.store";
 import { PostDetail } from "@/entities/post/model/types/post";
 import PostStatusBadge from "@/entities/post/ui/badge/PostStatusBadge";
+import { getChattingRoomStatus } from "@/features/chat/api/getChattingRoomStatus";
 
 export function PostDetailSection({ post }: { post: PostDetail }) {
   const router = useRouter();
   const queryClient = useQueryClient();
+  const { isLogined } = useAuthStore();
   const { openModal, closeModal } = useModalStore();
   const openChat = useChatStore((s) => s.mount);
 
@@ -28,6 +31,11 @@ export function PostDetailSection({ post }: { post: PostDetail }) {
     queryKey: ["seller", post.sellerId],
     queryFn: () => getUser(post.sellerId),
     enabled: !!post.sellerId,
+  });
+
+  const { data: chattingRoomStatus } = useQuery({
+    queryKey: ["findRoom", post.postingId],
+    queryFn: () => getChattingRoomStatus(post.postingId),
   });
 
   const { toggleLike, isLoading: isLikeLoading } = useLike(post.postingId);
@@ -53,7 +61,23 @@ export function PostDetailSection({ post }: { post: PostDetail }) {
   };
 
   const handleChatClick = () => {
-    openChat({ postingId: post.postingId, otherId: post.sellerId });
+    if (!isLogined) {
+      openModal("normal", {
+        message: " 로그인이 필요한 서비스입니다.\n로그인 해주세요.",
+        onClick: () => {
+          closeModal();
+          router.replace("/login");
+        },
+      });
+      return;
+    }
+    if (chattingRoomStatus) {
+      openChat({
+        postingId: post.postingId,
+        otherId: post.sellerId,
+        chatId: chattingRoomStatus?.chatId,
+      });
+    }
   };
 
   const handleDeleteClick = () => {
