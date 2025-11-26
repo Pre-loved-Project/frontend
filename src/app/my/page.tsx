@@ -1,12 +1,16 @@
 "use client";
-import { useState, useEffect } from "react";
+
+import { useState, useCallback } from "react";
+import { useQuery } from "@tanstack/react-query";
 import Profile, { ProfileProps } from "@/entities/user/ui/card/Profile";
+import ProfileSkeleton from "@/entities/user/ui/card/ProfileSkeleton";
 import PostCard from "@/entities/post/ui/card/PostCard";
 import { PostCreateButton } from "@/features/createPost/ui/PostCreateButton/PostCreateButton";
 import Tab from "@/widgets/mypage/ui/Tab.tsx/Tab";
-import { apiFetch } from "@/shared/api/fetcher";
 import { useModalStore } from "@/shared/model/modal.store";
 import { usePostCreateModal } from "@/features/createPost/lib/usePostCreateModal";
+import { getMyPosts, getMyProfile } from "@/entities/user/api/mypage";
+import type { Post } from "@/entities/post/model/types/post";
 import { PostStatus } from "@/entities/post/model/types/post";
 
 const options = [
@@ -16,6 +20,12 @@ const options = [
   { label: "관심 상품", value: "favorite" },
 ];
 
+const emptyMessageMap: Record<string, string> = {
+  selling: "등록되어 있는 상품이 없습니다.",
+  sold: "판매 완료된 상품이 없습니다.",
+  purchased: "구매 완료된 상품이 없습니다.",
+  favorite: "즐겨찾기한 상품이 없습니다.",
+};
 interface PostListItem {
   postingId: number;
   sellerId: number;
@@ -31,62 +41,35 @@ interface PostListItem {
   status: PostStatus;
 }
 
-const Mypage = () => {
-  const [selected, setSelected] = useState(options[0].value);
-  const [userProfile, setUserProfile] = useState<ProfileProps | null>(null);
-  const [posts, setPosts] = useState<PostListItem[]>([]);
-  const [loading, setLoading] = useState(false);
+export default function Page() {
+  const [selectedTab, setSelectedTab] = useState(options[0].value);
   const { openModal, closeModal } = useModalStore();
+
+  const {
+    data: userProfile,
+    isLoading: profileLoading,
+    refetch: refetchUserProfile,
+  } = useQuery<ProfileProps>({
+    queryKey: ["userProfile"],
+    queryFn: getMyProfile,
+  });
+
+  const {
+    data: postsData,
+    isLoading: postsLoading,
+    refetch: refetchPosts,
+  } = useQuery<{ data: Post[] }>({
+    queryKey: ["myPosts", selectedTab],
+    queryFn: () => getMyPosts(selectedTab),
+  });
+
   const { openPostCreateModal } = usePostCreateModal({
     onSuccess: async () => {
-      await fetchPosts(selected);
+      await refetchPosts();
     },
   });
 
-  async function fetchUserProfile() {
-    try {
-      const data = await apiFetch<ProfileProps>("/api/users/me", {
-        method: "GET",
-      });
-      setUserProfile(data);
-    } catch (error) {
-      console.error("유저 정보 로딩 실패: ", error);
-    }
-  }
-
-  async function fetchPosts(status: string) {
-    //TODO: sold | purchase | favorite 기능 구현되면 지우기
-    if (status != "selling") {
-      setPosts([]);
-    }
-
-    try {
-      setLoading(true);
-      const res = await apiFetch<{ data: PostListItem[] }>(
-        `/api/postings/my?status=${status}`,
-        {
-          method: "GET",
-        },
-      );
-      setPosts(res.data);
-    } catch (error) {
-      console.error("현재 유저 관련 게시글 불러오기 실패 : ", error);
-      setPosts([]);
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  useEffect(() => {
-    fetchUserProfile();
-  }, []);
-
-  useEffect(() => {
-    fetchPosts(selected);
-  }, [selected]);
-
-  // 프로필 수정 모달 열기 함수
-  const handleEditProfile = () => {
+  const handleEditProfile = useCallback(() => {
     if (!userProfile) return;
 
     openModal("editProfile", {
@@ -103,7 +86,7 @@ const Mypage = () => {
             },
           });
         }, 100);
-        await fetchUserProfile();
+        await refetchUserProfile();
       },
       onError: () => {
         closeModal();
@@ -116,35 +99,31 @@ const Mypage = () => {
         });
       },
     });
-  };
+  }, [userProfile, openModal, closeModal, refetchUserProfile]);
 
-  //카테고리별 빈 상태 문구
-  const emptyMessageMap: Record<string, string> = {
-    selling: "등록되어 있는 상품이 없습니다.",
-    sold: "판매 완료된 상품이 없습니다.",
-    purchased: "구매 완료된 상품이 없습니다.",
-    favorite: "즐겨찾기한 상품이 없습니다.",
-  };
+  const posts = postsData?.data || [];
 
   return (
-    <main className="m-auto flex max-w-[335px] flex-col items-center justify-center gap-[60px] py-[30px] md:max-w-[510px] md:py-[40px] xl:max-w-[1340px] xl:flex-row xl:items-start xl:justify-start xl:gap-[80px] xl:py-[60px]">
-      {userProfile && <Profile {...userProfile} onEdit={handleEditProfile} />}
+    <main className="m-auto flex max-w-[335px] flex-col items-center justify-center gap-[60px] py-[30px] md:max-w-[510px] md:py-10 xl:max-w-[1340px] xl:flex-row xl:items-start xl:justify-start xl:gap-20 xl:py-[60px]">
+      {profileLoading || !userProfile ? (
+        <ProfileSkeleton />
+      ) : (
+        <Profile {...userProfile} onEdit={handleEditProfile} />
+      )}
 
       <section className="flex flex-col gap-[30px]">
-        <Tab options={options} selected={selected} onChange={setSelected} />
-        {loading ? (
-          <p className="mt-10 text-center text-gray-400">로딩 중...</p>
-        ) : selected !== "selling" ? (
+        <Tab
+          options={options}
+          selected={selectedTab}
+          onChange={setSelectedTab}
+        />
+
+        {postsLoading ? null : posts.length === 0 ? (
           <p className="mt-10 text-center text-gray-400">
-            {emptyMessageMap[selected]} <br />
-            <span className="text-sm text-gray-500">(TODO: API 구현 예정)</span>
-          </p>
-        ) : posts.length == 0 ? (
-          <p className="mt-10 text-center text-gray-400">
-            {emptyMessageMap[selected]}
+            {emptyMessageMap[selectedTab]}
           </p>
         ) : (
-          <ul className="grid grid-cols-2 gap-[15px] xl:grid-cols-3 xl:gap-[20px]">
+          <ul className="grid grid-cols-2 gap-[15px] xl:grid-cols-3 xl:gap-5">
             {posts.map((post) => (
               <li key={post.postingId}>
                 <PostCard {...post} />
@@ -156,6 +135,4 @@ const Mypage = () => {
       </section>
     </main>
   );
-};
-
-export default Mypage;
+}
