@@ -32,7 +32,7 @@ export default function PostDetailPageClient({
   return (
     <main className="text-white">
       <PostDetailSection post={post} />
-      <SellerPostsSection sellerId={post.sellerId} />
+      <SellerPostsSection sellerId={post.sellerId} postingId={post.postingId} />
     </main>
   );
 }

@@ -6,12 +6,14 @@ interface GetSellerPostsParams {
   userId: number;
   page?: number;
   size?: number;
+  excludeId?: number;
 }
 
 export async function getSellerPosts({
   userId,
   page = 1,
   size = POST_PAGE_SIZE,
+  excludeId,
 }: GetSellerPostsParams): Promise<{ data: Post[] }> {
   if (!userId) throw new Error("Invalid userId");
 
@@ -19,6 +21,10 @@ export async function getSellerPosts({
     page: String(page),
     size: String(size),
   });
+
+  if (excludeId) {
+    query.append("postingId", String(excludeId));
+  }
 
   return apiFetch<{ data: Post[] }>(
     `/api/postings/user/${userId}?${query.toString()}`,

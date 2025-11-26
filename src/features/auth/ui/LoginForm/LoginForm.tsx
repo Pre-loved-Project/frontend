@@ -22,44 +22,37 @@ export const LoginForm = ({
 }: LoginFormProps) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  //에러 메시지 관리
   const [emailError, setEmailError] = useState<string | null>(null);
   const [passwordError, setPasswordError] = useState<string | null>(null);
 
   const { setAccessToken } = useAuthStore();
 
-  //로그인 요청 제출 핸들러, 추후 API 호출 예정
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    console.log("로그인 요청 폼 제출");
     try {
-      const res = await apiFetch<{
-        accessToken: string;
-      }>("/auth/login", {
+      const data = await apiFetch<{ accessToken: string }>("/api/auth/login", {
         method: "POST",
         body: JSON.stringify({ email, password }),
         noAuth: true,
+        useBaseUrl: false,
       });
 
-      setAccessToken(res.accessToken);
+      setAccessToken(data.accessToken);
       onSuccess?.();
-    } catch {
+    } catch (error) {
       onError?.("로그인에 실패하였습니다.\n이메일과 비밀번호를 확인해주세요.");
     }
   };
 
-  // 이메일 유효성 검사 함수
   const validateEmail = (value: string) => {
-    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; //이메일 regex
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return regex.test(value);
   };
 
-  //이메일 변경 처리 핸들러
   const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setEmail(value);
-
     if (value != null && value !== "" && !validateEmail(value)) {
       setEmailError("올바른 이메일 형식이 아닙니다.");
     } else {
@@ -67,11 +60,9 @@ export const LoginForm = ({
     }
   };
 
-  //비밀번호 변경 처리 핸들러
   const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setPassword(value);
-
     if (value != null && value !== "" && value.length < 8) {
       setPasswordError("비밀번호는 최소 8자 이상이어야 합니다.");
     } else {

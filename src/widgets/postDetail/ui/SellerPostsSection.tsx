@@ -6,17 +6,24 @@ import { useInfiniteScroll } from "@/shared/lib/useInfiniteScroll";
 import { getSellerPosts } from "@/entities/post/api/getSellerPosts";
 import { POST_PAGE_SIZE } from "@/entities/post/model/constants/api";
 
-export function SellerPostsSection({ sellerId }: { sellerId: number }) {
+export function SellerPostsSection({
+  sellerId,
+  postingId,
+}: {
+  sellerId: number;
+  postingId: number;
+}) {
   const {
     data: sellerPostsData,
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
   } = useInfiniteQuery({
-    queryKey: ["sellerPosts", sellerId],
+    queryKey: ["sellerPosts", sellerId, postingId],
     queryFn: ({ pageParam = 1 }) =>
       getSellerPosts({
         userId: sellerId,
+        excludeId: postingId,
         page: pageParam,
         size: POST_PAGE_SIZE,
       }),
