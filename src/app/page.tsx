@@ -3,7 +3,7 @@ import {
   dehydrate,
   HydrationBoundary,
 } from "@tanstack/react-query";
-import { getPosts } from "@/entities/post/api/getPosts";
+import { getPosts } from "@/entities/post/api/getPosts.server";
 import HomePageClient from "@/widgets/main/ui/Client/HomePage.client";
 
 export default async function Page({
