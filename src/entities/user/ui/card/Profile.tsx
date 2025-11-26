@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 
 import { useAuthStore } from "@/features/auth/model/auth.store";
+import { useModalStore } from "@/shared/model/modal.store";
 import Button from "@/shared/ui/Button/Button";
 import DefaultProfileImage from "./assets/profile.jpg";
 
@@ -29,6 +30,7 @@ const Profile = ({
 }: ProfileProps) => {
   const router = useRouter();
   const { logout } = useAuthStore();
+  const { openModal, closeModal } = useModalStore();
 
   return (
     <article className="flex h-[556px] w-[335px] shrink-0 items-center justify-center rounded-lg border border-[#353542] bg-[#252530] px-5 py-7 md:h-[601px] md:w-[509px] md:px-7 xl:h-[753px] xl:w-[340px] xl:px-5 xl:pt-10">
@@ -80,6 +82,7 @@ const Profile = ({
           <Button className="w-full!" onClick={onEdit}>
             프로필 편집
           </Button>
+
           <Button
             variant="tertiary"
             className="w-full!"
@@ -94,7 +97,12 @@ const Profile = ({
                 router.push("/login");
                 router.refresh();
               } else {
-                alert("로그아웃 실패");
+                openModal("normal", {
+                  message: "로그아웃에 실패했습니다.",
+                  onClick: () => {
+                    closeModal();
+                  },
+                });
               }
             }}
           >
