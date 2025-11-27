@@ -1,8 +1,8 @@
-import { error } from "console";
 import { DealStatus, MessageProps } from "./types";
 import { useAuthStore } from "@/features/auth/model/auth.store";
-import { refreshAccessToken } from "@/shared/api/refresh";
 import { PostStatus } from "@/entities/post/model/types/post";
+import { AuthorizationError } from "@/shared/error/error";
+import { handleError } from "@/shared/error/handleError";
 
 export interface ChatSocketEvents {
   onOpen?: () => void;
@@ -49,12 +49,13 @@ export class ChatSocket {
       this.socket.onopen = () => {
         console.log("[Socket] Connected");
         this.events.onOpen?.();
-        resolve(); // ✅ 연결 완료
+        resolve();
       };
 
       this.socket.onmessage = (event) => {
         try {
           const data = JSON.parse(event.data);
+
           if (data.type === "deal_update") {
             this.events.onDealUpdate?.({
               dealStatus: data.dealStatus,
@@ -89,9 +90,33 @@ export class ChatSocket {
         if (event.code === 4001) {
           console.warn("[Socket] Token expired (4001)");
 
-          const newToken = await refreshAccessToken();
-          this.reconnect();
+          const { logout, setAccessToken } = useAuthStore.getState();
+
+          try {
+            const refreshed = await fetch("/api/auth/refresh", {
+              method: "POST",
+              credentials: "include",
+            });
+
+            if (!refreshed.ok) {
+              logout();
+
+              throw new AuthorizationError(
+                "세션이 만료되었습니다.\n다시 로그인 해주세요.",
+              );
+            }
+
+            const { accessToken: newToken } = await refreshed.json();
+            setAccessToken(newToken);
+
+            this.reconnect();
+          } catch (err) {
+            handleError(err);
+            logout();
+            return;
+          }
         }
+
         console.warn("[Socket] Closed:", event.code);
         this.events.onClose?.(event.code, event.reason);
         this.socket = null;
@@ -131,7 +156,6 @@ export class ChatSocket {
 
     const state = this.socket.readyState;
 
-    // 아직 연결 중이거나 이미 닫힌 상태에서는 그냥 close()만 호출
     if (state === WebSocket.OPEN) {
       this.socket.send(JSON.stringify({ event: "leave_room" }));
       this.socket.close(1000, "User left");
