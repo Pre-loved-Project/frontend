@@ -1,16 +1,27 @@
+import { convertToWebP } from "../lib/image/convertToWebP";
+
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export async function uploadImage(imageFile: File): Promise<string> {
-  const formData = new FormData();
-  formData.append("image", imageFile);
-
   try {
+    const webpBlob = await convertToWebP(imageFile);
+
+    const webpFile = new File(
+      [webpBlob],
+      imageFile.name.replace(/\.[^.]+$/, ".webp"),
+      {
+        type: "image/webp",
+      },
+    );
+
+    const formData = new FormData();
+    formData.append("image", webpFile);
+
     const res = await fetch(`${BASE_URL}/api/image`, {
       method: "POST",
       body: formData,
     });
 
-    // 응답 코드 확인
     if (!res.ok) {
       let errorMessage = `업로드 실패 (code ${res.status})`;
       try {
@@ -23,7 +34,6 @@ export async function uploadImage(imageFile: File): Promise<string> {
       throw new Error(errorMessage);
     }
 
-    // 정상 응답 처리
     const data = await res.json();
     return data.imageUrl;
   } catch (err) {

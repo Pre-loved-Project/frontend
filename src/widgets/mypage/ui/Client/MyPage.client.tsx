@@ -11,6 +11,7 @@ import { useModalStore } from "@/shared/model/modal.store";
 import { usePostCreateModal } from "@/features/createPost/lib/usePostCreateModal";
 import { getMyPosts, getMyProfile } from "@/entities/user/api/mypage";
 import type { Post } from "@/entities/post/model/types/post";
+import { handleError } from "@/shared/error/handleError";
 
 const options = [
   { label: "판매중 상품", value: "selling" },
@@ -34,19 +35,31 @@ export default function MyPageClient({ defaultTab }: { defaultTab: string }) {
     data: userProfile,
     isLoading: profileLoading,
     refetch: refetchUserProfile,
+    isError: isUserProfileError,
+    error: userProfileError,
   } = useQuery<ProfileProps>({
     queryKey: ["userProfile"],
     queryFn: getMyProfile,
   });
 
+  if (isUserProfileError) {
+    handleError(userProfileError);
+  }
+
   const {
     data: postsData,
     isLoading: postsLoading,
     refetch: refetchPosts,
+    isError: isUserPostsError,
+    error: userPostsError,
   } = useQuery<{ data: Post[] }>({
     queryKey: ["myPosts", selectedTab],
     queryFn: () => getMyPosts(selectedTab),
   });
+
+  if (isUserPostsError) {
+    handleError(userPostsError);
+  }
 
   const { openPostCreateModal } = usePostCreateModal({
     onSuccess: async () => {

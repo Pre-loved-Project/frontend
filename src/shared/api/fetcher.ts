@@ -1,5 +1,5 @@
 import { useAuthStore } from "@/features/auth/model/auth.store";
-import { useModalStore } from "@/shared/model/modal.store";
+import { AuthorizationError, NotFoundError, ServerError } from "../error/error";
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -15,7 +15,6 @@ export async function apiFetch<T>(
   const { headers, noAuth, useBaseUrl = true, ...restOptions } = options;
 
   const { accessToken, setAccessToken, logout } = useAuthStore.getState();
-  const { openModal, closeModal } = useModalStore.getState();
 
   const defaultHeaders: HeadersInit = {
     "Content-Type": "application/json",
@@ -42,17 +41,9 @@ export async function apiFetch<T>(
 
     if (!refreshed.ok) {
       logout();
-
-      openModal("normal", {
-        message: "세션이 만료되었습니다. 다시 로그인 해주세요.",
-        buttonText: "확인",
-        onClick: () => {
-          closeModal();
-          location.replace("/login");
-        },
-      });
-
-      throw new Error("세션 만료");
+      throw new AuthorizationError(
+        "세션이 만료되었습니다.\n다시 로그인 해주세요.",
+      );
     }
 
     const { accessToken: newToken } = await refreshed.json();
@@ -69,6 +60,13 @@ export async function apiFetch<T>(
   }
 
   if (!res.ok) {
+    if (res.status === 404) {
+      throw new NotFoundError();
+    }
+
+    if (res.status >= 500) {
+      throw new ServerError();
+    }
     let message = `API Error ${res.status}`;
 
     try {
@@ -79,7 +77,7 @@ export async function apiFetch<T>(
       if (text) message = text;
     }
 
-    throw new Error(message);
+    throw new ServerError(message);
   }
 
   return res.json() as Promise<T>;

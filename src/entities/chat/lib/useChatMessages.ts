@@ -3,19 +3,18 @@ import {
   useInfiniteQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-import { useEffect, useRef, useMemo } from "react";
+import { useRef, useMemo } from "react";
 import { apiFetch } from "@/shared/api/fetcher";
-import { MessagesResponse, MessageProps } from "../model/types";
-import { useModalStore } from "@/shared/model/modal.store";
+import { MessagesResponse, MessageProps, Chat } from "../model/types";
 
 export const useChatMessages = (chatId: number | null) => {
   const queryClient = useQueryClient();
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
-  const { openModal, closeModal } = useModalStore();
 
   const {
     data,
+    isError,
     error,
     fetchNextPage,
     hasNextPage,
@@ -38,15 +37,6 @@ export const useChatMessages = (chatId: number | null) => {
       lastPage.hasNext ? lastPage.nextCursor : undefined,
   });
 
-  useEffect(() => {
-    if (error) {
-      openModal("normal", {
-        message: "메시지 로딩 중 에러가 발생했습니다.",
-        onClick: closeModal,
-      });
-    }
-  }, [error]);
-
   const messages: MessageProps[] = useMemo(() => {
     if (!data) return [];
 
@@ -57,6 +47,7 @@ export const useChatMessages = (chatId: number | null) => {
   }, [data]);
 
   const pushMessageToCache = (newMsg: MessageProps) => {
+    //메시지 리스트 업데이트
     queryClient.setQueryData<InfiniteData<MessagesResponse>>(
       ["chatMessages", chatId],
       (oldData) => {
@@ -74,6 +65,29 @@ export const useChatMessages = (chatId: number | null) => {
         };
       },
     );
+
+    //chats list의 lastMessage 업데이트
+    const roles = [undefined, "buyer", "seller"];
+    roles.forEach((role) => {
+      queryClient.setQueryData<Chat[]>(["chats", role], (oldChats) => {
+        if (!oldChats) return oldChats;
+
+        const updatedChats = oldChats.map((chat) =>
+          chat.chatId === chatId
+            ? {
+                ...chat,
+                lastMessage: newMsg,
+              }
+            : chat,
+        );
+
+        return updatedChats.sort(
+          (a, b) =>
+            new Date(b.lastMessage?.sendAt ?? 0).getTime() -
+            new Date(a.lastMessage?.sendAt ?? 0).getTime(),
+        );
+      });
+    });
   };
 
   const fetchMoreMessages = async () => {
@@ -97,6 +111,7 @@ export const useChatMessages = (chatId: number | null) => {
     hasNextPage,
     isMessagesFirstLoading,
     isMessagesLoading,
+    isError,
     error,
     scrollContainerRef,
     messagesEndRef,

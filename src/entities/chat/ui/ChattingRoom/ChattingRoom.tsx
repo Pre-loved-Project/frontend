@@ -8,8 +8,6 @@ import { TextField } from "@/shared/ui/TextField/TextField";
 import DeleteIcon from "@/shared/icons/delete.svg";
 import PostStatusBadge from "@/entities/post/ui/badge/PostStatusBadge";
 import DealActionPanel from "@/features/deal/ui/DealActionPanel/DealActionPanel";
-
-import { apiFetch } from "@/shared/api/fetcher";
 import { useChatMessages } from "../../lib/useChatMessages";
 import { useChatSocket } from "../../lib/useChatSocket";
 import { useDealStatus } from "../../lib/useDealStatus";
@@ -18,7 +16,9 @@ import { DealStatus } from "../../model/types";
 
 import { getPostDetail } from "@/entities/post/api/getPostDetail";
 import { getUser } from "@/entities/user/api/getUser";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { createChattingRoom } from "@/features/chat/api/createChattingRoom";
+import { handleError } from "@/shared/error/handleError";
 
 export const ChattingRoom = ({
   postingId,
@@ -32,34 +32,50 @@ export const ChattingRoom = ({
   status?: DealStatus;
 }) => {
   const [chatId, setChatId] = useState<number | null>(initialChatId ?? null);
+  const queryClient = useQueryClient();
   const {
     data: post,
     isLoading: isPostLoading,
     isError: isPostingError,
+    error: postingError,
   } = useQuery({
     queryKey: ["postDetail", postingId],
     queryFn: () => getPostDetail(postingId),
   });
 
+  if (isPostingError) {
+    handleError(postingError);
+  }
+
   const {
     data: otherUser,
     isLoading: isOtherUserLoading,
     isError: isOtherUserError,
+    error: otherUserError,
   } = useQuery({
     queryKey: ["otherUser", otherId],
     queryFn: () => getUser(otherId),
   });
+
+  if (isOtherUserError) {
+    handleError(otherUserError);
+  }
 
   const {
     messages,
     pushMessageToCache,
     fetchMoreMessages,
     hasNextPage,
-    isMessagesFirstLoading,
+    isError: isChatMessagesError,
+    error: chatMessagesError,
     isMessagesLoading,
     scrollContainerRef,
     messagesEndRef,
   } = useChatMessages(chatId);
+
+  if (isChatMessagesError) {
+    handleError(chatMessagesError);
+  }
 
   const {
     postStatus: currentPostStatus,
@@ -168,14 +184,9 @@ export const ChattingRoom = ({
 
     if (!chatId) {
       try {
-        const res = await apiFetch<{ chatId: number; createdAt: string }>(
-          `/api/chat`,
-          {
-            method: "POST",
-            body: JSON.stringify({ postingId }),
-          },
-        );
+        const res = await createChattingRoom(postingId);
         setChatId(res.chatId); //useChatSocket hook을 통한 소켓 자동 재연결.
+        queryClient.invalidateQueries({ queryKey: ["chats"] });
       } catch {
         openModal("normal", {
           message: "채팅방 생성에 실패했습니다.",
@@ -211,27 +222,35 @@ export const ChattingRoom = ({
   return (
     <div className="relative h-[calc(100vh-70px)] w-full xl:h-[calc(100vh-100px)]">
       {/* 게시글 정보 영역 */}
-      <div className="absolute top-0 left-0 flex h-[100px] w-full items-center gap-4 border-b border-gray-500 p-4">
+      <div className="relative flex h-[100px] w-full items-center gap-4 border-b border-gray-500 p-4">
         {/* 게시글 이미지 */}
         <img
           src={post?.images[0]}
           alt="게시글 이미지"
           className="h-15 w-15 rounded object-cover"
         />
-        {/* 제목과 가격 세로 정렬 */}
-        <div className="flex flex-col">
-          <span className="font-bold text-white">
-            {post?.title}
+
+        {/* 제목 + 가격 */}
+        <div className="flex min-w-0 flex-1 flex-col">
+          <span className="flex min-w-0 items-start font-bold text-white">
+            <span className="line-clamp-2 max-w-full min-w-0 break-words">
+              {post?.title}
+            </span>
+
             {post && (
-              <PostStatusBadge status={currentPostStatus} className="ml-2" />
+              <PostStatusBadge
+                status={currentPostStatus}
+                className="ml-2 shrink-0"
+              />
             )}
           </span>
+
           <span className="text-white">
             {post?.price.toLocaleString("ko-KR") + " 원"}
           </span>
         </div>
 
-        <div className="absolute top-4 right-4">
+        <div className="shrink-0">
           {post && (
             <DealActionPanel
               isOwner={!(otherId === post.sellerId)}
