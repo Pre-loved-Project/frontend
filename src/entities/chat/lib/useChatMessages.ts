@@ -3,19 +3,18 @@ import {
   useInfiniteQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-import { useEffect, useRef, useMemo } from "react";
+import { useRef, useMemo } from "react";
 import { apiFetch } from "@/shared/api/fetcher";
 import { MessagesResponse, MessageProps, Chat } from "../model/types";
-import { useModalStore } from "@/shared/model/modal.store";
 
 export const useChatMessages = (chatId: number | null) => {
   const queryClient = useQueryClient();
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
-  const { openModal, closeModal } = useModalStore();
 
   const {
     data,
+    isError,
     error,
     fetchNextPage,
     hasNextPage,
@@ -37,15 +36,6 @@ export const useChatMessages = (chatId: number | null) => {
     getNextPageParam: (lastPage) =>
       lastPage.hasNext ? lastPage.nextCursor : undefined,
   });
-
-  useEffect(() => {
-    if (error) {
-      openModal("normal", {
-        message: "메시지 로딩 중 에러가 발생했습니다.",
-        onClick: closeModal,
-      });
-    }
-  }, [error]);
 
   const messages: MessageProps[] = useMemo(() => {
     if (!data) return [];
@@ -121,6 +111,7 @@ export const useChatMessages = (chatId: number | null) => {
     hasNextPage,
     isMessagesFirstLoading,
     isMessagesLoading,
+    isError,
     error,
     scrollContainerRef,
     messagesEndRef,

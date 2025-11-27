@@ -18,6 +18,7 @@ import { getPostDetail } from "@/entities/post/api/getPostDetail";
 import { getUser } from "@/entities/user/api/getUser";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { createChattingRoom } from "@/features/chat/api/createChattingRoom";
+import { handleError } from "@/shared/error/handleError";
 
 export const ChattingRoom = ({
   postingId,
@@ -36,30 +37,45 @@ export const ChattingRoom = ({
     data: post,
     isLoading: isPostLoading,
     isError: isPostingError,
+    error: postingError,
   } = useQuery({
     queryKey: ["postDetail", postingId],
     queryFn: () => getPostDetail(postingId),
   });
 
+  if (isPostingError) {
+    handleError(postingError);
+  }
+
   const {
     data: otherUser,
     isLoading: isOtherUserLoading,
     isError: isOtherUserError,
+    error: otherUserError,
   } = useQuery({
     queryKey: ["otherUser", otherId],
     queryFn: () => getUser(otherId),
   });
+
+  if (isOtherUserError) {
+    handleError(otherUserError);
+  }
 
   const {
     messages,
     pushMessageToCache,
     fetchMoreMessages,
     hasNextPage,
-    isMessagesFirstLoading,
+    isError: isChatMessagesError,
+    error: chatMessagesError,
     isMessagesLoading,
     scrollContainerRef,
     messagesEndRef,
   } = useChatMessages(chatId);
+
+  if (isChatMessagesError) {
+    handleError(chatMessagesError);
+  }
 
   const {
     postStatus: currentPostStatus,

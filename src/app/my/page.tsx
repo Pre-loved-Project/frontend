@@ -7,21 +7,26 @@ import {
 import { getMyPosts } from "@/entities/user/api/getMyPosts.server";
 import { getMyProfile } from "@/entities/user/api/getMyProfile.server";
 import MyPageClient from "@/widgets/mypage/ui/Client/MyPage.client";
+import { handleError } from "@/shared/error/handleError";
 
 const DEFAULT_TAB = "selling";
 
 export default async function Page() {
   const queryClient = new QueryClient();
 
-  await queryClient.prefetchQuery({
-    queryKey: ["userProfile"],
-    queryFn: getMyProfile,
-  });
+  try {
+    await queryClient.fetchQuery({
+      queryKey: ["userProfile"],
+      queryFn: getMyProfile,
+    });
 
-  await queryClient.prefetchQuery({
-    queryKey: ["myPosts", DEFAULT_TAB],
-    queryFn: () => getMyPosts(DEFAULT_TAB),
-  });
+    await queryClient.fetchQuery({
+      queryKey: ["myPosts", DEFAULT_TAB],
+      queryFn: () => getMyPosts(DEFAULT_TAB),
+    });
+  } catch (e) {
+    handleError(e);
+  }
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>

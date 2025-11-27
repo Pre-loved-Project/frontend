@@ -19,6 +19,7 @@ import { useAuthStore } from "@/features/auth/model/auth.store";
 import { PostDetail } from "@/entities/post/model/types/post";
 import PostStatusBadge from "@/entities/post/ui/badge/PostStatusBadge";
 import { getChattingRoomStatus } from "@/features/chat/api/getChattingRoomStatus";
+import { handleError } from "@/shared/error/handleError";
 
 export function PostDetailSection({ post }: { post: PostDetail }) {
   const router = useRouter();
@@ -27,16 +28,32 @@ export function PostDetailSection({ post }: { post: PostDetail }) {
   const { openModal, closeModal } = useModalStore();
   const openChat = useChatStore((s) => s.mount);
 
-  const { data: seller } = useQuery({
+  const {
+    data: seller,
+    isError: isSellerError,
+    error: sellerError,
+  } = useQuery({
     queryKey: ["seller", post.sellerId],
     queryFn: () => getUser(post.sellerId),
     enabled: !!post.sellerId,
   });
 
-  const { data: chattingRoomStatus } = useQuery({
+  if (isSellerError) {
+    handleError(sellerError);
+  }
+
+  const {
+    data: chattingRoomStatus,
+    isError: isChattingRoomStatusError,
+    error: chattingRoomStatusError,
+  } = useQuery({
     queryKey: ["findRoom", post.postingId],
     queryFn: () => getChattingRoomStatus(post.postingId),
   });
+
+  if (isChattingRoomStatusError) {
+    handleError(chattingRoomStatusError);
+  }
 
   const { toggleLike, isLoading: isLikeLoading } = useLike(post.postingId);
   const handleToggleLike = () => toggleLike(!post.isFavorite);

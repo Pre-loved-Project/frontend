@@ -5,6 +5,7 @@ import { fetchChatList } from "../model/chat.api";
 import type { Chat } from "@/entities/chat/model/types";
 import { useQuery } from "@tanstack/react-query";
 import { DealStatus } from "@/entities/chat/model/types";
+import { handleError } from "@/shared/error/handleError";
 
 interface ChatListProps {
   onSelect: (info: {
@@ -29,12 +30,12 @@ const ChatList = ({ onSelect, tab = "all" }: ChatListProps) => {
     queryFn: () => fetchChatList(role),
   });
 
-  if (isLoading) {
-    return <p className="p-4 text-center text-white/70">불러오는 중...</p>;
+  if (isError) {
+    handleError(error);
   }
 
-  if (isError) {
-    console.error("채팅 목록 불러오기 실패:", error);
+  if (isLoading) {
+    return <p className="p-4 text-center text-white/70">불러오는 중...</p>;
   }
 
   if (!chats?.length) {

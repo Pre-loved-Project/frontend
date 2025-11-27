@@ -1,5 +1,5 @@
 import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
+import { AuthorizationError, NotFoundError, ServerError } from "../error/error";
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -34,7 +34,9 @@ export async function serverFetch<T>(
     const refreshToken = cookieStore.get("refreshToken")?.value;
 
     if (!refreshToken) {
-      redirect("/login");
+      throw new AuthorizationError(
+        "세션이 만료되었습니다.\n다시 로그인 해주세요.",
+      );
     }
 
     const refreshRes = await fetch("/api/auth/refresh", {
@@ -59,13 +61,23 @@ export async function serverFetch<T>(
         ...restOptions,
       });
     } else {
-      redirect("/login");
+      throw new AuthorizationError(
+        "세션이 만료되었습니다.\n다시 로그인 해주세요.",
+      );
     }
+  }
+
+  if (res.status === 404) {
+    throw new NotFoundError();
+  }
+
+  if (res.status >= 500) {
+    throw new ServerError();
   }
 
   if (!res.ok) {
     const text = await res.text();
-    throw new Error(text || `API Error ${res.status}`);
+    throw new ServerError(text);
   }
 
   return res.json() as Promise<T>;
