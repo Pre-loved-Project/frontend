@@ -24,10 +24,12 @@ export const LoginForm = ({
   const [password, setPassword] = useState("");
   const [emailError, setEmailError] = useState<string | null>(null);
   const [passwordError, setPasswordError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const { setAccessToken } = useAuthStore();
 
   const handleSubmit = async (e: React.FormEvent) => {
+    setIsLoading(true);
     e.preventDefault();
 
     try {
@@ -42,6 +44,8 @@ export const LoginForm = ({
       onSuccess?.();
     } catch (error) {
       onError?.("로그인에 실패하였습니다.\n이메일과 비밀번호를 확인해주세요.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -91,13 +95,13 @@ export const LoginForm = ({
       />
 
       <Button
-        variant="primary"
+        variant={isLoading ? "secondary" : "primary"}
         type="submit"
         disabled={
           !email || emailError !== null || !password || passwordError !== null
         }
       >
-        로그인
+        {isLoading ? "로그인 중 ..." : "로그인"}
       </Button>
     </form>
   );

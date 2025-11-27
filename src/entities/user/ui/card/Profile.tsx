@@ -93,9 +93,15 @@ const Profile = ({
               });
 
               if (res.ok) {
-                logout();
-                router.push("/login");
-                router.refresh();
+                openModal("normal", {
+                  message: "로그아웃이 완료되었습니다.",
+                  onClick: () => {
+                    closeModal();
+                    logout();
+                    router.push("/login");
+                    router.refresh();
+                  },
+                });
               } else {
                 openModal("normal", {
                   message: "로그아웃에 실패했습니다.",

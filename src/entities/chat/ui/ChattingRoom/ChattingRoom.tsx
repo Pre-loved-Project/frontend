@@ -222,27 +222,35 @@ export const ChattingRoom = ({
   return (
     <div className="relative h-[calc(100vh-70px)] w-full xl:h-[calc(100vh-100px)]">
       {/* 게시글 정보 영역 */}
-      <div className="absolute top-0 left-0 flex h-[100px] w-full items-center gap-4 border-b border-gray-500 p-4">
+      <div className="relative flex h-[100px] w-full items-center gap-4 border-b border-gray-500 p-4">
         {/* 게시글 이미지 */}
         <img
           src={post?.images[0]}
           alt="게시글 이미지"
           className="h-15 w-15 rounded object-cover"
         />
-        {/* 제목과 가격 세로 정렬 */}
-        <div className="flex flex-col">
-          <span className="font-bold text-white">
-            {post?.title}
+
+        {/* 제목 + 가격 */}
+        <div className="flex min-w-0 flex-1 flex-col">
+          <span className="flex min-w-0 items-start font-bold text-white">
+            <span className="line-clamp-2 max-w-full min-w-0 break-words">
+              {post?.title}
+            </span>
+
             {post && (
-              <PostStatusBadge status={currentPostStatus} className="ml-2" />
+              <PostStatusBadge
+                status={currentPostStatus}
+                className="ml-2 shrink-0"
+              />
             )}
           </span>
+
           <span className="text-white">
             {post?.price.toLocaleString("ko-KR") + " 원"}
           </span>
         </div>
 
-        <div className="absolute top-4 right-4">
+        <div className="shrink-0">
           {post && (
             <DealActionPanel
               isOwner={!(otherId === post.sellerId)}
