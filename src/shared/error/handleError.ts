@@ -2,6 +2,7 @@ import { notFound, redirect } from "next/navigation";
 import { AuthorizationError, NotFoundError, ServerError } from "./error";
 
 export function handleError(error: unknown) {
+  console.log(error);
   if (error instanceof AuthorizationError) {
     redirect("/login?expired=true");
   }

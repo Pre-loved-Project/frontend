@@ -5,6 +5,7 @@ import {
 } from "@tanstack/react-query";
 import { getPosts } from "@/entities/post/api/getPosts.server";
 import HomePageClient from "@/widgets/main/ui/Client/HomePage.client";
+import { handleError } from "@/shared/error/handleError";
 
 export default async function Page({
   searchParams,
@@ -18,17 +19,21 @@ export default async function Page({
 
   const queryClient = new QueryClient();
 
-  await queryClient.prefetchInfiniteQuery({
-    queryKey: ["posts", initialCategory, initialSort, initialKeyword],
-    queryFn: ({ pageParam = 1 }) =>
-      getPosts({
-        category: initialCategory,
-        sort: initialSort,
-        page: pageParam,
-        keyword: initialKeyword,
-      }),
-    initialPageParam: 1,
-  });
+  try {
+    await queryClient.fetchInfiniteQuery({
+      queryKey: ["posts", initialCategory, initialSort, initialKeyword],
+      queryFn: ({ pageParam = 1 }) =>
+        getPosts({
+          category: initialCategory,
+          sort: initialSort,
+          page: pageParam,
+          keyword: initialKeyword,
+        }),
+      initialPageParam: 1,
+    });
+  } catch (e) {
+    handleError(e);
+  }
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
