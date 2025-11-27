@@ -20,6 +20,7 @@ import { PostDetail } from "@/entities/post/model/types/post";
 import PostStatusBadge from "@/entities/post/ui/badge/PostStatusBadge";
 import { getChattingRoomStatus } from "@/features/chat/api/getChattingRoomStatus";
 import { handleError } from "@/shared/error/handleError";
+import { apiFetch } from "@/shared/api/fetcher";
 
 export function PostDetailSection({ post }: { post: PostDetail }) {
   const router = useRouter();
@@ -102,12 +103,17 @@ export function PostDetailSection({ post }: { post: PostDetail }) {
       message: "정말 이 게시물을 삭제하시겠습니까?",
       onConfirm: async () => {
         try {
-          await fetch(`/api/postings/${post.postingId}`, { method: "DELETE" });
+          await apiFetch(`/api/postings/${post.postingId}`, {
+            method: "DELETE",
+          });
           queryClient.removeQueries({
             queryKey: ["postDetail", post.postingId],
           });
           queryClient.invalidateQueries({
             queryKey: ["sellerPosts", post.sellerId],
+          });
+          queryClient.invalidateQueries({
+            queryKey: ["myPosts"],
           });
           closeModal();
           openModal("normal", {
