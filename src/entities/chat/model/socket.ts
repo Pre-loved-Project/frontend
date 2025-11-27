@@ -1,8 +1,8 @@
-import { error } from "console";
 import { DealStatus, MessageProps } from "./types";
 import { useAuthStore } from "@/features/auth/model/auth.store";
 import { PostStatus } from "@/entities/post/model/types/post";
-import { useModalStore } from "@/shared/model/modal.store";
+import { AuthorizationError } from "@/shared/error/error";
+import { handleError } from "@/shared/error/handleError";
 
 export interface ChatSocketEvents {
   onOpen?: () => void;
@@ -91,7 +91,6 @@ export class ChatSocket {
           console.warn("[Socket] Token expired (4001)");
 
           const { logout, setAccessToken } = useAuthStore.getState();
-          const { openModal, closeModal } = useModalStore.getState();
 
           try {
             const refreshed = await fetch("/api/auth/refresh", {
@@ -102,16 +101,9 @@ export class ChatSocket {
             if (!refreshed.ok) {
               logout();
 
-              openModal("normal", {
-                message: "세션이 만료되었습니다. 다시 로그인 해주세요.",
-                buttonText: "확인",
-                onClick: () => {
-                  closeModal();
-                  location.replace("/login");
-                },
-              });
-
-              return;
+              throw new AuthorizationError(
+                "세션이 만료되었습니다.\n다시 로그인 해주세요.",
+              );
             }
 
             const { accessToken: newToken } = await refreshed.json();
@@ -119,7 +111,7 @@ export class ChatSocket {
 
             this.reconnect();
           } catch (err) {
-            console.error("[Socket] refresh failed:", err);
+            handleError(err);
             logout();
             return;
           }
