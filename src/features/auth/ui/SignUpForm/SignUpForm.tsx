@@ -32,6 +32,8 @@ export const SignUpForm = ({ onSuccess, onError }: SignUpFormProps) => {
     string | null
   >(null);
 
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+
   //이메일 유효성 검사
   const validateEmail = (value: string) => {
     const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -119,6 +121,7 @@ export const SignUpForm = ({ onSuccess, onError }: SignUpFormProps) => {
 
   // 회원가입 폼 제출 핸들러
   const handleSubmit = async (e: React.FormEvent) => {
+    setIsLoading(true);
     e.preventDefault();
     console.log("회원가입 요청 폼 제출");
     try {
@@ -152,6 +155,8 @@ export const SignUpForm = ({ onSuccess, onError }: SignUpFormProps) => {
           onError?.("회원가입에 실패했습니다. 잠시 후 다시 시도해주세요.");
         }
       }
+    } finally {
+      setIsLoading(false);
     }
   };
   const dropDownWidth = cn("w-[100px]", "md:w-[135px]", "xl:w-[200px]");
@@ -230,7 +235,7 @@ export const SignUpForm = ({ onSuccess, onError }: SignUpFormProps) => {
       </div>
 
       <Button
-        variant="primary"
+        variant={isLoading ? "secondary" : "primary"}
         type="submit"
         className="mt-6"
         disabled={
@@ -247,7 +252,7 @@ export const SignUpForm = ({ onSuccess, onError }: SignUpFormProps) => {
           !day
         }
       >
-        가입하기
+        {isLoading ? "가입 중 ..." : "가입하기"}
       </Button>
     </form>
   );

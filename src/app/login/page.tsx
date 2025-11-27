@@ -1,23 +1,38 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { LoginForm } from "@/features/auth/ui/LoginForm/LoginForm";
 import { Modal } from "@/shared/ui/Modal/Modal";
 import { useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 import { useAuthStore } from "@/features/auth/model/auth.store";
+import { useModalStore } from "@/shared/model/modal.store";
 
-export default function SignUpPage() {
+export default function LoginPage() {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const { setIsLogined } = useAuthStore();
+  const { openModal, closeModal } = useModalStore();
+
+  useEffect(() => {
+    queryClient.clear();
+  }, []);
+
   return (
     <div className="flex min-h-[calc(100vh-70px)] flex-col items-center justify-center px-4 md:min-h-[calc(100vh-80px)] xl:min-h-[calc(100vh-100px)]">
       <h1 className="mb-8 text-2xl font-bold text-white">로그인</h1>
       <LoginForm
         size="lg"
         onSuccess={() => {
-          setIsLogined(true);
-          router.push("/"); //메인 페이지 이동
+          openModal("normal", {
+            message: "로그인에 성공하였습니다.",
+            onClick: () => {
+              closeModal();
+              setIsLogined(true);
+              router.push("/"); //메인 페이지 이동
+            },
+          });
         }}
         onError={(msg) => {
           setErrorMessage(msg);
