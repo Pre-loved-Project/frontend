@@ -1,10 +1,18 @@
-import { MessageProps } from "./types";
+import { DealStatus, MessageProps } from "./types";
 import { useAuthStore } from "@/features/auth/model/auth.store";
+import { PostStatus } from "@/entities/post/model/types/post";
+import { AuthorizationError } from "@/shared/error/error";
+import { handleError } from "@/shared/error/handleError";
 
 export interface ChatSocketEvents {
   onOpen?: () => void;
   onMessage?: (message: MessageProps) => void;
   onSystem?: (system: { type: string; message: string }) => void;
+  onDealUpdate?: (update: {
+    postStatus: PostStatus;
+    dealStatus: DealStatus;
+    message: string;
+  }) => void;
   onClose?: (code: number, reason?: string) => void;
   onError?: (event: Event) => void;
 }
@@ -17,6 +25,10 @@ export class ChatSocket {
   constructor(chatId: number, events: ChatSocketEvents = {}) {
     this.chatId = chatId;
     this.events = events;
+  }
+
+  isOpen(): boolean {
+    return this.socket !== null && this.socket.readyState === WebSocket.OPEN;
   }
 
   connect(): Promise<void> {
@@ -37,12 +49,22 @@ export class ChatSocket {
       this.socket.onopen = () => {
         console.log("[Socket] Connected");
         this.events.onOpen?.();
-        resolve(); // ✅ 연결 완료
+        resolve();
       };
 
       this.socket.onmessage = (event) => {
         try {
           const data = JSON.parse(event.data);
+
+          if (data.type === "deal_update") {
+            this.events.onDealUpdate?.({
+              dealStatus: data.dealStatus,
+              postStatus: data.postStatus,
+              message: data.systemMessage,
+            });
+            return;
+          }
+
           if (["welcome", "system", "read"].includes(data.type)) {
             this.events.onSystem?.(data);
             return;
@@ -64,7 +86,37 @@ export class ChatSocket {
         }
       };
 
-      this.socket.onclose = (event) => {
+      this.socket.onclose = async (event) => {
+        if (event.code === 4001) {
+          console.warn("[Socket] Token expired (4001)");
+
+          const { logout, setAccessToken } = useAuthStore.getState();
+
+          try {
+            const refreshed = await fetch("/api/auth/refresh", {
+              method: "POST",
+              credentials: "include",
+            });
+
+            if (!refreshed.ok) {
+              logout();
+
+              throw new AuthorizationError(
+                "세션이 만료되었습니다.\n다시 로그인 해주세요.",
+              );
+            }
+
+            const { accessToken: newToken } = await refreshed.json();
+            setAccessToken(newToken);
+
+            this.reconnect();
+          } catch (err) {
+            handleError(err);
+            logout();
+            return;
+          }
+        }
+
         console.warn("[Socket] Closed:", event.code);
         this.events.onClose?.(event.code, event.reason);
         this.socket = null;
@@ -76,6 +128,12 @@ export class ChatSocket {
         reject(err);
       };
     });
+  }
+
+  private reconnect() {
+    console.log("[Socket] Reconnecting after refresh…");
+    this.socket = null;
+    this.connect();
   }
 
   sendMessage(type: "text" | "image", content: string) {
@@ -95,9 +153,16 @@ export class ChatSocket {
 
   leaveRoom() {
     if (!this.socket) return;
-    console.log(this.socket);
-    this.socket.send(JSON.stringify({ event: "leave_room" }));
-    this.socket.close(1000, "User left");
+
+    const state = this.socket.readyState;
+
+    if (state === WebSocket.OPEN) {
+      this.socket.send(JSON.stringify({ event: "leave_room" }));
+      this.socket.close(1000, "User left");
+    } else {
+      this.socket.close(1000, `User left skipped - ${state.toString()}`);
+    }
+
     this.socket = null;
   }
 }

@@ -1,5 +1,12 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
+import { useQueryClient } from "@tanstack/react-query";
+import { getPostDetail } from "@/entities/post/api/getPostDetail";
+import { useDebouncedCallback } from "@/shared/lib/useDebouncedCallback";
+import PostStatusBadge from "../badge/PostStatusBadge";
+import { PostStatus } from "../../model/types/post";
 
 interface PostCardProps {
   postingId: number;
@@ -12,6 +19,7 @@ interface PostCardProps {
   chatCount: number;
   viewCount: number;
   thumbnail: string;
+  status: PostStatus;
 }
 
 const PostCard = ({
@@ -22,17 +30,37 @@ const PostCard = ({
   chatCount,
   viewCount,
   thumbnail,
+  status,
 }: PostCardProps) => {
+  const queryClient = useQueryClient();
+
+  const { debouncedCallback: handleMouseEnter, cancel: handleMouseLeave } =
+    useDebouncedCallback(() => {
+      const cached = queryClient.getQueryData(["postDetail", postingId]);
+      if (cached) return;
+
+      queryClient.prefetchQuery({
+        queryKey: ["postDetail", postingId],
+        queryFn: () => getPostDetail(postingId),
+        staleTime: 1000 * 60 * 3,
+      });
+    }, 200);
+
   return (
-    <Link href={`/detail/${postingId}`}>
-      <article className="w-full rounded-[8px] border border-[#353542] bg-[#252530] p-[10px] md:pb-[20px] xl:pb-[25px]">
-        <div className="flex flex-col gap-[10px] md:gap-[20px] xl:gap-[25px]">
-          <div className="relative h-[98px] w-full overflow-hidden rounded-[6px] md:h-[160px] xl:h-[220px]">
+    <Link
+      href={`/detail/${postingId}`}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
+      <article className="w-full rounded-lg border border-[#353542] bg-[#252530] p-2.5 md:pb-5 xl:pb-6">
+        <div className="flex flex-col gap-2.5 md:gap-5 xl:gap-6">
+          <div className="relative h-24 w-full overflow-hidden rounded-md md:h-40 xl:h-56">
             {thumbnail ? (
               <Image
                 src={thumbnail}
                 alt={title}
                 fill
+                sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw"
                 className="object-cover transition-transform duration-200 ease-in-out hover:scale-105"
               />
             ) : (
@@ -41,31 +69,34 @@ const PostCard = ({
               </div>
             )}
           </div>
-          <div className="flex flex-col gap-[5px] md:gap-[10px]">
-            <h1 className="line-clamp-2 h-[28px] text-sm leading-none font-medium text-[#F1F1F5] md:h-[32px] md:text-[16px] xl:h-[36px] xl:text-[18px]">
+
+          <div className="flex flex-col gap-1.5 md:gap-2.5">
+            <h1 className="line-clamp-2 h-7 text-sm leading-none font-medium text-[#F1F1F5] md:h-8 md:text-base xl:h-9 xl:text-lg">
               {title}
             </h1>
+            <PostStatusBadge status={status} className="block w-fit" />
             <p className="text-xs text-[#9FA6B2] md:text-sm">
-              {price?.toLocaleString()} 원
+              {price.toLocaleString()} 원
             </p>
-            <div className="flex w-full flex-col gap-[5px] text-xs leading-none font-light text-[#6E6E82] md:flex-row md:justify-between md:text-[14px] xl:text-[16px]">
-              <div className="flex gap-[5px]">
-                <span aria-label="조회 수" title="조회 수">
-                  조회
-                </span>
+
+            <div className="flex w-full flex-col gap-1.5 text-xs leading-none font-light text-[#6E6E82] md:flex-row md:justify-between md:text-sm xl:text-base">
+              <div className="flex gap-1.5">
+                <span>조회</span>
                 <span>{viewCount}</span>
               </div>
-              <div className="flex items-center gap-[4px]">
+
+              <div className="flex items-center gap-1">
                 <img
                   src="/icons/chat.svg"
                   alt="채팅 수"
-                  className="h-[10px] w-[10px]"
+                  className="h-2.5 w-2.5"
                 />
                 <span>{chatCount}</span>
+
                 <img
                   src="/icons/heart.svg"
                   alt="좋아요 수"
-                  className="h-[10px] w-[10px]"
+                  className="h-2.5 w-2.5"
                 />
                 <span>{likeCount}</span>
               </div>

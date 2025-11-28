@@ -1,62 +1,122 @@
 "use client";
 import React, { useState, useRef, useEffect, useMemo } from "react";
-import { User } from "@/entities/user/model/types/user";
-import { PostDetail } from "@/entities/post/model/types/post";
-import { MessageProps, MessagesResponse } from "../../model/types";
 import { MessageRow, MessageRowProps } from "../MessageRow/MessageRow";
-import Button from "@/shared/ui/Button/Button";
-import { TextField } from "@/shared/ui/TextField/TextField";
-import DeleteIcon from "@/shared/images/delete.svg";
-import { apiFetch } from "@/shared/api/fetcher";
 import { uploadImage } from "@/shared/api/uploadImage";
 import { useModalStore } from "@/shared/model/modal.store";
-import { ChatSocket } from "../../model/socket";
+import Button from "@/shared/ui/Button/Button";
+import { TextField } from "@/shared/ui/TextField/TextField";
+import DeleteIcon from "@/shared/icons/delete.svg";
+import PostStatusBadge from "@/entities/post/ui/badge/PostStatusBadge";
+import DealActionPanel from "@/features/deal/ui/DealActionPanel/DealActionPanel";
+import { useChatMessages } from "../../lib/useChatMessages";
+import { useChatSocket } from "../../lib/useChatSocket";
+import { useDealStatus } from "../../lib/useDealStatus";
+import { useInfiniteScroll } from "@/shared/lib/useInfiniteScroll";
+import { DealStatus } from "../../model/types";
+
+import { getPostDetail } from "@/entities/post/api/getPostDetail";
+import { getUser } from "@/entities/user/api/getUser";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { createChattingRoom } from "@/features/chat/api/createChattingRoom";
+import { handleError } from "@/shared/error/handleError";
 
 export const ChattingRoom = ({
   postingId,
   otherId,
   chatId: initialChatId,
+  status: dealStatus,
 }: {
   postingId: number;
   otherId: number;
   chatId?: number;
+  status?: DealStatus;
 }) => {
   const [chatId, setChatId] = useState<number | null>(initialChatId ?? null);
-  const [post, setPost] = useState<PostDetail | null>(null);
-  const [otherUser, setOtherUser] = useState<User | null>(null);
-  const [messages, setMessages] = useState<MessageProps[]>([]);
-  const [cursor, setCursor] = useState<number | null>(null);
-  const [hasNext, setHasNext] = useState<boolean>(true);
+  const queryClient = useQueryClient();
+  const {
+    data: post,
+    isLoading: isPostLoading,
+    isError: isPostingError,
+    error: postingError,
+  } = useQuery({
+    queryKey: ["postDetail", postingId],
+    queryFn: () => getPostDetail(postingId),
+  });
 
-  const [isOtherUserLoading, setIsOtherUserLoading] = useState(false);
-  const [isPostLoading, setIsPostLoading] = useState(false);
-  const [isMessagesLoading, setIsMessagesLoading] = useState(false);
+  if (isPostingError) {
+    handleError(postingError);
+  }
+
+  const {
+    data: otherUser,
+    isLoading: isOtherUserLoading,
+    isError: isOtherUserError,
+    error: otherUserError,
+  } = useQuery({
+    queryKey: ["otherUser", otherId],
+    queryFn: () => getUser(otherId),
+  });
+
+  if (isOtherUserError) {
+    handleError(otherUserError);
+  }
+
+  const {
+    messages,
+    pushMessageToCache,
+    fetchMoreMessages,
+    hasNextPage,
+    isError: isChatMessagesError,
+    error: chatMessagesError,
+    isMessagesLoading,
+    scrollContainerRef,
+    messagesEndRef,
+  } = useChatMessages(chatId);
+
+  if (isChatMessagesError) {
+    handleError(chatMessagesError);
+  }
+
+  const {
+    postStatus: currentPostStatus,
+    dealStatus: currentDealStatus,
+    isLoading: isDealLoading,
+    onDealChange,
+    applyUpdate,
+  } = useDealStatus(
+    chatId ?? null,
+    post?.status ?? "SELLING",
+    dealStatus ?? "ACTIVE",
+  );
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  const initialScrollDone = useRef(false);
+
+  useEffect(() => {
+    if (!initialScrollDone.current && messages.length > 0) {
+      initialScrollDone.current = true;
+      messagesEndRef.current?.scrollIntoView({ behavior: "auto" });
+    }
+  }, [messages]);
+
+  const { sendMessage } = useChatSocket(
+    chatId,
+    pushMessageToCache,
+    scrollToBottom,
+    applyUpdate,
+  );
 
   const { openModal, closeModal } = useModalStore();
-
   const [text, setText] = useState("");
   const [image, setImage] = useState<File | null>(null);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-  const socketRef = useRef<ChatSocket | null>(null);
-
-  const connectSocket = (id: number): Promise<void> => {
-    return new Promise((resolve) => {
-      if (socketRef.current) socketRef.current.leaveRoom();
-
-      const socket = new ChatSocket(id, {
-        onOpen: () => {
-          console.log("[Socket] connected");
-          resolve();
-        },
-        onMessage: (msg) => setMessages((prev) => [...prev, msg]),
-        onSystem: (sys) => console.log("[System]", sys.message),
-        onClose: (code) => console.log("[Socket] Closed:", code),
-      });
-
-      socket.connect();
-      socketRef.current = socket;
-    });
-  };
+  const messagesTopRef = useInfiniteScroll<HTMLDivElement>(
+    fetchMoreMessages,
+    isMessagesLoading,
+    hasNextPage,
+  );
 
   const formatTime = (time: string) =>
     new Date(time).toLocaleTimeString("ko-KR", {
@@ -70,15 +130,15 @@ export const ChattingRoom = ({
     return `${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일`;
   };
 
-  const messagesWithComputedProps = (
-    msgList: MessageProps[],
-  ): MessageRowProps[] => {
+  const displayMessages = useMemo((): MessageRowProps[] => {
+    if (!messages.length) return [];
+
     const result: MessageRowProps[] = [];
     let lastDate: string | null = null;
 
-    msgList.forEach((msg, i) => {
-      const prev = msgList[i - 1];
-      const next = msgList[i + 1];
+    messages.forEach((msg, i) => {
+      const prev = messages[i - 1];
+      const next = messages[i + 1];
 
       const currentDate = formatDate(msg.sendAt);
       const currentTime = formatTime(msg.sendAt);
@@ -88,7 +148,6 @@ export const ChattingRoom = ({
       const showTime =
         !next || next.isMine !== msg.isMine || nextTime !== currentTime;
 
-      //날짜가 바뀌면 날짜 구분선 추가
       if (lastDate !== currentDate) {
         result.push({
           message: {
@@ -109,101 +168,15 @@ export const ChattingRoom = ({
         message: msg,
         profileImage:
           !msg.isMine && showProfile
-            ? otherUser?.imageUrl
-              ? otherUser.imageUrl
-              : "/icons/user.svg"
+            ? otherUser?.imageUrl || "/icons/user.svg"
             : undefined,
         showProfile,
         showTime,
       });
     });
+
     return result;
-  };
-
-  //게시물 정보 조회하여 렌더링
-  useEffect(() => {
-    async function fetchPost() {
-      try {
-        setIsPostLoading(true);
-        const res = await apiFetch<PostDetail>(`/api/postings/${postingId}`, {
-          method: "GET",
-        });
-
-        setPost(res);
-      } catch {
-        openModal("normal", {
-          message: "게시물 정보 조회에 실패했습니다.",
-          onClick: () => closeModal(),
-        });
-      } finally {
-        setIsPostLoading(false);
-      }
-    }
-    fetchPost();
-  }, [postingId]);
-
-  //상대방 정보 가져오기
-  useEffect(() => {
-    async function fecthUser() {
-      try {
-        setIsOtherUserLoading(true);
-        const res = await apiFetch<User>(`/api/users/${otherId}`, {
-          method: "GET",
-        });
-        setOtherUser(res);
-      } catch {
-        openModal("normal", {
-          message: "상대 유저 정보 조회에 실패했습니다.",
-          onClick: () => closeModal(),
-        });
-      } finally {
-        setIsOtherUserLoading(false);
-      }
-    }
-    fecthUser();
-  }, []);
-
-  useEffect(() => {
-    if (!chatId) return;
-
-    async function fetchInitialMessages() {
-      try {
-        setIsMessagesLoading(true);
-        const res = await apiFetch<MessagesResponse>(
-          `/api/chat/${chatId}?size=20`,
-          { method: "GET" },
-        );
-        const sorted = [...res.messages].sort(
-          (a, b) => new Date(a.sendAt).getTime() - new Date(b.sendAt).getTime(),
-        );
-        setMessages(sorted);
-        setCursor(res.nextCursor);
-        setHasNext(res.hasNext);
-      } catch {
-        openModal("normal", {
-          message: "메시지 조회에 실패했습니다.",
-          onClick: () => closeModal(),
-        });
-      } finally {
-        setIsMessagesLoading(false);
-      }
-    }
-    fetchInitialMessages();
-  }, [chatId]);
-
-  const displayMessages = useMemo(
-    () => messagesWithComputedProps(messages),
-    [messages],
-  );
-
-  //기존 채팅방이 있을 경우 바로 소켓 연결
-  useEffect(() => {
-    if (!socketRef.current && chatId) connectSocket(chatId);
-  }, []);
-
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+  }, [messages, otherUser]);
 
   const handleSend = async () => {
     //채팅방이 없을 시 새로운 채팅방 생성 후 소켓 연결
@@ -211,15 +184,9 @@ export const ChattingRoom = ({
 
     if (!chatId) {
       try {
-        const res = await apiFetch<{ chatId: number; createdAt: string }>(
-          `/api/chat`,
-          {
-            method: "POST",
-            body: JSON.stringify({ postingId }),
-          },
-        );
-        setChatId(res.chatId);
-        await connectSocket(res.chatId);
+        const res = await createChattingRoom(postingId);
+        setChatId(res.chatId); //useChatSocket hook을 통한 소켓 자동 재연결.
+        queryClient.invalidateQueries({ queryKey: ["chats"] });
       } catch {
         openModal("normal", {
           message: "채팅방 생성에 실패했습니다.",
@@ -238,23 +205,6 @@ export const ChattingRoom = ({
     setImage(null);
   };
 
-  const sendMessage = (type: "text" | "image", content: string) => {
-    const now = new Date();
-    const sendAt = now.toISOString();
-    socketRef.current?.sendMessage(type, content);
-    setMessages((prev) => [
-      ...prev,
-      {
-        messageId: Date.now(),
-        type,
-        content,
-        isMine: true,
-        sendAt,
-        isRead: true,
-      },
-    ]);
-  };
-
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files ? e.target.files[0] : null;
     if (file && file.type.startsWith("image/")) {
@@ -262,7 +212,7 @@ export const ChattingRoom = ({
     }
   };
 
-  if (isPostLoading || isOtherUserLoading || isMessagesLoading)
+  if (isPostLoading || isOtherUserLoading)
     return (
       <div className="flex h-full w-full items-center justify-center">
         <p className="text-center text-lg font-medium text-white">로딩 중...</p>
@@ -272,24 +222,58 @@ export const ChattingRoom = ({
   return (
     <div className="relative h-[calc(100vh-70px)] w-full xl:h-[calc(100vh-100px)]">
       {/* 게시글 정보 영역 */}
-      <div className="absolute top-0 left-0 flex h-[100px] w-full items-center gap-4 border-b border-gray-500 p-4">
+      <div className="relative flex h-[100px] w-full items-center gap-4 border-b border-gray-500 p-4">
         {/* 게시글 이미지 */}
         <img
           src={post?.images[0]}
           alt="게시글 이미지"
           className="h-15 w-15 rounded object-cover"
         />
-        {/* 제목과 가격 세로 정렬 */}
-        <div className="flex flex-col">
-          <span className="font-bold text-white">{post?.title}</span>
+
+        {/* 제목 + 가격 */}
+        <div className="flex min-w-0 flex-1 flex-col">
+          <span className="flex min-w-0 items-start font-bold text-white">
+            <span className="line-clamp-2 max-w-full min-w-0 break-words">
+              {post?.title}
+            </span>
+
+            {post && (
+              <PostStatusBadge
+                status={currentPostStatus}
+                className="ml-2 shrink-0"
+              />
+            )}
+          </span>
+
           <span className="text-white">
             {post?.price.toLocaleString("ko-KR") + " 원"}
           </span>
         </div>
+
+        <div className="shrink-0">
+          {post && (
+            <DealActionPanel
+              isOwner={!(otherId === post.sellerId)}
+              postStatus={currentPostStatus}
+              dealStatus={currentDealStatus}
+              onDealChange={onDealChange}
+              isLoading={isDealLoading}
+            />
+          )}
+        </div>
       </div>
 
       {/* 메시지 리스트 영역 */}
-      <div className="absolute top-[100px] bottom-[100px] left-0 w-full overflow-y-auto p-4">
+      <div
+        ref={scrollContainerRef}
+        className="absolute top-[100px] bottom-[100px] left-0 w-full overflow-y-auto p-4"
+      >
+        <div ref={messagesTopRef} className="h-px" />
+        {isMessagesLoading && (
+          <div className="py-2 text-center text-sm text-gray-400">
+            이전 메시지를 불러오는 중...
+          </div>
+        )}
         {displayMessages.length === 0 ? (
           <div className="flex h-full items-center justify-center text-sm text-gray-300">
             메시지가 없습니다. <br /> 지금 바로 채팅을 시작해보세요!
@@ -306,7 +290,7 @@ export const ChattingRoom = ({
 
       {image && (
         <div className="absolute bottom-[100px] left-0 px-8">
-          <div className="relative flex items-center justify-center rounded-md bg-gradient-to-r from-[rgba(80,151,250,0.4)] to-[rgba(83,99,255,0.4)] p-8 px-20">
+          <div className="relative flex items-center justify-center rounded-md bg-linear-to-r from-[rgba(80,151,250,0.4)] to-[rgba(83,99,255,0.4)] p-8 px-20">
             <img
               src={URL.createObjectURL(image)}
               alt="Selected image"
@@ -335,7 +319,7 @@ export const ChattingRoom = ({
           <img
             src="/icons/image-select.svg"
             alt="Upload Icon"
-            className="h-[24px] w-[24px] md:h-[25px] md:w-[25px] xl:h-[34px] xl:w-[34px]"
+            className="h-6 w-6 md:h-[25px] md:w-[25px] xl:h-[34px] xl:w-[34px]"
           />
           <input
             type="file"

@@ -1,66 +1,74 @@
 import { useAuthStore } from "@/features/auth/model/auth.store";
-import { refreshAccessToken } from "./refresh";
-import { useModalStore } from "@/shared/model/modal.store";
+import { AuthorizationError, NotFoundError, ServerError } from "../error/error";
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
+interface ApiFetchOptions extends RequestInit {
+  noAuth?: boolean;
+  useBaseUrl?: boolean;
+}
+
 export async function apiFetch<T>(
   endpoint: string,
-  options: RequestInit & { noAuth?: boolean },
+  options: ApiFetchOptions = {},
 ): Promise<T> {
-  const { headers, noAuth, ...restOptions } = options;
+  const { headers, noAuth, useBaseUrl = true, ...restOptions } = options;
+
   const { accessToken, setAccessToken, logout } = useAuthStore.getState();
-  const { openModal, closeModal } = useModalStore.getState();
 
   const defaultHeaders: HeadersInit = {
     "Content-Type": "application/json",
   };
 
-  if (!noAuth && typeof window !== "undefined") {
+  if (!noAuth && accessToken) {
     defaultHeaders["Authorization"] = `Bearer ${accessToken}`;
   }
 
-  let res = await fetch(`${BASE_URL}${endpoint}`, {
+  const finalUrl = useBaseUrl ? `${BASE_URL}${endpoint}` : endpoint;
+
+  let res = await fetch(finalUrl, {
     headers: { ...defaultHeaders, ...headers },
-    cache: "no-store",
     credentials: "include",
+    cache: "no-store",
     ...restOptions,
   });
 
-  //AccessToken 만료 처리
   if (res.status === 401 && !noAuth) {
-    const newToken = await refreshAccessToken();
+    const refreshed = await fetch("/api/auth/refresh", {
+      method: "POST",
+      credentials: "include",
+    });
 
-    if (newToken) {
-      setAccessToken(newToken);
-      defaultHeaders["Authorization"] = `Bearer ${newToken}`;
-
-      //동일한 경로에 요청 재시도
-      res = await fetch(`${BASE_URL}${endpoint}`, {
-        headers: { ...defaultHeaders, ...headers },
-        cache: "no-store",
-        credentials: "include",
-        ...restOptions,
-      });
-    } else {
+    if (!refreshed.ok) {
       logout();
-      openModal("normal", {
-        message: "세션이 만료되었습니다. 다시 로그인 해주세요.",
-        buttonText: "확인",
-        onClick: () => {
-          closeModal();
-          if (typeof window !== "undefined") {
-            location.replace("/login");
-          }
-        },
-      });
-
-      throw new Error("세션이 만료되었습니다. 다시 로그인 해주세요.");
+      throw new AuthorizationError(
+        "세션이 만료되었습니다.\n다시 로그인 해주세요.",
+      );
     }
+
+    const { accessToken: newToken } = await refreshed.json();
+
+    setAccessToken(newToken);
+    defaultHeaders["Authorization"] = `Bearer ${newToken}`;
+
+    res = await fetch(finalUrl, {
+      headers: { ...defaultHeaders, ...headers },
+      credentials: "include",
+      cache: "no-store",
+      ...restOptions,
+    });
   }
 
   if (!res.ok) {
+    if (res.status === 404) {
+      throw new NotFoundError();
+    }
+
+    if (res.status >= 500) {
+      throw new ServerError();
+    }
     let message = `API Error ${res.status}`;
+
     try {
       const data = await res.json();
       message = data.message ?? data.detail ?? message;
@@ -68,7 +76,8 @@ export async function apiFetch<T>(
       const text = await res.text();
       if (text) message = text;
     }
-    throw new Error(message);
+
+    throw new ServerError(message);
   }
 
   return res.json() as Promise<T>;

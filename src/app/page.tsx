@@ -1,48 +1,47 @@
-import SideMenuWrapper from "@/widgets/main/ui/SideMenu/SideMenuWrapper";
-import PostList from "@/entities/post/ui/list/PostList";
-import { serverFetch } from "@/shared/api/fetcher.server";
-import { POST_PAGE_SIZE } from "@/entities/post/model/constants/api";
-import type { Post } from "@/entities/post/model/types/post";
+import {
+  QueryClient,
+  dehydrate,
+  HydrationBoundary,
+} from "@tanstack/react-query";
+import { getPosts } from "@/entities/post/api/getPosts.server";
+import HomePageClient from "@/widgets/main/ui/Client/HomePage.client";
+import { handleError } from "@/shared/error/handleError";
 
-export default async function HomePage({
+export default async function Page({
   searchParams,
 }: {
   searchParams: Promise<Record<string, string>>;
 }) {
   const params = await searchParams;
+  const initialCategory = params?.category ?? "전체";
+  const initialSort = params?.sort ?? "latest";
+  const initialKeyword = (params?.keyword ?? "").trim();
 
-  const selectedCategory = params?.category ?? "전체";
-  const selectedSortOption = params?.sort ?? "latest";
-  const page = Number(params?.page ?? 1);
-  const keyword = (params?.keyword ?? "").trim();
+  const queryClient = new QueryClient();
 
-  const query = new URLSearchParams({
-    page: String(page),
-    size: String(POST_PAGE_SIZE),
-    sort: selectedSortOption,
-  });
-  if (selectedCategory !== "전체") query.append("category", selectedCategory);
-  if (keyword) query.append("keyword", keyword);
-
-  const { data: posts } = await serverFetch<{ data: Post[] }>(
-    `/api/postings?${query.toString()}`,
-    { method: "GET" },
-  );
+  try {
+    await queryClient.fetchInfiniteQuery({
+      queryKey: ["posts", initialCategory, initialSort, initialKeyword],
+      queryFn: ({ pageParam = 1 }) =>
+        getPosts({
+          category: initialCategory,
+          sort: initialSort,
+          page: pageParam,
+          keyword: initialKeyword,
+        }),
+      initialPageParam: 1,
+    });
+  } catch (e) {
+    handleError(e);
+  }
 
   return (
-    <div className="flex flex-col gap-[60px] md:block">
-      <aside>
-        <SideMenuWrapper selectedCategory={selectedCategory} />
-      </aside>
-
-      <main className="mb-[30px] md:ml-[160px] md:pr-[30px] md:pl-[25px] lg:pr-[60px] lg:pl-[90px]">
-        <PostList
-          initialPosts={posts}
-          selectedCategory={selectedCategory}
-          selectedSortOption={selectedSortOption}
-          selectedKeyword={keyword}
-        />
-      </main>
-    </div>
+    <HydrationBoundary state={dehydrate(queryClient)}>
+      <HomePageClient
+        initialCategory={initialCategory}
+        initialSort={initialSort}
+        initialKeyword={initialKeyword}
+      />
+    </HydrationBoundary>
   );
 }

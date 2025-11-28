@@ -9,7 +9,9 @@ interface ChatItemProps {
 }
 
 const ChatItem = ({ chat, onClick }: ChatItemProps) => {
-  const formattedTime = useFormattedTime(chat.createdAt);
+  const lastMessageContent =
+    chat.lastMessage.type === "image" ? "이미지" : chat.lastMessage.content;
+  const formattedTime = useFormattedTime(chat.lastMessage.sendAt);
 
   return (
     <button
@@ -19,7 +21,7 @@ const ChatItem = ({ chat, onClick }: ChatItemProps) => {
       <div className="relative h-12 w-12 flex-shrink-0">
         <Image
           src={chat.otherImage || Profile}
-          alt={`${chat.otherNick} 프로필`}
+          alt={`${chat.otherNickname} 프로필`}
           fill
           sizes="48px"
           className="rounded-full object-cover"
@@ -28,11 +30,11 @@ const ChatItem = ({ chat, onClick }: ChatItemProps) => {
 
       <div className="flex flex-1 flex-col">
         <div className="flex items-center justify-between">
-          <span className="font-semibold text-white">{chat.otherNick}</span>
+          <span className="font-semibold text-white">{chat.otherNickname}</span>
           <span className="text-xs text-gray-400">{formattedTime}</span>
         </div>
 
-        <p className="truncate text-sm text-gray-400">{chat.lastMessage}</p>
+        <p className="truncate text-sm text-gray-400">{lastMessageContent}</p>
       </div>
     </button>
   );

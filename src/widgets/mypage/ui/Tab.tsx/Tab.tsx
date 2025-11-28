@@ -1,8 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
 import cn from "@/shared/lib/cn";
-import ArrowDownIcon from "@/shared/images/arrow-down.svg";
-import ArrowUpIcon from "@/shared/images/arrow-up.svg";
 import { TabSortProps } from "@/widgets/mypage/model/tabSort.types";
 
 const Tab = ({ options, selected, onChange }: TabSortProps) => {
@@ -30,11 +28,23 @@ const Tab = ({ options, selected, onChange }: TabSortProps) => {
           aria-haspopup="dialog"
           aria-expanded={open}
           aria-controls="sort-options"
-          className="flex items-center justify-between gap-[5px] p-[5px] text-[14px] leading-none font-[400] text-white"
+          className="flex items-center justify-between gap-1.25 p-1.25 text-sm leading-none font-normal text-white"
           onClick={() => setOpen((prev) => !prev)}
         >
           {selectedLabel}
-          {open ? <ArrowUpIcon /> : <ArrowDownIcon />}
+          {open ? (
+            <img
+              src="/icons/arrow-up.svg"
+              alt="Arrow Up"
+              className="h-auto w-auto"
+            />
+          ) : (
+            <img
+              src="/icons/arrow-down.svg"
+              alt="Arrow Down"
+              className="h-auto w-auto"
+            />
+          )}
         </button>
 
         {open && (
@@ -91,7 +101,7 @@ const Tab = ({ options, selected, onChange }: TabSortProps) => {
             id={`tab-${value}`}
             tabIndex={selected === value ? 0 : -1}
             className={cn(
-              "w-[160px] border-b p-[16px] text-center text-[20px] leading-none font-normal transition-colors duration-150 hover:cursor-pointer hover:border-b-white focus-visible:outline-none",
+              "w-40 border-b p-4 text-xl leading-none font-normal transition-colors duration-150 hover:cursor-pointer hover:border-b-white focus-visible:outline-none",
               selected === value
                 ? "border-b-white text-white"
                 : "border-b-gray-600 text-gray-600",

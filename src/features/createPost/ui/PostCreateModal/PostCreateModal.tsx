@@ -125,9 +125,9 @@ export const PostCreateModal = ({
                 onClick={() => handleRemoveImage(idx)}
               >
                 <img
-                  src="icons/delete.svg"
+                  src="/icons/delete.svg"
                   alt="삭제"
-                  className="h-[10px] w-[10px]"
+                  className="h-2.5 w-2.5"
                 />
               </button>
             </div>
@@ -153,9 +153,9 @@ export const PostCreateModal = ({
           onClick={onClose}
         >
           <img
-            src="icons/delete.svg"
+            src="/icons/delete.svg"
             alt="닫기"
-            className="h-[24px] w-[24px] text-gray-600"
+            className="h-6 w-6 text-gray-600"
           />
         </button>
 
@@ -167,7 +167,7 @@ export const PostCreateModal = ({
             onClick={() => inputRef.current?.click()}
           >
             <img
-              src="icons/image-select.svg"
+              src="/icons/image-select.svg"
               alt="이미지 선택"
               className="h-8 w-8"
             />

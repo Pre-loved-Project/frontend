@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import PostCard from "./PostCard";
+import { PostStatus } from "../../model/types/post";
 
 const meta: Meta<typeof PostCard> = {
   title: "Post/PostCard",
@@ -16,6 +17,10 @@ const meta: Meta<typeof PostCard> = {
     chatCount: { control: "number" },
     viewCount: { control: "number" },
     thumbnail: { control: "text" },
+    status: {
+      control: { type: "radio" },
+      options: ["SELLING", "RESERVED", "SOLD"],
+    },
   },
 };
 
@@ -33,6 +38,7 @@ export const Mobile: Story = {
     chatCount: 2,
     viewCount: 101,
     thumbnail: "",
+    status: "SELLING",
   },
   globals: {
     viewport: { value: "mobile2", isRotated: false },
@@ -51,6 +57,7 @@ export const Tablet: Story = {
     chatCount: 2,
     viewCount: 101,
     thumbnail: "",
+    status: "RESERVED",
   },
   globals: {
     viewport: { value: "tablet", isRotated: false },
@@ -69,6 +76,7 @@ export const Desktop: Story = {
     chatCount: 2,
     viewCount: 101,
     thumbnail: "",
+    status: "SOLD",
   },
   globals: {
     viewport: { value: "desktop", isRotated: false },
