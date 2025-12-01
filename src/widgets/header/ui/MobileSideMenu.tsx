@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { useModalStore } from "@/shared/model/modal.store";
 import { useAuthStore } from "@/features/auth/model/auth.store";
 import cn from "@/shared/lib/cn";
 import { apiFetch } from "@/shared/api/fetcher";
@@ -23,6 +24,7 @@ export default function MobileSideMenu({
 }) {
   const router = useRouter();
   const { isLogined, logout } = useAuthStore();
+  const { openModal, closeModal } = useModalStore();
   const [isVisible, setIsVisible] = useState(false);
 
   const queryClient = useQueryClient();
@@ -125,13 +127,29 @@ export default function MobileSideMenu({
                   <button
                     type="button"
                     onClick={async () => {
-                      await apiFetch("/auth/logout", {
+                      const res = await fetch("/api/auth/logout", {
                         method: "POST",
                         credentials: "include",
                       });
-                      logout();
                       handleClose();
-                      router.push("/");
+                      if (res.ok) {
+                        openModal("normal", {
+                          message: "로그아웃이 완료되었습니다.",
+                          onClick: () => {
+                            closeModal();
+                            logout();
+                            router.push("/login");
+                            router.refresh();
+                          },
+                        });
+                      } else {
+                        openModal("normal", {
+                          message: "로그아웃에 실패했습니다.",
+                          onClick: () => {
+                            closeModal();
+                          },
+                        });
+                      }
                     }}
                     className="w-full px-4 py-3 text-left text-red-400 hover:bg-white/10"
                   >
