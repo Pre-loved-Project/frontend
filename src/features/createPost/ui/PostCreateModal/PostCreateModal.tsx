@@ -33,6 +33,7 @@ export const PostCreateModal = ({
   const [price, setPrice] = useState<number | "">("");
   const [category, setCategory] = useState("");
   const [description, setDescription] = useState("");
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -64,6 +65,7 @@ export const PostCreateModal = ({
   const handleSubmit = async () => {
     try {
       if (!title || !price || !category) return;
+      setIsLoading(true);
 
       const uploadedImageUrlArray: string[] = [];
       for (const file of images) {
@@ -92,6 +94,8 @@ export const PostCreateModal = ({
         onError?.(error.message);
       }
       onError?.(String(error));
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -219,11 +223,11 @@ export const PostCreateModal = ({
 
         <Button
           variant="primary"
-          disabled={!title || !price || !category || !description}
+          disabled={isLoading || !title || !price || !category || !description}
           onClick={handleSubmit}
           className={cn("mt-4", widthClass)}
         >
-          추가하기
+          {isLoading ? "추가 중 ..." : "추가하기"}
         </Button>
       </div>
     </div>
