@@ -58,14 +58,14 @@ export const DropDown = ({
         </span>
         {open ? (
           <img
-            src="icons/arrow-up.svg"
+            src="/icons/arrow-up.svg"
             alt="arrow up"
             aria-label="arrow up"
             className="h-[12px] w-[12px] md:h-[14px] md:w-[14px] xl:h-[16px] xl:w-[16px]"
           />
         ) : (
           <img
-            src="icons/arrow-down.svg"
+            src="/icons/arrow-down.svg"
             alt="arrow down"
             aria-label="arrow down"
             className="h-[12px] w-[12px] md:h-[14px] md:w-[14px] xl:h-[16px] xl:w-[16px]"
