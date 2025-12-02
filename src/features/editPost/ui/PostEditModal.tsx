@@ -97,11 +97,12 @@ export const PostEditModal = ({
   ].map((cat) => ({ label: cat, value: cat }));
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (files) {
-      setImages((prev) => [...prev, ...Array.from(files)]);
-      e.target.value = ""; // input 값 초기화
-    }
+    const files = e.currentTarget.files;
+    if (!files || files.length == 0) return;
+
+    const selected = Array.from(files);
+    setImages((prev) => [...prev, ...selected]);
+    e.target.value = ""; // input 값 초기화
   };
 
   const handleRemoveImageUrl = (index: number) => {
