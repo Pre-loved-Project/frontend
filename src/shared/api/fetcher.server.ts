@@ -17,14 +17,14 @@ export async function serverFetch<T>(
   if (!noAuth) {
     const accessToken = cookieStore.get("accessToken")?.value;
 
-    console.log("[serverFetch] AccessToken", accessToken);
-
     if (accessToken) {
       defaultHeaders["Authorization"] = `Bearer ${accessToken}`;
     }
   }
 
-  let res = await fetch(`${BASE_URL}${endpoint}`, {
+  const finalUrl = `${BASE_URL}${endpoint}`;
+
+  let res = await fetch(finalUrl, {
     headers: { ...defaultHeaders, ...headers },
     cache: "no-store",
     ...restOptions,
@@ -39,46 +39,42 @@ export async function serverFetch<T>(
       );
     }
 
-    const refreshRes = await fetch("/api/auth/refresh", {
+    const refreshRes = await fetch("http://localhost:3000/api/auth/refresh", {
       method: "POST",
-      credentials: "include",
+      headers: {
+        Cookie: `refreshToken=${refreshToken}`,
+      },
       cache: "no-store",
     });
 
     console.log("[serverFetch] refreshRes status:", refreshRes.status);
 
-    if (refreshRes.ok) {
-      const { accessToken: newToken } = await refreshRes.json();
-
-      res = await fetch(`${BASE_URL}${endpoint}`, {
-        headers: {
-          ...defaultHeaders,
-          ...headers,
-          Authorization: `Bearer ${newToken}`,
-        },
-        credentials: "include",
-        cache: "no-store",
-        ...restOptions,
-      });
-    } else {
+    if (!refreshRes.ok) {
       throw new AuthorizationError(
         "세션이 만료되었습니다.\n다시 로그인 해주세요.",
       );
     }
+
+    const { accessToken: newToken } = await refreshRes.json();
+
+    res = await fetch(finalUrl, {
+      headers: {
+        ...defaultHeaders,
+        ...headers,
+        Authorization: `Bearer ${newToken}`,
+      },
+      cache: "no-store",
+      ...restOptions,
+    });
   }
 
-  if (res.status === 404) {
-    throw new NotFoundError();
-  }
-
-  if (res.status >= 500) {
-    throw new ServerError();
-  }
+  if (res.status === 404) throw new NotFoundError();
+  if (res.status >= 500) throw new ServerError();
 
   if (!res.ok) {
     const text = await res.text();
-    throw new ServerError(text);
+    throw new ServerError(text || "요청 처리 중 오류가 발생했습니다.");
   }
 
-  return res.json() as Promise<T>;
+  return (await res.json()) as T;
 }

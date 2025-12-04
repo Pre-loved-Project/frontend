@@ -34,7 +34,7 @@ export async function apiFetch<T>(
   });
 
   if (res.status === 401 && !noAuth) {
-    const refreshed = await fetch("/api/auth/refresh", {
+    const refreshed = await fetch("https://localhost:3000/api/auth/refresh", {
       method: "POST",
       credentials: "include",
     });
