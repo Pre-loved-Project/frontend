@@ -11,13 +11,12 @@ export async function serverFetch<T>(
   const h = await headers();
   const cookie = h.get("cookie") ?? "";
 
-  const BASE_URL = getBaseUrl();
+  const BASE_URL = await getBaseUrl();
   const url = `${BASE_URL}${endpoint}`;
 
   const res = await fetch(url, {
     headers: {
       "Content-Type": "application/json",
-      ...headers,
       ...extraHeaders,
       Cookie: cookie,
     },
