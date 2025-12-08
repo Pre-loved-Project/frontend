@@ -71,6 +71,11 @@ const ChatList = ({ onSelect, tab = "all" }: ChatListProps) => {
       });
     });
   };
+
+  useChatListSocket({
+    onChatCreated: handleChatCreated,
+    onChatListUpdate: handleChatListUpdated,
+  });
   if (isError) {
     handleError(error);
   }
