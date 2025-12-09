@@ -2,9 +2,6 @@
 
 import Link from "next/link";
 import SearchForm from "./SearchForm";
-import { useQueryClient } from "@tanstack/react-query";
-import { getMyProfile } from "@/entities/user/api/mypage";
-import { useDebouncedCallback } from "@/shared/lib/useDebouncedCallback";
 
 interface HeaderDesktopProps {
   isLogined: boolean;
@@ -26,18 +23,6 @@ const HeaderDesktop = ({
   navItems,
   onOpenChat,
 }: HeaderDesktopProps) => {
-  const queryClient = useQueryClient();
-
-  const handleProfilePrefetch = () => {
-    queryClient.prefetchQuery({
-      queryKey: ["userProfile"],
-      queryFn: getMyProfile,
-    });
-  };
-
-  const { debouncedCallback: debouncedPrefetch, cancel: cancelPrefetch } =
-    useDebouncedCallback(handleProfilePrefetch, 500);
-
   return (
     <div className="hidden w-full items-center justify-between md:flex">
       <div className="text-white">
@@ -71,10 +56,6 @@ const HeaderDesktop = ({
                   <Link
                     href={href}
                     className="flex items-center justify-center"
-                    onMouseEnter={
-                      href === "/my" ? debouncedPrefetch : undefined
-                    }
-                    onMouseLeave={href === "/my" ? cancelPrefetch : undefined}
                   >
                     <img src={icon} alt={label} className="h-4 w-4" />
                     <p className="ml-1">{label}</p>
