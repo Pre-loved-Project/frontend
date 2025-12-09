@@ -35,11 +35,6 @@ export function useLike(postingId?: number) {
       if (!postingId || !context?.previousData) return;
       queryClient.setQueryData(["postDetail", postingId], context.previousData);
     },
-
-    onSettled: () => {
-      if (!postingId) return;
-      queryClient.invalidateQueries({ queryKey: ["postDetail", postingId] });
-    },
   });
 
   return {

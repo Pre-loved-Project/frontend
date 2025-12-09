@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, useMemo } from "react";
+import React, { useState, useRef, useMemo, useEffect } from "react";
 import cn from "@/shared/lib/cn";
 import { TextField } from "@/shared/ui/TextField/TextField";
 import { TextBox } from "@/shared/ui/TextBox/TextBox";
@@ -33,6 +33,7 @@ export const PostCreateModal = ({
   const [price, setPrice] = useState<number | "">("");
   const [category, setCategory] = useState("");
   const [description, setDescription] = useState("");
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -50,11 +51,12 @@ export const PostCreateModal = ({
   ].map((cat) => ({ label: cat, value: cat }));
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (files) {
-      setImages((prev) => [...prev, ...Array.from(files)]);
-      e.target.value = ""; // input 값 초기화
-    }
+    const files = e.currentTarget.files;
+    if (!files || files.length == 0) return;
+
+    const selected = Array.from(files);
+    setImages((prev) => [...prev, ...selected]);
+    e.target.value = ""; // input 값 초기화
   };
 
   const handleRemoveImage = (index: number) => {
@@ -64,6 +66,7 @@ export const PostCreateModal = ({
   const handleSubmit = async () => {
     try {
       if (!title || !price || !category) return;
+      setIsLoading(true);
 
       const uploadedImageUrlArray: string[] = [];
       for (const file of images) {
@@ -92,6 +95,8 @@ export const PostCreateModal = ({
         onError?.(error.message);
       }
       onError?.(String(error));
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -219,11 +224,11 @@ export const PostCreateModal = ({
 
         <Button
           variant="primary"
-          disabled={!title || !price || !category || !description}
+          disabled={isLoading || !title || !price || !category || !description}
           onClick={handleSubmit}
           className={cn("mt-4", widthClass)}
         >
-          추가하기
+          {isLoading ? "추가 중 ..." : "추가하기"}
         </Button>
       </div>
     </div>
