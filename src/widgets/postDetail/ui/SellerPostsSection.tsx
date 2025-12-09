@@ -59,10 +59,6 @@ export function SellerPostsSection({
           ),
         )}
       </div>
-
-      {isFetchingNextPage && (
-        <p className="mt-4 text-center text-gray-400">불러오는 중...</p>
-      )}
     </section>
   );
 }

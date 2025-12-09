@@ -9,7 +9,6 @@ import PostCarousel from "@/entities/post/ui/carousel/PostCarousel";
 import LikeButton from "@/features/like/ui/LikeButton";
 import Button from "@/shared/ui/Button/Button";
 import UserIcon from "@/shared/icons/user.svg";
-import Link from "next/link";
 
 import { useLike } from "@/features/like/lib/useLike";
 import { usePostEditModal } from "@/features/editPost/lib/usePostEditModal";
@@ -19,7 +18,6 @@ import { useAuthStore } from "@/features/auth/model/auth.store";
 import { PostDetail } from "@/entities/post/model/types/post";
 import PostStatusBadge from "@/entities/post/ui/badge/PostStatusBadge";
 import { getChattingRoomStatus } from "@/features/chat/api/getChattingRoomStatus";
-import { handleError } from "@/shared/error/handleError";
 import { apiFetch } from "@/shared/api/fetcher";
 
 export function PostDetailSection({ post }: { post: PostDetail }) {
@@ -29,32 +27,15 @@ export function PostDetailSection({ post }: { post: PostDetail }) {
   const { openModal, closeModal } = useModalStore();
   const openChat = useChatStore((s) => s.mount);
 
-  const {
-    data: seller,
-    isError: isSellerError,
-    error: sellerError,
-  } = useQuery({
+  const { data: seller } = useQuery({
     queryKey: ["seller", post.sellerId],
     queryFn: () => getUser(post.sellerId),
     enabled: !!post.sellerId,
   });
-
-  if (isSellerError) {
-    handleError(sellerError);
-  }
-
-  const {
-    data: chattingRoomStatus,
-    isError: isChattingRoomStatusError,
-    error: chattingRoomStatusError,
-  } = useQuery({
+  const { data: chattingRoomStatus } = useQuery({
     queryKey: ["findRoom", post.postingId],
     queryFn: () => getChattingRoomStatus(post.postingId),
   });
-
-  if (isChattingRoomStatusError) {
-    handleError(chattingRoomStatusError);
-  }
 
   const { toggleLike, isLoading: isLikeLoading } = useLike(post.postingId);
   const handleToggleLike = () => toggleLike(!post.isFavorite);
@@ -89,6 +70,7 @@ export function PostDetailSection({ post }: { post: PostDetail }) {
       });
       return;
     }
+
     if (chattingRoomStatus) {
       openChat({
         postingId: post.postingId,
@@ -106,15 +88,19 @@ export function PostDetailSection({ post }: { post: PostDetail }) {
           await apiFetch(`/api/postings/${post.postingId}`, {
             method: "DELETE",
           });
+
           queryClient.removeQueries({
             queryKey: ["postDetail", post.postingId],
           });
+
           queryClient.invalidateQueries({
             queryKey: ["sellerPosts", post.sellerId],
           });
+
           queryClient.invalidateQueries({
             queryKey: ["myPosts"],
           });
+
           closeModal();
           openModal("normal", {
             message: "삭제가 완료되었습니다.",
@@ -124,7 +110,13 @@ export function PostDetailSection({ post }: { post: PostDetail }) {
             },
           });
         } catch (err) {
-          console.error("게시물 삭제 실패:", err);
+          closeModal();
+          openModal("normal", {
+            message: "게시글 삭제에 실패했습니다.",
+            onClick: () => closeModal(),
+          });
+
+          console.error(err);
         }
       },
       onCancel: closeModal,
@@ -147,12 +139,14 @@ export function PostDetailSection({ post }: { post: PostDetail }) {
               <UserIcon className="h-full w-full text-white" />
             )}
           </div>
+
           <span className="flex items-center text-base md:text-xl xl:text-base">
             {seller?.nickname || "판매자"}
           </span>
         </div>
         <div className="mx-4 h-px bg-gray-600 xl:hidden" />
       </div>
+
       <div className="flex flex-col justify-between gap-5 py-6 md:pt-8 xl:w-1/2 xl:pt-0 xl:pb-[88px]">
         <div className="relative flex flex-col gap-5">
           <h1 className="text-xl font-bold">{post.title}</h1>
@@ -165,12 +159,14 @@ export function PostDetailSection({ post }: { post: PostDetail }) {
             className="absolute top-1 right-5"
           />
         </div>
+
         <div className="flex flex-col gap-5">
           <span className="flex flex-wrap gap-1 text-[#868b94]">
             <span>채팅 {post.chatCount}</span>·
             <span>관심 {post.likeCount}</span>·
             <span>조회 {post.viewCount}</span>
           </span>
+
           <div className="flex items-center justify-center gap-2.5">
             {post.isOwner ? (
               <>
