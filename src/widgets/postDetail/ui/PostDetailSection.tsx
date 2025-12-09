@@ -140,6 +140,7 @@ export function PostDetailSection({ post }: { post: PostDetail }) {
             <Link
               href={`/user/${seller?.userId ?? ""}`}
               aria-label="판매자 프로필 페이지"
+              className="h-full w-full"
             >
               {seller?.imageUrl ? (
                 <img
