@@ -137,20 +137,15 @@ export function PostDetailSection({ post }: { post: PostDetail }) {
         <PostCarousel images={post.images} />
         <div className="align-center mx-4 flex gap-3 py-4 md:mx-6 xl:mx-0">
           <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-full md:h-16 md:w-16 xl:h-14 xl:w-14">
-            <Link
-              href={`/user/${seller?.userId ?? ""}`}
-              aria-label="판매자 프로필 페이지"
-            >
-              {seller?.imageUrl ? (
-                <img
-                  src={seller.imageUrl}
-                  alt={`${seller.nickname} 프로필`}
-                  className="h-full w-full object-cover"
-                />
-              ) : (
-                <UserIcon className="h-full w-full text-white" />
-              )}
-            </Link>
+            {seller?.imageUrl ? (
+              <img
+                src={seller.imageUrl}
+                alt={`${seller.nickname} 프로필`}
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              <UserIcon className="h-full w-full text-white" />
+            )}
           </div>
           <span className="flex items-center text-base md:text-xl xl:text-base">
             {seller?.nickname || "판매자"}
