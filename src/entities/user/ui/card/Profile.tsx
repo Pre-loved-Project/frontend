@@ -35,16 +35,17 @@ const Profile = ({
   return (
     <article className="flex h-[556px] w-[335px] shrink-0 items-center justify-center rounded-lg border border-[#353542] bg-[#252530] px-5 py-7 md:h-[601px] md:w-[509px] md:px-7 xl:h-[753px] xl:w-[340px] xl:px-5 xl:pt-10">
       <div className="flex h-full w-full flex-col items-center justify-between">
-        <Image
-          src={imageUrl || DefaultProfileImage}
-          alt="프로필"
-          width={120}
-          height={120}
-          priority
-          fetchPriority="high"
-          sizes="(max-width:1280px) 120px, 180px"
-          className="rounded-full xl:h-[180px] xl:w-[180px]"
-        />
+        <div className="relative h-[120px] w-[120px] xl:h-[180px] xl:w-[180px]">
+          <Image
+            src={imageUrl || DefaultProfileImage}
+            alt="프로필"
+            fill
+            priority
+            fetchPriority="high"
+            className="rounded-full object-cover"
+            sizes="(max-width:1280px) 120px, 180px"
+          />
+        </div>
 
         <div className="w-full">
           <h1 className="mb-2.5 text-center text-xl leading-7 font-semibold text-white xl:text-2xl">
