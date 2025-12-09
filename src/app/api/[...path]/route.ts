@@ -13,6 +13,10 @@ async function proxy(
   req: NextRequest,
   ctx: { params: Promise<{ path: string[] }> },
 ) {
+  if (!req.nextUrl.pathname.startsWith("/api/")) {
+    return NextResponse.next();
+  }
+
   // 프록시 대상 경로 생성
   const { path: rawPath } = await ctx.params;
   const path = "/" + rawPath.join("/");
