@@ -80,6 +80,7 @@ export const PostEditModal = ({
   const [price, setPrice] = useState<number | "">(initPrice);
   const [category, setCategory] = useState(initCategory);
   const [content, setContent] = useState(initContent);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const inputRef = useRef<HTMLInputElement>(null);
   const categoryOptions = [
@@ -96,11 +97,12 @@ export const PostEditModal = ({
   ].map((cat) => ({ label: cat, value: cat }));
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (files) {
-      setImages((prev) => [...prev, ...Array.from(files)]);
-      e.target.value = ""; // input 값 초기화
-    }
+    const files = e.currentTarget.files;
+    if (!files || files.length == 0) return;
+
+    const selected = Array.from(files);
+    setImages((prev) => [...prev, ...selected]);
+    e.target.value = ""; // input 값 초기화
   };
 
   const handleRemoveImageUrl = (index: number) => {
@@ -120,6 +122,7 @@ export const PostEditModal = ({
         (imageUrls.length === 0 && images.length === 0)
       )
         return;
+      setIsLoading(true);
 
       // 새로 추가한 이미지 URL 배열 생성
       const uploadedImageUrlArray: string[] = [];
@@ -147,6 +150,8 @@ export const PostEditModal = ({
       console.error("게시글 수정 실패 : ", error);
       const message = error instanceof Error ? error.message : String(error);
       onError?.(message);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -248,11 +253,11 @@ export const PostEditModal = ({
 
         <Button
           variant="primary"
-          disabled={!title || !price || !category || !content}
+          disabled={isLoading || !title || !price || !category || !content}
           onClick={handleSubmit}
           className={cn("mt-4", widthClass)}
         >
-          수정하기
+          {isLoading ? "수정 중 ... " : "수정하기"}
         </Button>
       </div>
     </div>

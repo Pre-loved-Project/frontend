@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { ChatSocket } from "../model/socket";
+import { ChatSocket } from "../model/chatSocket";
 import { DealStatus, MessageProps } from "../model/types";
 import { PostStatus } from "@/entities/post/model/types/post";
 
@@ -86,7 +86,7 @@ export const useChatSocket = (
     if (chatId) connectSocket();
 
     return () => {
-      socketRef.current?.leaveRoom();
+      socketRef.current?.close();
       socketRef.current = null;
     };
   }, [chatId]);
