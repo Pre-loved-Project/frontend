@@ -15,6 +15,7 @@ const meta: Meta<typeof Message> = {
     },
     content: { control: "text" },
     isMine: { control: "boolean" },
+    isRead: { contorl: "boolean" },
   },
 };
 
@@ -26,6 +27,7 @@ export const MyText: Story = {
     type: "text",
     content: "네, 아직 있습니다. 상태는 아주 좋아요 🙂",
     isMine: true,
+    isRead: true,
   },
 };
 
@@ -34,6 +36,7 @@ export const OtherText: Story = {
     type: "text",
     content: "안녕하세요! 이 물건 아직 있나요?",
     isMine: false,
+    isRead: false,
   },
 };
 

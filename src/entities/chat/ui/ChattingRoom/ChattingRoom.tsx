@@ -63,7 +63,10 @@ export const ChattingRoom = ({
 
   const {
     messages,
+    lastReadMessageId,
+    lastOtherMessageId,
     pushMessageToCache,
+    applyReadStatus,
     fetchMoreMessages,
     hasNextPage,
     isError: isChatMessagesError,
@@ -102,12 +105,31 @@ export const ChattingRoom = ({
     }
   }, [messages]);
 
-  const { sendMessage } = useChatSocket(
+  const { isSocketConnected, sendMessage, readLastMessage } = useChatSocket(
     chatId,
+    otherId,
     pushMessageToCache,
     scrollToBottom,
     applyUpdate,
+    () => lastOtherMessageId,
+    applyReadStatus,
   );
+
+  const firstReadRequestDone = useRef(false);
+  useEffect(() => {
+    if (firstReadRequestDone.current) {
+      return;
+    }
+    if (
+      !isMessagesLoading &&
+      isSocketConnected &&
+      messages.length > 0 &&
+      lastOtherMessageId !== null
+    ) {
+      readLastMessage();
+      firstReadRequestDone.current = true;
+    }
+  }, [messages, isSocketConnected]);
 
   const { openModal, closeModal } = useModalStore();
   const [text, setText] = useState("");
