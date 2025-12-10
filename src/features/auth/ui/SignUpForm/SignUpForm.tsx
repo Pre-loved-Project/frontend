@@ -135,7 +135,7 @@ export const SignUpForm = ({ onSuccess, onError }: SignUpFormProps) => {
       };
 
       console.log(body);
-      const res = await apiFetch("/api/users/", {
+      const res = await apiFetch("/api/users", {
         method: "POST",
         body: JSON.stringify(body),
         noAuth: true,
