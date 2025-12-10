@@ -57,7 +57,6 @@ export const useChatMessages = (chatId: number | null) => {
     for (let i = messages.length - 1; i >= 0; i--) {
       const msg = messages[i];
       if (msg.type !== "system" && !msg.isMine) {
-        console.log(`현재 상대 마지막 메시지 id : ${msg.messageId}`);
         return msg.messageId;
       }
     }
@@ -110,7 +109,6 @@ export const useChatMessages = (chatId: number | null) => {
 
   const applyReadStatus = () => {
     if (!chatId) return;
-    console.log("applyReadStatus 호출");
     let stopUpdating = false;
 
     queryClient.setQueryData<InfiniteData<MessagesResponse>>(
@@ -124,9 +122,6 @@ export const useChatMessages = (chatId: number | null) => {
             if (stopUpdating) return msg;
             if (msg.isMine) {
               if (!msg.isRead) {
-                console.log(
-                  `applayReadStatus에서 msg ${msg.messageId}가 true로 바뀜`,
-                );
                 return { ...msg, isRead: true };
               } else {
                 stopUpdating = true;

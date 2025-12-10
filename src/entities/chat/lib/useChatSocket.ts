@@ -63,7 +63,6 @@ export const useChatSocket = (
           pushMessageToCache(msg);
           requestAnimationFrame(() => scrollToBottom?.());
           if (!msg.isMine) {
-            console.log("메시지 받자마자 읽음 처리");
             readLastMessage();
           }
         },
