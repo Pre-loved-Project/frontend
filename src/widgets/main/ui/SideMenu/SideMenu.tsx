@@ -1,10 +1,7 @@
 "use client";
 
-import { useQueryClient } from "@tanstack/react-query";
-import { getPosts } from "@/entities/post/api/getPosts";
 import cn from "@/shared/lib/cn";
 import { useRouter } from "next/navigation";
-import { useDebouncedCallback } from "@/shared/lib/useDebouncedCallback";
 import { useSearchParams } from "next/navigation";
 
 interface SideMenuProps {
@@ -15,33 +12,6 @@ interface SideMenuProps {
 const SideMenu = ({ categories, selectedCategory }: SideMenuProps) => {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const queryClient = useQueryClient();
-
-  const prefetchData = async (category: string) => {
-    const existing = queryClient.getQueryData([
-      "posts",
-      category,
-      "latest",
-      "",
-    ]);
-    if (existing) return;
-
-    queryClient.prefetchInfiniteQuery({
-      queryKey: ["posts", category, "latest", ""],
-      queryFn: ({ pageParam = 1 }) =>
-        getPosts({
-          category,
-          sort: "latest",
-          page: pageParam,
-          keyword: "",
-        }),
-      initialPageParam: 1,
-      staleTime: 1000 * 60 * 5,
-    });
-  };
-
-  const { debouncedCallback: handleHover, cancel: cancelHover } =
-    useDebouncedCallback(prefetchData, 200);
 
   const handleSelect = async (category: string) => {
     if (category === selectedCategory) return;
@@ -52,8 +22,6 @@ const SideMenu = ({ categories, selectedCategory }: SideMenuProps) => {
     params.delete("keyword");
 
     router.push(`/?${params.toString()}`);
-
-    cancelHover();
   };
 
   return (
@@ -74,8 +42,6 @@ const SideMenu = ({ categories, selectedCategory }: SideMenuProps) => {
           <li key={category}>
             <button
               type="button"
-              onMouseEnter={() => handleHover(category)}
-              onMouseLeave={cancelHover}
               onClick={() => handleSelect(category)}
               aria-selected={selectedCategory === category}
               className={cn(

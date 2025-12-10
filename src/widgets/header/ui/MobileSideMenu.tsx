@@ -6,10 +6,6 @@ import Link from "next/link";
 import { useModalStore } from "@/shared/model/modal.store";
 import { useAuthStore } from "@/features/auth/model/auth.store";
 import cn from "@/shared/lib/cn";
-import { apiFetch } from "@/shared/api/fetcher";
-import { useQueryClient } from "@tanstack/react-query";
-import { getMyProfile } from "@/entities/user/api/mypage";
-import { useDebouncedCallback } from "@/shared/lib/useDebouncedCallback";
 
 export default function MobileSideMenu({
   onClose,
@@ -26,18 +22,6 @@ export default function MobileSideMenu({
   const { isLogined, logout } = useAuthStore();
   const { openModal, closeModal } = useModalStore();
   const [isVisible, setIsVisible] = useState(false);
-
-  const queryClient = useQueryClient();
-
-  const handleProfilePrefetch = () => {
-    queryClient.prefetchQuery({
-      queryKey: ["userProfile"],
-      queryFn: getMyProfile,
-    });
-  };
-
-  const { debouncedCallback: debouncedPrefetch, cancel: cancelPrefetch } =
-    useDebouncedCallback(handleProfilePrefetch, 500);
 
   useEffect(() => {
     const timer = requestAnimationFrame(() => setIsVisible(true));
@@ -102,13 +86,13 @@ export default function MobileSideMenu({
                 </li>
 
                 <li>
-                  <Link
+                  {/* <Link
                     href="/ai"
                     className="block px-4 py-3 text-white hover:bg-white/10"
                     onClick={handleClose}
                   >
                     분석하기
-                  </Link>
+                  </Link> */}
                 </li>
 
                 <li>
@@ -116,8 +100,6 @@ export default function MobileSideMenu({
                     href="/my"
                     className="block px-4 py-3 text-white hover:bg-white/10"
                     onClick={handleClose}
-                    onMouseEnter={debouncedPrefetch}
-                    onMouseLeave={cancelPrefetch}
                   >
                     마이페이지
                   </Link>
