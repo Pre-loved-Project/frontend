@@ -111,11 +111,9 @@ export const DropDown = ({
               setOpen(false);
             }}
             className={cn(
-              "mt-1 flex cursor-pointer items-center rounded-md px-2 transition-colors",
+              "flex cursor-pointer items-center rounded-md px-2 py-2 transition-colors",
               "text-gray-400 hover:bg-gray-600 hover:text-white",
-              "w-[380px] gap-[5px] p-[10px]",
-              "md:w-[360px] md:gap-[5px] md:p-[10px]",
-              "xl:w-[400px] xl:gap-[5px] xl:p-[10px]",
+              "w-full",
             )}
           >
             {opt.label}
