@@ -115,7 +115,7 @@ export const PostCreateModal = ({
           <img
             src="/icons/delete.svg"
             alt="닫기"
-            className="h-6 w-6 text-gray-600"
+            className="h-6 w-6 text-gray-600 hover:cursor-pointer"
           />
         </button>
 
