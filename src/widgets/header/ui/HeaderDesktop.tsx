@@ -1,7 +1,9 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import SearchForm from "./SearchForm";
+import { useOpenCreatePostWithAuth } from "@/features/createPost/lib/useOpenCreatePost";
 
 interface HeaderDesktopProps {
   isLogined: boolean;
@@ -23,6 +25,11 @@ const HeaderDesktop = ({
   navItems,
   onOpenChat,
 }: HeaderDesktopProps) => {
+  const pathname = usePathname();
+  const { handleOpen } = useOpenCreatePostWithAuth();
+
+  const hideSellButton = pathname.startsWith("/my");
+
   return (
     <div className="hidden w-full items-center justify-between md:flex">
       <div className="text-white">
@@ -34,6 +41,23 @@ const HeaderDesktop = ({
 
         {isLogined ? (
           <ul className="flex text-sm font-normal text-white">
+            {!hideSellButton && (
+              <li className="flex items-center justify-center px-3">
+                <button
+                  type="button"
+                  onClick={handleOpen}
+                  className="flex cursor-pointer items-center justify-center"
+                >
+                  <img
+                    src="/icons/sell.svg"
+                    alt="판매하기"
+                    className="h-4 w-4"
+                  />
+                  <p className="ml-1">판매하기</p>
+                </button>
+              </li>
+            )}
+
             {navItems.map(({ href, label, icon, hasDivider }) => (
               <li
                 key={href}
@@ -41,9 +65,9 @@ const HeaderDesktop = ({
                   hasDivider
                     ? "relative before:absolute before:left-0 before:h-4 before:w-px before:bg-white after:absolute after:right-0 after:h-4 after:w-px after:bg-white"
                     : ""
-                } `}
+                }`}
               >
-                {href === "/chat" && onOpenChat ? (
+                {href === "/chat" ? (
                   <button
                     type="button"
                     onClick={() => onOpenChat()}

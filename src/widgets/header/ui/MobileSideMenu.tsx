@@ -2,9 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { useModalStore } from "@/shared/model/modal.store";
 import { useAuthStore } from "@/features/auth/model/auth.store";
+import { useOpenCreatePostWithAuth } from "@/features/createPost/lib/useOpenCreatePost";
 import cn from "@/shared/lib/cn";
 
 export default function MobileSideMenu({
@@ -19,9 +21,13 @@ export default function MobileSideMenu({
   }) => void;
 }) {
   const router = useRouter();
+  const pathname = usePathname();
   const { isLogined, logout } = useAuthStore();
   const { openModal, closeModal } = useModalStore();
+  const { handleOpen } = useOpenCreatePostWithAuth();
   const [isVisible, setIsVisible] = useState(false);
+
+  const hideSellButton = pathname.startsWith("/my");
 
   useEffect(() => {
     const timer = requestAnimationFrame(() => setIsVisible(true));
@@ -85,15 +91,20 @@ export default function MobileSideMenu({
                   </button>
                 </li>
 
-                <li>
-                  {/* <Link
-                    href="/ai"
-                    className="block px-4 py-3 text-white hover:bg-white/10"
-                    onClick={handleClose}
-                  >
-                    분석하기
-                  </Link> */}
-                </li>
+                {!hideSellButton && (
+                  <li>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        handleOpen();
+                        handleClose();
+                      }}
+                      className="w-full px-4 py-3 text-left text-white hover:bg-white/10"
+                    >
+                      판매하기
+                    </button>
+                  </li>
+                )}
 
                 <li>
                   <Link
@@ -150,6 +161,7 @@ export default function MobileSideMenu({
                     로그인
                   </Link>
                 </li>
+
                 <li>
                   <Link
                     href="/signup"
