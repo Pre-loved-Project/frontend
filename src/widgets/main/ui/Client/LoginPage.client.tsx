@@ -1,17 +1,19 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { LoginForm } from "@/features/auth/ui/LoginForm/LoginForm";
-import { Modal } from "@/shared/ui/Modal/Modal";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuthStore } from "@/features/auth/model/auth.store";
 import { useChatStore } from "@/features/chat/model/chat.store";
+import { useModalStore } from "@/shared/model/modal.store";
+import Link from "next/link";
+
 export default function LoginPageClient() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const expired = searchParams.get("expired");
 
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const { openModal, closeModal } = useModalStore();
   const { setIsLogined, logout } = useAuthStore();
   const { unmount } = useChatStore();
 
@@ -19,32 +21,36 @@ export default function LoginPageClient() {
     if (expired === "true") {
       unmount();
       logout();
-      setErrorMessage("세션이 만료되었습니다.\n다시 로그인해주세요.");
+
+      openModal("normal", {
+        message: "세션이 만료되었습니다.\n다시 로그인해주세요.",
+        buttonText: "확인",
+        onClick: () => closeModal(),
+      });
     }
   }, [expired]);
 
   return (
     <div className="flex min-h-[calc(100vh-70px)] flex-col items-center justify-center px-4 md:min-h-[calc(100vh-80px)] xl:min-h-[calc(100vh-100px)]">
       <h1 className="mb-8 text-2xl font-bold text-white">로그인</h1>
+
       <LoginForm
-        size="lg"
         onSuccess={() => {
           setIsLogined(true);
-          router.push("/"); //메인 페이지 이동
+          router.push("/");
         }}
         onError={(msg) => {
-          setErrorMessage(msg);
+          openModal("normal", {
+            message: msg,
+            buttonText: "확인",
+            onClick: () => closeModal(),
+          });
         }}
       />
 
-      {!!errorMessage && (
-        <Modal
-          message={errorMessage}
-          buttonText="확인"
-          onClick={() => setErrorMessage(null)}
-          className=""
-        />
-      )}
+      <Link href="/signup" className="mt-6 text-sm text-white/60">
+        아직 회원이 아니신가요? <span className="underline">회원가입</span>
+      </Link>
     </div>
   );
 }
