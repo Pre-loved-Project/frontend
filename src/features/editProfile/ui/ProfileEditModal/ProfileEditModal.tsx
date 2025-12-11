@@ -40,6 +40,7 @@ export const ProfileEditModal = ({
   onError,
 }: ProfileEditModalProps) => {
   const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imageChanged, setImageChanged] = useState<boolean>(false);
   const [nickname, setNickname] = useState(initialNickname);
   const [introduction, setIntroduction] = useState(initialIntroduction ?? "");
   const [category, setCategory] = useState(initialCategory ?? "");
@@ -59,6 +60,7 @@ export const ProfileEditModal = ({
   ].map((cat) => ({ label: cat, value: cat }));
 
   const isChanged =
+    imageChanged ||
     nickname !== initialNickname ||
     introduction !== (initialIntroduction ?? "") ||
     category !== (initialCategory ?? "");
@@ -125,7 +127,13 @@ export const ProfileEditModal = ({
 
       <div className="flex w-full flex-col items-start gap-2">
         <label className="text-sm font-medium text-white">프로필 이미지</label>
-        <ProfileImageChangeInput imgUrl={imageUrl} onChange={setImageFile} />
+        <ProfileImageChangeInput
+          imgUrl={imageUrl}
+          onChange={(file) => {
+            setImageFile(file);
+            setImageChanged(true);
+          }}
+        />
       </div>
 
       <div className="flex flex-col items-start gap-2">
