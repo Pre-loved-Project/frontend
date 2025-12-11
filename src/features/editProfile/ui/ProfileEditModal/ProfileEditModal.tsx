@@ -70,16 +70,19 @@ export const ProfileEditModal = ({
       if (!isChanged) return;
       setLoading(true);
 
-      let uploadedImageUrl = imageUrl;
+      let uploadedImageUrl: string | null | undefined = imageUrl;
 
       if (imageFile) {
         uploadedImageUrl = await uploadImage(imageFile);
+      } else if (imageChanged) {
+        uploadedImageUrl = null;
       }
 
-      const updateBody: Record<string, string> = {};
+      const updateBody: Record<string, string | null> = {};
       if (nickname.trim()) updateBody.nickname = nickname;
       if (introduction.trim()) updateBody.introduction = introduction;
-      if (uploadedImageUrl) updateBody.imageUrl = uploadedImageUrl;
+      if (uploadedImageUrl !== undefined)
+        updateBody.imageUrl = uploadedImageUrl;
       if (category.trim()) updateBody.category = category;
 
       await apiFetch("/api/users/me", {
