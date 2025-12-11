@@ -66,6 +66,7 @@ export const PostEditModal = ({
 }: PostEditModalProps) => {
   const [imageUrls, setImageUrls] = useState<string[]>(initImages);
   const [images, setImages] = useState<File[]>([]);
+  const [imageChanged, setImageChanged] = useState<boolean>(false);
   const [imageError, setImageError] = useState<string | null>(null);
   const [title, setTitle] = useState(initTitle);
   const [price, setPrice] = useState<number | "">(initPrice);
@@ -74,6 +75,7 @@ export const PostEditModal = ({
   const [isLoading, setIsLoading] = useState(false);
 
   const isChanged =
+    imageChanged ||
     title !== initTitle ||
     price !== initPrice ||
     category !== initCategory ||
@@ -101,15 +103,18 @@ export const PostEditModal = ({
     const selected = Array.from(files);
     setImages((prev) => [...prev, ...selected]);
     e.target.value = "";
+    setImageChanged(true);
     setImageError(null);
   };
 
   const handleRemoveImageUrl = (idx: number) => {
     setImageUrls((prev) => prev.filter((_, i) => i !== idx));
+    setImageChanged(true);
   };
 
   const handleRemoveImage = (idx: number) => {
     setImages((prev) => prev.filter((_, i) => i !== idx));
+    setImageChanged(true);
   };
 
   const handleSubmit = async () => {
