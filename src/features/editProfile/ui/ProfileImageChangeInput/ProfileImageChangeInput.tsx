@@ -38,7 +38,7 @@ export const ProfileImageChangeInput = ({
   return (
     <label
       className={cn(
-        "relative flex cursor-pointer items-center justify-center overflow-hidden rounded-lg bg-gray-800",
+        "bg-black-800 relative flex cursor-pointer items-center justify-center overflow-hidden rounded-lg",
         "h-32 w-32 md:h-36 md:w-36 xl:h-40 xl:w-40",
         className,
       )}

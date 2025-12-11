@@ -7,45 +7,35 @@ import { TextBox } from "@/shared/ui/TextBox/TextBox";
 import { DropDown } from "@/shared/ui/DropDown/DropDown";
 import Button from "@/shared/ui/Button/Button";
 import Image from "next/image";
-import { Swiper, SwiperSlide } from "swiper/react";
-import { Navigation } from "swiper/modules";
-import "swiper/css";
-import "swiper/css/navigation";
-import "swiper/css/pagination";
+import { LoadingDots } from "@/shared/ui/Loading/LoadingDots";
 import { apiFetch } from "@/shared/api/fetcher";
 import { uploadImage } from "@/shared/api/uploadImage";
 
-const ImageSwiperSlide = (
+const ImageItem = (
   idx: number,
   url: string,
-  onRemoveButtonClick: (idx: number) => void,
+  onRemove: (idx: number) => void,
 ) => {
   return (
-    <SwiperSlide
+    <div
       key={`${url}-${idx}`}
-      className="flex h-[70px] w-[70px] items-center justify-center md:h-[100px] md:w-[100px] xl:h-[100px] xl:w-[100px]"
+      className="relative h-[70px] w-[70px] shrink-0 md:h-[100px] md:w-[100px] xl:h-[100px] xl:w-[100px]"
     >
-      <div className="relative mx-auto h-[70px] w-[70px] md:h-[100px] md:w-[100px] xl:h-[100px] xl:w-[100px]">
-        <Image
-          src={url}
-          alt={`preview-${idx}`}
-          fill
-          style={{ objectFit: "cover" }}
-          className="rounded-lg"
-        />
-        <button
-          type="button"
-          className="absolute top-0.5 right-0.5 flex items-center justify-center rounded-full bg-black/50 p-1"
-          onClick={() => onRemoveButtonClick(idx)}
-        >
-          <img
-            src="/icons/delete.svg"
-            alt="삭제"
-            className="h-2 w-2 md:h-3 md:w-3 xl:h-3 xl:w-3"
-          />
-        </button>
-      </div>
-    </SwiperSlide>
+      <Image
+        src={url}
+        alt={`preview-${idx}`}
+        fill
+        className="rounded-lg object-cover"
+      />
+
+      <button
+        type="button"
+        className="absolute top-0.5 right-0.5 flex items-center justify-center rounded-full bg-black/50 p-1"
+        onClick={() => onRemove(idx)}
+      >
+        <img src="/icons/delete.svg" alt="삭제" className="h-2.5 w-2.5" />
+      </button>
+    </div>
   );
 };
 
@@ -76,13 +66,23 @@ export const PostEditModal = ({
 }: PostEditModalProps) => {
   const [imageUrls, setImageUrls] = useState<string[]>(initImages);
   const [images, setImages] = useState<File[]>([]);
+  const [imageChanged, setImageChanged] = useState<boolean>(false);
+  const [imageError, setImageError] = useState<string | null>(null);
   const [title, setTitle] = useState(initTitle);
   const [price, setPrice] = useState<number | "">(initPrice);
   const [category, setCategory] = useState(initCategory);
   const [content, setContent] = useState(initContent);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const isChanged =
+    imageChanged ||
+    title !== initTitle ||
+    price !== initPrice ||
+    category !== initCategory ||
+    content !== initContent;
 
   const inputRef = useRef<HTMLInputElement>(null);
+
   const categoryOptions = [
     "전자제품/가전제품",
     "식료품",
@@ -98,37 +98,43 @@ export const PostEditModal = ({
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.currentTarget.files;
-    if (!files || files.length == 0) return;
+    if (!files || files.length === 0) return;
 
     const selected = Array.from(files);
     setImages((prev) => [...prev, ...selected]);
-    e.target.value = ""; // input 값 초기화
+    e.target.value = "";
+    setImageChanged(true);
+    setImageError(null);
   };
 
-  const handleRemoveImageUrl = (index: number) => {
-    setImageUrls((prev) => prev.filter((_, i) => i !== index));
+  const handleRemoveImageUrl = (idx: number) => {
+    setImageUrls((prev) => prev.filter((_, i) => i !== idx));
+    setImageChanged(true);
   };
-  const handleRemoveImage = (index: number) => {
-    setImages((prev) => prev.filter((_, i) => i !== index));
+
+  const handleRemoveImage = (idx: number) => {
+    setImages((prev) => prev.filter((_, i) => i !== idx));
+    setImageChanged(true);
   };
 
   const handleSubmit = async () => {
+    if (!isChanged) return;
+
     try {
-      if (
-        !title ||
-        !price ||
-        !category ||
-        !content ||
-        (imageUrls.length === 0 && images.length === 0)
-      )
+      if (!title || !price || !category || !content) return;
+      if (imageUrls.length === 0 && images.length === 0) {
+        setImageError(
+          "이미지가 추가되지 않았습니다. 최소 1개의 이미지를 추가해주세요.",
+        );
         return;
+      }
+
       setIsLoading(true);
 
-      // 새로 추가한 이미지 URL 배열 생성
       const uploadedImageUrlArray: string[] = [];
       for (const file of images) {
-        const uploadedImageUrl = await uploadImage(file);
-        uploadedImageUrlArray.push(uploadedImageUrl);
+        const url = await uploadImage(file);
+        uploadedImageUrlArray.push(url);
       }
 
       const body = {
@@ -139,15 +145,13 @@ export const PostEditModal = ({
         images: [...imageUrls, ...uploadedImageUrlArray],
       };
 
-      const res = await apiFetch(`/api/postings/${postId}`, {
+      await apiFetch(`/api/postings/${postId}`, {
         method: "PATCH",
         body: JSON.stringify(body),
       });
 
-      console.log("게시글 수정 성공! : ", res);
       onEdit?.();
     } catch (error) {
-      console.error("게시글 수정 실패 : ", error);
       const message = error instanceof Error ? error.message : String(error);
       onError?.(message);
     } finally {
@@ -156,30 +160,11 @@ export const PostEditModal = ({
   };
 
   const widthClass = "w-[290px] md:w-[510px] xl:w-[540px]";
-  const imageSwiper = useMemo(
-    () => (
-      <Swiper
-        modules={[Navigation]}
-        spaceBetween={0}
-        slidesPerView={3}
-        navigation={true}
-        className="flex flex-1 items-center justify-center rounded-lg"
-      >
-        {imageUrls.map((url, idx) =>
-          ImageSwiperSlide(idx, url, handleRemoveImageUrl),
-        )}
-        {images.map((file, idx) =>
-          ImageSwiperSlide(idx, URL.createObjectURL(file), handleRemoveImage),
-        )}
-      </Swiper>
-    ),
-    [imageUrls, images],
-  );
 
   return (
     <div
       className={cn(
-        "bg-black-950 fixed inset-0 z-50 flex items-center justify-center",
+        "fixed inset-0 z-50 flex items-center justify-center",
         "overflow-auto p-4",
         className,
       )}
@@ -190,7 +175,11 @@ export const PostEditModal = ({
           className="absolute top-4 right-4"
           onClick={onClose}
         >
-          <img src="/icons/delete.svg" alt="닫기" className="h-6 w-6" />
+          <img
+            src="/icons/delete.svg"
+            alt="닫기"
+            className="h-6 w-6 hover:cursor-pointer"
+          />
         </button>
 
         <h2 className="text-lg font-semibold text-white">게시물 수정</h2>
@@ -206,6 +195,7 @@ export const PostEditModal = ({
               className="h-8 w-8"
             />
           </label>
+
           <input
             ref={inputRef}
             type="file"
@@ -215,8 +205,28 @@ export const PostEditModal = ({
             className="hidden"
           />
 
-          {(imageUrls.length > 0 || images.length > 0) && imageSwiper}
+          {(imageUrls.length > 0 || images.length > 0) && (
+            <div className="no-scrollbar flex gap-3 overflow-x-auto pr-2">
+              {imageUrls.map((url, idx) =>
+                ImageItem(idx, url, handleRemoveImageUrl),
+              )}
+
+              {images.map((file, idx) =>
+                ImageItem(idx, URL.createObjectURL(file), handleRemoveImage),
+              )}
+            </div>
+          )}
         </div>
+        {imageError && (
+          <span
+            className={cn(
+              "text-[12px] md:text-[12px] xl:text-[14px]",
+              "text-red",
+            )}
+          >
+            {imageError}
+          </span>
+        )}
 
         <TextField
           placeholder="제목을 입력해주세요"
@@ -253,11 +263,19 @@ export const PostEditModal = ({
 
         <Button
           variant="primary"
-          disabled={isLoading || !title || !price || !category || !content}
+          disabled={
+            isLoading || !title || !price || !category || !content || !isChanged
+          }
           onClick={handleSubmit}
           className={cn("mt-4", widthClass)}
         >
-          {isLoading ? "수정 중 ... " : "수정하기"}
+          {isLoading ? (
+            <span className="flex items-center gap-2">
+              수정 중 <LoadingDots />
+            </span>
+          ) : (
+            "수정하기"
+          )}
         </Button>
       </div>
     </div>
