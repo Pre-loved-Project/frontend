@@ -6,6 +6,7 @@ import { DropDown } from "@/shared/ui/DropDown/DropDown";
 import Button from "@/shared/ui/Button/Button";
 import { apiFetch } from "@/shared/api/fetcher";
 import cn from "@/shared/lib/cn";
+import { LoadingDots } from "@/shared/ui/Loading/LoadingDots";
 
 interface SignUpFormProps {
   onSuccess?: () => void;
@@ -13,18 +14,15 @@ interface SignUpFormProps {
 }
 
 export const SignUpForm = ({ onSuccess, onError }: SignUpFormProps) => {
-  //input text 상태
   const [email, setEmail] = useState("");
   const [nickname, setNickname] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
-  // 생년월일 상태
   const [year, setYear] = useState<number | "">("");
   const [month, setMonth] = useState<number | "">("");
   const [day, setDay] = useState<number | "">("");
 
-  // input error 상태
   const [emailError, setEmailError] = useState<string | null>(null);
   const [nicknameError, setNicknameError] = useState<string | null>(null);
   const [passwordError, setPasswordError] = useState<string | null>(null);
@@ -34,13 +32,11 @@ export const SignUpForm = ({ onSuccess, onError }: SignUpFormProps) => {
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  //이메일 유효성 검사
   const validateEmail = (value: string) => {
     const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return regex.test(value);
   };
 
-  //input value change 핸들러
   const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setEmail(value);
@@ -87,7 +83,6 @@ export const SignUpForm = ({ onSuccess, onError }: SignUpFormProps) => {
     }
   };
 
-  // password, confirmPassword 동기화 체크
   useEffect(() => {
     if (password && confirmPassword && password !== confirmPassword) {
       setConfirmPasswordError("비밀번호가 일치하지 않습니다.");
@@ -96,9 +91,8 @@ export const SignUpForm = ({ onSuccess, onError }: SignUpFormProps) => {
     }
   }, [password, confirmPassword]);
 
-  //연, 월, 일 드롭다운 옵션 생성
   const yearOptions = Array.from({ length: 2025 - 1900 + 1 }, (_, i) => {
-    const y = 1900 + i;
+    const y = 2025 - i;
     return { label: `${y}년`, value: y };
   });
 
@@ -119,40 +113,31 @@ export const SignUpForm = ({ onSuccess, onError }: SignUpFormProps) => {
     });
   };
 
-  // 회원가입 폼 제출 핸들러
   const handleSubmit = async (e: React.FormEvent) => {
-    setIsLoading(true);
     e.preventDefault();
-    console.log("회원가입 요청 폼 제출");
-    try {
-      const body = {
-        email,
-        nickname,
-        birthDate: `${year}-${String(month).padStart(2, "0")}-${String(
-          day,
-        ).padStart(2, "0")}`,
-        password,
-      };
+    setIsLoading(true);
 
-      console.log(body);
-      const res = await apiFetch("/api/users", {
+    try {
+      await apiFetch("/api/users", {
         method: "POST",
-        body: JSON.stringify(body),
+        body: JSON.stringify({
+          email,
+          nickname,
+          birthDate: `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`,
+          password,
+        }),
         noAuth: true,
       });
 
-      console.log("회원가입 성공:", res);
       onSuccess?.();
     } catch (error: unknown) {
-      console.error("회원가입 실패:", error + "\n");
       if (error instanceof Error) {
-        // 서버 에러 메시지 처리
         if (error.message.includes("EMAIL_DUPLICATE")) {
           setEmailError("이미 사용 중인 이메일입니다.");
         } else if (error.message.includes("NICKNAME_DUPLICATE")) {
           setNicknameError("이미 사용 중인 닉네임입니다.");
         } else {
-          onError?.("회원가입에 실패했습니다. 잠시 후 다시 시도해주세요.");
+          onError?.("회원가입에 실패했습니다.\n잠시 후 다시 시도해주세요.");
         }
       }
     } finally {
@@ -199,7 +184,6 @@ export const SignUpForm = ({ onSuccess, onError }: SignUpFormProps) => {
         onChange={handleConfirmPasswordChange}
       />
 
-      {/* 생년월일 DropDown */}
       <div className="flex flex-col gap-2">
         <label className="text-[16px] font-medium text-white">생년월일</label>
         <div className="flex gap-4">
@@ -214,9 +198,11 @@ export const SignUpForm = ({ onSuccess, onError }: SignUpFormProps) => {
             placeholder="연도"
             className={dropDownWidth}
           />
+
           <DropDown
             options={monthOptions()}
             value={month}
+            disabled={!year}
             onChange={(val) => {
               setMonth(val as number);
               setDay("");
@@ -224,9 +210,11 @@ export const SignUpForm = ({ onSuccess, onError }: SignUpFormProps) => {
             placeholder="월"
             className={dropDownWidth}
           />
+
           <DropDown
             options={dayOptions()}
             value={day}
+            disabled={!year || !month}
             onChange={(val) => setDay(val as number)}
             placeholder="일"
             className={dropDownWidth}
@@ -252,7 +240,13 @@ export const SignUpForm = ({ onSuccess, onError }: SignUpFormProps) => {
           !day
         }
       >
-        {isLoading ? "가입 중 ..." : "가입하기"}
+        {isLoading ? (
+          <span className="flex items-center gap-2">
+            가입 중 <LoadingDots />
+          </span>
+        ) : (
+          "가입하기"
+        )}
       </Button>
     </form>
   );

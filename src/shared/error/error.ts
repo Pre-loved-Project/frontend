@@ -1,10 +1,10 @@
 export class BaseError extends Error {
   constructor(
     message: string,
-    public readonly status?: number,
+    public readonly status: number,
   ) {
     super(message);
-    this.name = this.constructor.name;
+    this.name = new.target.name;
   }
 }
 
@@ -21,7 +21,7 @@ export class NotFoundError extends BaseError {
 }
 
 export class ServerError extends BaseError {
-  constructor(message = "서버 오류가 발생했습니다.") {
-    super(message, 500);
+  constructor(message = "서버 오류가 발생했습니다.", status: number) {
+    super(message, status);
   }
 }
