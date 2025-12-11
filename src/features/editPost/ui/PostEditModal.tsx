@@ -66,6 +66,7 @@ export const PostEditModal = ({
 }: PostEditModalProps) => {
   const [imageUrls, setImageUrls] = useState<string[]>(initImages);
   const [images, setImages] = useState<File[]>([]);
+  const [imageError, setImageError] = useState<string | null>(null);
   const [title, setTitle] = useState(initTitle);
   const [price, setPrice] = useState<number | "">(initPrice);
   const [category, setCategory] = useState(initCategory);
@@ -100,6 +101,7 @@ export const PostEditModal = ({
     const selected = Array.from(files);
     setImages((prev) => [...prev, ...selected]);
     e.target.value = "";
+    setImageError(null);
   };
 
   const handleRemoveImageUrl = (idx: number) => {
@@ -115,7 +117,12 @@ export const PostEditModal = ({
 
     try {
       if (!title || !price || !category || !content) return;
-      if (imageUrls.length === 0 && images.length === 0) return;
+      if (imageUrls.length === 0 && images.length === 0) {
+        setImageError(
+          "이미지가 추가되지 않았습니다. 최소 1개의 이미지를 추가해주세요.",
+        );
+        return;
+      }
 
       setIsLoading(true);
 
@@ -205,6 +212,16 @@ export const PostEditModal = ({
             </div>
           )}
         </div>
+        {imageError && (
+          <span
+            className={cn(
+              "text-[12px] md:text-[12px] xl:text-[14px]",
+              "text-red",
+            )}
+          >
+            {imageError}
+          </span>
+        )}
 
         <TextField
           placeholder="제목을 입력해주세요"

@@ -25,6 +25,7 @@ export const PostCreateModal = ({
   onError,
 }: PostCreateModalProps) => {
   const [images, setImages] = useState<File[]>([]);
+  const [imageError, setImageError] = useState<string | null>(null);
   const [title, setTitle] = useState("");
   const [price, setPrice] = useState<number | "">("");
   const [category, setCategory] = useState("");
@@ -52,6 +53,7 @@ export const PostCreateModal = ({
 
     const selected = Array.from(files);
     setImages((prev) => [...prev, ...selected]);
+    setImageError(null);
     e.target.value = "";
   };
 
@@ -62,6 +64,12 @@ export const PostCreateModal = ({
   const handleSubmit = async () => {
     try {
       if (!title || !price || !category) return;
+      if (images.length === 0) {
+        setImageError(
+          "이미지가 추가되지 않았습니다. 최소 1개의 이미지를 추가해주세요.",
+        );
+        return;
+      }
       setIsLoading(true);
 
       const uploadedImageUrlArray: string[] = [];
@@ -170,6 +178,16 @@ export const PostCreateModal = ({
             ))}
           </div>
         </div>
+        {imageError && (
+          <span
+            className={cn(
+              "text-[12px] md:text-[12px] xl:text-[14px]",
+              "text-red",
+            )}
+          >
+            {imageError}
+          </span>
+        )}
 
         <TextField
           placeholder="제목을 입력해주세요"
