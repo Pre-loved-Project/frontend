@@ -72,6 +72,12 @@ export const PostEditModal = ({
   const [content, setContent] = useState(initContent);
   const [isLoading, setIsLoading] = useState(false);
 
+  const isChanged =
+    title !== initTitle ||
+    price !== initPrice ||
+    category !== initCategory ||
+    content !== initContent;
+
   const inputRef = useRef<HTMLInputElement>(null);
 
   const categoryOptions = [
@@ -104,6 +110,8 @@ export const PostEditModal = ({
   };
 
   const handleSubmit = async () => {
+    if (!isChanged) return;
+
     try {
       if (!title || !price || !category || !content) return;
       if (imageUrls.length === 0 && images.length === 0) return;
@@ -154,7 +162,11 @@ export const PostEditModal = ({
           className="absolute top-4 right-4"
           onClick={onClose}
         >
-          <img src="/icons/delete.svg" alt="닫기" className="h-6 w-6" />
+          <img
+            src="/icons/delete.svg"
+            alt="닫기"
+            className="h-6 w-6 hover:cursor-pointer"
+          />
         </button>
 
         <h2 className="text-lg font-semibold text-white">게시물 수정</h2>
@@ -232,7 +244,9 @@ export const PostEditModal = ({
 
         <Button
           variant="primary"
-          disabled={isLoading || !title || !price || !category || !content}
+          disabled={
+            isLoading || !title || !price || !category || !content || !isChanged
+          }
           onClick={handleSubmit}
           className={cn("mt-4", widthClass)}
         >

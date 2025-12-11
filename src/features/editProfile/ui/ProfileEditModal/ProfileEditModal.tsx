@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState } from "react";
 import cn from "@/shared/lib/cn";
 import { ProfileImageChangeInput } from "../ProfileImageChangeInput/ProfileImageChangeInput";
 import { Input } from "@/entities/user/ui/Input/Input";
@@ -58,8 +58,14 @@ export const ProfileEditModal = ({
     "반려동물/취미",
   ].map((cat) => ({ label: cat, value: cat }));
 
+  const isChanged =
+    nickname !== initialNickname ||
+    introduction !== (initialIntroduction ?? "") ||
+    category !== (initialCategory ?? "");
+
   const handleSave = async () => {
     try {
+      if (!isChanged) return;
       setLoading(true);
 
       let uploadedImageUrl = imageUrl;
@@ -155,7 +161,7 @@ export const ProfileEditModal = ({
         <Button
           className="mt-3 md:w-[440px]"
           variant="primary"
-          disabled={loading}
+          disabled={loading || !nickname || !isChanged}
           onClick={handleSave}
         >
           {loading ? (
