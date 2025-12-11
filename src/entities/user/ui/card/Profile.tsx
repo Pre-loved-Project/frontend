@@ -75,7 +75,9 @@ const Profile = ({
         </div>
 
         <div className="w-full text-center">
-          <dd className="text-lg font-semibold text-[#F1F1F5]">{category}</dd>
+          <dd className="text-lg font-semibold text-[#F1F1F5]">
+            {category || "—"}
+          </dd>
           <dt className="mt-1 text-sm text-[#9FA6B2]">관심 카테고리</dt>
         </div>
 

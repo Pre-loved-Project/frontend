@@ -144,7 +144,7 @@ export function PostDetailSection({ post }: { post: PostDetail }) {
             {seller?.nickname || "판매자"}
           </span>
         </div>
-        <div className="mx-4 h-px bg-gray-600 xl:hidden" />
+        <div className="h-px bg-gray-600 xl:hidden" />
       </div>
 
       <div className="flex flex-col justify-between gap-5 py-6 md:pt-8 xl:w-1/2 xl:pt-0 xl:pb-[88px]">
