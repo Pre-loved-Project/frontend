@@ -1,6 +1,5 @@
 "use client";
 
-import React from "react";
 import cn from "@/shared/lib/cn";
 import Button from "../Button/Button";
 
@@ -22,7 +21,7 @@ export const ConfirmModal = ({
   className,
 }: ConfirmModalProps) => {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
       <div
         className={cn(
           "bg-black-900 flex flex-col items-center justify-center gap-10 rounded-lg p-6 text-center shadow-lg",

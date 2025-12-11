@@ -7,6 +7,8 @@ import { Input } from "@/entities/user/ui/Input/Input";
 import { TextBox } from "@/shared/ui/TextBox/TextBox";
 import { DropDown } from "@/shared/ui/DropDown/DropDown";
 import Button from "@/shared/ui/Button/Button";
+import { LoadingDots } from "@/shared/ui/Loading/LoadingDots";
+
 import { apiFetch } from "@/shared/api/fetcher";
 import { uploadImage } from "@/shared/api/uploadImage";
 
@@ -156,7 +158,13 @@ export const ProfileEditModal = ({
           disabled={loading}
           onClick={handleSave}
         >
-          {loading ? "저장 중..." : "저장하기"}
+          {loading ? (
+            <span className="flex items-center gap-2">
+              저장 중 <LoadingDots />
+            </span>
+          ) : (
+            "저장하기"
+          )}
         </Button>
       </div>
     </div>
