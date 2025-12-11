@@ -97,7 +97,8 @@ export const PostEditModal = ({
     const files = e.currentTarget.files;
     if (!files || files.length === 0) return;
 
-    setImages((prev) => [...prev, ...Array.from(files)]);
+    const selected = Array.from(files);
+    setImages((prev) => [...prev, ...selected]);
     e.target.value = "";
   };
 
@@ -199,11 +200,7 @@ export const PostEditModal = ({
               )}
 
               {images.map((file, idx) =>
-                ImageItem(
-                  idx + imageUrls.length,
-                  URL.createObjectURL(file),
-                  handleRemoveImage,
-                ),
+                ImageItem(idx, URL.createObjectURL(file), handleRemoveImage),
               )}
             </div>
           )}
