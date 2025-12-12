@@ -33,7 +33,9 @@ const HeaderDesktop = ({
   return (
     <div className="hidden w-full items-center justify-between md:flex">
       <div className="text-white">
-        <Link href="/">찰딱</Link>
+        <Link href="/">
+          <img src="/icons/logo.png" className="h-15 w-15" />
+        </Link>
       </div>
 
       <div className="flex items-center">

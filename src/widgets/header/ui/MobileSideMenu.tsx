@@ -48,6 +48,33 @@ export default function MobileSideMenu({
     handleClose();
   };
 
+  const handleLogout = async () => {
+    const res = await fetch("/api/auth/logout", {
+      method: "POST",
+      credentials: "include",
+    });
+
+    if (res.ok) {
+      handleClose();
+      router.push("/login");
+      router.refresh();
+      logout();
+      openModal("normal", {
+        message: "로그아웃이 완료되었습니다.",
+        onClick: () => {
+          closeModal();
+        },
+      });
+    } else {
+      openModal("normal", {
+        message: "로그아웃에 실패했습니다.",
+        onClick: () => {
+          closeModal();
+        },
+      });
+    }
+  };
+
   return (
     <div>
       <div
@@ -119,30 +146,16 @@ export default function MobileSideMenu({
                 <li>
                   <button
                     type="button"
-                    onClick={async () => {
-                      const res = await fetch("/api/auth/logout", {
-                        method: "POST",
-                        credentials: "include",
+                    onClick={() => {
+                      openModal("confirm", {
+                        message: "정말 로그아웃하시겠습니까?",
+                        onConfirm: async () => {
+                          await handleLogout();
+                        },
+                        onCancel: () => {
+                          closeModal();
+                        },
                       });
-                      handleClose();
-                      if (res.ok) {
-                        openModal("normal", {
-                          message: "로그아웃이 완료되었습니다.",
-                          onClick: () => {
-                            closeModal();
-                            logout();
-                            router.push("/login");
-                            router.refresh();
-                          },
-                        });
-                      } else {
-                        openModal("normal", {
-                          message: "로그아웃에 실패했습니다.",
-                          onClick: () => {
-                            closeModal();
-                          },
-                        });
-                      }
                     }}
                     className="w-full px-4 py-3 text-left text-red-400 hover:bg-white/10"
                   >
