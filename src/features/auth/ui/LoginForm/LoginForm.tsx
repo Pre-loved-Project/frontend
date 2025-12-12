@@ -36,9 +36,8 @@ export const LoginForm = ({ onSuccess, onError }: LoginFormProps) => {
       setAccessToken(res.accessToken);
       onSuccess?.();
     } catch (error) {
-      onError?.("로그인에 실패하였습니다.\n이메일과 비밀번호를 확인해주세요.");
-    } finally {
       setIsLoading(false);
+      onError?.("로그인에 실패하였습니다.\n이메일과 비밀번호를 확인해주세요.");
     }
   };
 
