@@ -46,6 +46,15 @@ export const MessageRow = ({
         )}
 
         <Message {...message} />
+        {message.isMine && !message.isRead && (
+          <span
+            className={`absolute -left-4 text-[11px] font-bold text-blue-400 ${
+              showTime ? "bottom-4" : "bottom-0"
+            }`}
+          >
+            1
+          </span>
+        )}
 
         {showTime && (
           <span

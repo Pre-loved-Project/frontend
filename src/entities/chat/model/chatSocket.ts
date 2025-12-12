@@ -10,14 +10,17 @@ export interface ChatSocketEvents extends SocketEvents {
     dealStatus: DealStatus;
     message: string;
   }) => void;
+  onRead?: (messageId: number) => void;
 }
 
 export class ChatSocket extends Socket<ChatSocketEvents> {
   private chatId: number;
+  private otherId: number;
 
-  constructor(chatId: number, events: ChatSocketEvents = {}) {
+  constructor(chatId: number, otherId: number, events: ChatSocketEvents = {}) {
     super(events);
     this.chatId = chatId;
+    this.otherId = otherId;
   }
 
   protected getEndpointPath(): string {
@@ -42,7 +45,13 @@ export class ChatSocket extends Socket<ChatSocketEvents> {
         return;
       }
 
-      if (["welcome", "system", "read"].includes(data.type)) {
+      if (data.type === "read") {
+        console.log(`[Socket] : 읽음 처리 이벤트 수신`);
+        this.events.onRead?.(data.lastReadMessageId);
+        return;
+      }
+
+      if (["welcome", "system"].includes(data.type)) {
         this.events.onSystem?.(data);
         return;
       }
@@ -53,7 +62,7 @@ export class ChatSocket extends Socket<ChatSocketEvents> {
           messageId: data.messageId,
           type: data.type,
           content: data.content,
-          isMine: false,
+          isMine: data.senderId !== this.otherId,
           sendAt: data.createdAt,
           isRead: false,
         };
@@ -71,6 +80,17 @@ export class ChatSocket extends Socket<ChatSocketEvents> {
     }
 
     const payload = { event: "send_message", type, content };
+    this.socket.send(JSON.stringify(payload));
+  }
+
+  public readMessage(messageId: number) {
+    if (!this.socket || this.socket.readyState !== WebSocket.OPEN) {
+      console.warn("[ChatSocket] Not connected");
+      return;
+    }
+
+    console.log(`[Socket] : read_message 이벤트 송신 messageId : ${messageId}`);
+    const payload = { event: "read_message", messageId };
     this.socket.send(JSON.stringify(payload));
   }
 }

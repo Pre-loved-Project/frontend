@@ -26,4 +26,5 @@ export interface MessagesResponse {
   messages: MessageProps[];
   hasNext: boolean;
   nextCursor: number | null;
+  lastReadMessageId: number;
 }
