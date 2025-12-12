@@ -9,24 +9,24 @@ interface HeaderMobileProps {
 
 const HeaderMobile = ({ setShowSearch, onOpenMenu }: HeaderMobileProps) => {
   return (
-    <div className="flex w-full items-center justify-between md:hidden">
+    <div className="relative flex w-full items-center justify-between md:hidden">
       <button
         aria-label="menu"
         type="button"
-        className="cursor-pointer"
+        className="z-10 cursor-pointer"
         onClick={onOpenMenu}
       >
         <img src="/icons/menu.svg" alt="menu" className="h-[24px] w-[24px]" />
       </button>
 
-      <div className="flex-1 text-center text-white">
-        <Link href="/">찰딱</Link>
-      </div>
+      <Link href="/" className="absolute left-1/2 -translate-x-1/2 text-white">
+        <img src="/icons/logo.png" className="h-10 w-10" />
+      </Link>
 
       <button
         aria-label="search-button"
         type="button"
-        className="cursor-pointer"
+        className="z-10 cursor-pointer"
         onClick={() => setShowSearch(true)}
       >
         <img
