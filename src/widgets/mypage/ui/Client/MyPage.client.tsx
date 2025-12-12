@@ -69,7 +69,7 @@ export default function MyPageClient({ defaultTab }: { defaultTab: string }) {
         <Profile {...userProfile!} onEdit={openEditProfileModal} />
       )}
 
-      <section className="flex flex-col gap-[30px]">
+      <section className="flex w-full flex-col gap-[30px]">
         <Tab
           options={options}
           selected={selectedTab}
