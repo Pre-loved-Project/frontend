@@ -70,20 +70,24 @@ export default function PostList({
         />
       </div>
 
-      <div className="grid grid-cols-2 gap-[15px] xl:grid-cols-3">
-        {posts.map((post, i) =>
-          i === posts.length - 1 ? (
-            <div ref={lastRef} key={post.postingId}>
-              <PostCard {...post} />
-            </div>
-          ) : (
-            <PostCard key={post.postingId} {...post} />
-          ),
-        )}
-      </div>
-
-      {isFetchingNextPage && (
-        <p className="mt-4 text-center text-gray-400">불러오는 중...</p>
+      {posts.length === 0 && !isFetchingNextPage ? (
+        <div className="flex flex-col items-center justify-center py-20 text-gray-400">
+          <span className="text-[16px]">
+            해당 카테고리에 등록된 게시물이 없어요.
+          </span>
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 gap-[15px] xl:grid-cols-3">
+          {posts.map((post, i) =>
+            i === posts.length - 1 ? (
+              <div ref={lastRef} key={post.postingId}>
+                <PostCard {...post} />
+              </div>
+            ) : (
+              <PostCard key={post.postingId} {...post} />
+            ),
+          )}
+        </div>
       )}
     </section>
   );
