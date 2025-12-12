@@ -18,6 +18,7 @@ export function SellerPostsSection({
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
+    isLoading,
   } = useInfiniteQuery({
     queryKey: ["sellerPosts", sellerId, postingId],
     queryFn: ({ pageParam = 1 }) =>
@@ -33,6 +34,8 @@ export function SellerPostsSection({
     initialPageParam: 1,
   });
 
+  const sellerPosts = sellerPostsData?.pages.flatMap((p) => p.data) ?? [];
+
   const lastPostRef = useInfiniteScroll(
     () => {
       if (hasNextPage && !isFetchingNextPage) fetchNextPage();
@@ -41,27 +44,31 @@ export function SellerPostsSection({
     !!hasNextPage,
   );
 
-  const sellerPosts = sellerPostsData?.pages.flatMap((p) => p.data) ?? [];
-
   return (
-    <section className="mx-4 my-2 md:mx-10 xl:mx-16 xl:my-10">
-      <div className="mx-4 h-px bg-gray-600" />
+    <section className="mx-4 mb-2 md:mx-10 xl:mx-16 xl:mb-10">
+      <div className="h-px bg-gray-600" />
       <h1 className="my-6 text-2xl font-bold xl:text-3xl">판매한 상품</h1>
 
-      <div className="grid w-full grid-cols-2 gap-x-4 gap-y-8 md:grid-cols-4 xl:grid-cols-5">
-        {sellerPosts.map((item, idx) =>
-          idx === sellerPosts.length - 1 ? (
-            <div ref={lastPostRef} key={item.postingId}>
-              <PostCard {...item} />
-            </div>
-          ) : (
-            <PostCard key={item.postingId} {...item} />
-          ),
-        )}
-      </div>
-
-      {isFetchingNextPage && (
-        <p className="mt-4 text-center text-gray-400">불러오는 중...</p>
+      {isLoading ? (
+        <div className="flex w-full flex-col items-center justify-center py-10 text-gray-400">
+          <p className="text-base md:text-lg">로딩 중...</p>
+        </div>
+      ) : sellerPosts.length === 0 ? (
+        <div className="flex w-full flex-col items-center justify-center py-10 text-gray-400">
+          <p className="text-base md:text-lg">판매한 상품이 없습니다.</p>
+        </div>
+      ) : (
+        <div className="grid w-full grid-cols-2 gap-x-4 gap-y-8 md:grid-cols-4 xl:grid-cols-5">
+          {sellerPosts.map((item, idx) =>
+            idx === sellerPosts.length - 1 ? (
+              <div ref={lastPostRef} key={item.postingId}>
+                <PostCard {...item} />
+              </div>
+            ) : (
+              <PostCard key={item.postingId} {...item} />
+            ),
+          )}
+        </div>
       )}
     </section>
   );

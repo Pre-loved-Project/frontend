@@ -2,29 +2,19 @@ import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import * as cookie from "cookie";
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL!;
 
 export async function POST() {
-  const cookieHandler = await cookies();
-  const refreshToken = cookieHandler.get("refreshToken")?.value;
+  const cookieStore = await cookies();
+  const refreshToken = cookieStore.get("refreshToken")?.value;
 
   if (!refreshToken) {
-    return NextResponse.json(
-      { message: "No refresh token provided" },
-      { status: 401 },
-    );
+    return NextResponse.json({ message: "No refresh token" }, { status: 401 });
   }
-
-  const cookieOptions = {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    path: "/",
-  };
 
   const backendRes = await fetch(`${BASE_URL}/auth/refresh`, {
     method: "POST",
     headers: {
-      "Content-Type": "application/json",
       Cookie: `refreshToken=${refreshToken}`,
     },
   });
@@ -40,10 +30,12 @@ export async function POST() {
 
   const res = NextResponse.json({ accessToken });
 
-  cookieHandler.set({
+  res.cookies.set({
     name: "accessToken",
     value: accessToken,
-    ...cookieOptions,
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    path: "/",
     maxAge: 60 * 60 * 2,
   });
 
@@ -53,15 +45,15 @@ export async function POST() {
     const parsed = cookie.parse(c);
 
     if (parsed.refreshToken) {
-      const maxAge = parsed["Max-Age"]
-        ? parseInt(parsed["Max-Age"], 10)
-        : 60 * 60 * 24 * 30;
-
-      cookieHandler.set({
+      res.cookies.set({
         name: "refreshToken",
         value: parsed.refreshToken,
-        ...cookieOptions,
-        maxAge,
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        path: "/",
+        maxAge: parsed["Max-Age"]
+          ? parseInt(parsed["Max-Age"], 10)
+          : 60 * 60 * 24 * 30,
       });
     }
   }

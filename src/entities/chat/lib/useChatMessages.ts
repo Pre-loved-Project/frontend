@@ -46,6 +46,23 @@ export const useChatMessages = (chatId: number | null) => {
       .flatMap((page) => [...page.messages].reverse());
   }, [data]);
 
+  const lastReadMessageId = useMemo(() => {
+    if (!data || data.pages.length == 0) return null;
+    return data.pages[0].lastReadMessageId;
+  }, [data]);
+
+  const lastOtherMessageId: number | null = useMemo(() => {
+    if (!messages.length) return null;
+
+    for (let i = messages.length - 1; i >= 0; i--) {
+      const msg = messages[i];
+      if (msg.type !== "system" && !msg.isMine) {
+        return msg.messageId;
+      }
+    }
+    return null;
+  }, [messages]);
+
   const pushMessageToCache = (newMsg: MessageProps) => {
     //메시지 리스트 업데이트
     queryClient.setQueryData<InfiniteData<MessagesResponse>>(
@@ -90,6 +107,39 @@ export const useChatMessages = (chatId: number | null) => {
     });
   };
 
+  const applyReadStatus = () => {
+    if (!chatId) return;
+    let stopUpdating = false;
+
+    queryClient.setQueryData<InfiniteData<MessagesResponse>>(
+      ["chatMessages", chatId],
+      (oldData) => {
+        if (!oldData) return oldData;
+
+        const updatedPages = oldData.pages.map((page) => ({
+          ...page,
+          messages: page.messages.map((msg) => {
+            if (stopUpdating) return msg;
+            if (msg.isMine) {
+              if (!msg.isRead) {
+                return { ...msg, isRead: true };
+              } else {
+                stopUpdating = true;
+                return msg;
+              }
+            }
+            return msg;
+          }),
+        }));
+
+        return {
+          pageParams: oldData.pageParams,
+          pages: updatedPages,
+        };
+      },
+    );
+  };
+
   const fetchMoreMessages = async () => {
     const container = scrollContainerRef.current;
     const prevHeight = container?.scrollHeight ?? 0;
@@ -106,7 +156,10 @@ export const useChatMessages = (chatId: number | null) => {
 
   return {
     messages,
+    lastReadMessageId,
+    lastOtherMessageId,
     pushMessageToCache,
+    applyReadStatus,
     fetchMoreMessages,
     hasNextPage,
     isMessagesFirstLoading,

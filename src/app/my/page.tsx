@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import {
   HydrationBoundary,
   QueryClient,
@@ -15,15 +17,16 @@ export default async function Page() {
   const queryClient = new QueryClient();
 
   try {
-    await queryClient.fetchQuery({
-      queryKey: ["userProfile"],
-      queryFn: getMyProfile,
-    });
-
-    await queryClient.fetchQuery({
-      queryKey: ["myPosts", DEFAULT_TAB],
-      queryFn: () => getMyPosts(DEFAULT_TAB),
-    });
+    await Promise.all([
+      queryClient.fetchQuery({
+        queryKey: ["userProfile"],
+        queryFn: getMyProfile,
+      }),
+      queryClient.fetchQuery({
+        queryKey: ["myPosts", DEFAULT_TAB],
+        queryFn: () => getMyPosts(DEFAULT_TAB),
+      }),
+    ]);
   } catch (e) {
     handleError(e);
   }

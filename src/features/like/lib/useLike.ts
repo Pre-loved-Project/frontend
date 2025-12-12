@@ -1,8 +1,10 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { updateFavorite } from "../api/updateFavorite";
+import { useModalStore } from "@/shared/model/modal.store";
 
 export function useLike(postingId?: number) {
   const queryClient = useQueryClient();
+  const { openModal, closeModal } = useModalStore();
 
   const mutation = useMutation({
     mutationFn: async (liked: boolean) => {
@@ -33,12 +35,13 @@ export function useLike(postingId?: number) {
 
     onError: (err, newLiked, context) => {
       if (!postingId || !context?.previousData) return;
+      openModal("normal", {
+        message: "좋아요 처리 중 오류가 발생했습니다.",
+        onClick: () => closeModal(),
+      });
       queryClient.setQueryData(["postDetail", postingId], context.previousData);
-    },
 
-    onSettled: () => {
-      if (!postingId) return;
-      queryClient.invalidateQueries({ queryKey: ["postDetail", postingId] });
+      console.error(err);
     },
   });
 

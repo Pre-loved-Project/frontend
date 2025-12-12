@@ -1,83 +1,55 @@
-import { cookies } from "next/headers";
-import { AuthorizationError, NotFoundError, ServerError } from "../error/error";
-
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+import { headers } from "next/headers";
+import {
+  NotFoundError,
+  ServerError,
+  AuthorizationError,
+  BaseError,
+} from "../error/error";
+import { getBaseUrl } from "./config";
 
 export async function serverFetch<T>(
   endpoint: string,
-  options: RequestInit & { noAuth?: boolean } = {},
+  options: RequestInit = {},
 ): Promise<T> {
-  const { headers, noAuth, ...restOptions } = options;
-  const cookieStore = await cookies();
+  const { headers: extraHeaders = {}, ...restOptions } = options;
 
-  const defaultHeaders: HeadersInit = {
-    "Content-Type": "application/json",
-  };
+  const h = await headers();
+  const cookie = h.get("cookie") ?? "";
 
-  if (!noAuth) {
-    const accessToken = cookieStore.get("accessToken")?.value;
+  const BASE_URL = await getBaseUrl();
+  const url = `${BASE_URL}${endpoint}`;
 
-    console.log("[serverFetch] AccessToken", accessToken);
-
-    if (accessToken) {
-      defaultHeaders["Authorization"] = `Bearer ${accessToken}`;
-    }
-  }
-
-  let res = await fetch(`${BASE_URL}${endpoint}`, {
-    headers: { ...defaultHeaders, ...headers },
+  const res = await fetch(url, {
+    headers: {
+      "Content-Type": "application/json",
+      ...extraHeaders,
+      Cookie: cookie,
+    },
     cache: "no-store",
     ...restOptions,
+  }).catch(() => {
+    throw new ServerError(
+      "네트워크 오류가 발생했습니다.\n인터넷 연결을 확인하고 다시 시도해주세요.",
+      res.status,
+    );
   });
 
-  if (res.status === 401 && !noAuth) {
-    const refreshToken = cookieStore.get("refreshToken")?.value;
-
-    if (!refreshToken) {
-      throw new AuthorizationError(
-        "세션이 만료되었습니다.\n다시 로그인 해주세요.",
-      );
-    }
-
-    const refreshRes = await fetch("/api/auth/refresh", {
-      method: "POST",
-      credentials: "include",
-      cache: "no-store",
-    });
-
-    console.log("[serverFetch] refreshRes status:", refreshRes.status);
-
-    if (refreshRes.ok) {
-      const { accessToken: newToken } = await refreshRes.json();
-
-      res = await fetch(`${BASE_URL}${endpoint}`, {
-        headers: {
-          ...defaultHeaders,
-          ...headers,
-          Authorization: `Bearer ${newToken}`,
-        },
-        credentials: "include",
-        cache: "no-store",
-        ...restOptions,
-      });
-    } else {
-      throw new AuthorizationError(
-        "세션이 만료되었습니다.\n다시 로그인 해주세요.",
-      );
-    }
-  }
-
-  if (res.status === 404) {
-    throw new NotFoundError();
-  }
-
-  if (res.status >= 500) {
-    throw new ServerError();
-  }
-
   if (!res.ok) {
-    const text = await res.text();
-    throw new ServerError(text);
+    let message = `요청 실패 (${res.status})`;
+
+    try {
+      const data = await res.json();
+      if (typeof data === "object" && data?.message) {
+        message = data.message;
+      }
+    } catch {
+      // 기본 메시지
+    }
+
+    if (res.status === 401) throw new AuthorizationError();
+    if (res.status === 404) throw new NotFoundError();
+    if (res.status >= 500) throw new ServerError(message, res.status);
+    throw new BaseError(message, res.status);
   }
 
   return res.json() as Promise<T>;

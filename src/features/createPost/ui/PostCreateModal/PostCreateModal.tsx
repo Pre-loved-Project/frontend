@@ -1,17 +1,13 @@
 "use client";
 
-import React, { useState, useRef, useMemo } from "react";
+import React, { useState, useRef, useMemo, useEffect } from "react";
 import cn from "@/shared/lib/cn";
 import { TextField } from "@/shared/ui/TextField/TextField";
 import { TextBox } from "@/shared/ui/TextBox/TextBox";
 import { DropDown } from "@/shared/ui/DropDown/DropDown";
 import Button from "@/shared/ui/Button/Button";
 import Image from "next/image";
-import { Swiper, SwiperSlide } from "swiper/react";
-import { Navigation } from "swiper/modules";
-import "swiper/css";
-import "swiper/css/navigation";
-import "swiper/css/pagination";
+import { LoadingDots } from "@/shared/ui/Loading/LoadingDots";
 import { apiFetch } from "@/shared/api/fetcher";
 import { uploadImage } from "@/shared/api/uploadImage";
 
@@ -29,10 +25,12 @@ export const PostCreateModal = ({
   onError,
 }: PostCreateModalProps) => {
   const [images, setImages] = useState<File[]>([]);
+  const [imageError, setImageError] = useState<string | null>(null);
   const [title, setTitle] = useState("");
   const [price, setPrice] = useState<number | "">("");
   const [category, setCategory] = useState("");
   const [description, setDescription] = useState("");
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -50,11 +48,13 @@ export const PostCreateModal = ({
   ].map((cat) => ({ label: cat, value: cat }));
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (files) {
-      setImages((prev) => [...prev, ...Array.from(files)]);
-      e.target.value = ""; // input 값 초기화
-    }
+    const files = e.currentTarget.files;
+    if (!files || files.length == 0) return;
+
+    const selected = Array.from(files);
+    setImages((prev) => [...prev, ...selected]);
+    setImageError(null);
+    e.target.value = "";
   };
 
   const handleRemoveImage = (index: number) => {
@@ -64,6 +64,13 @@ export const PostCreateModal = ({
   const handleSubmit = async () => {
     try {
       if (!title || !price || !category) return;
+      if (images.length === 0) {
+        setImageError(
+          "이미지가 추가되지 않았습니다. 최소 1개의 이미지를 추가해주세요.",
+        );
+        return;
+      }
+      setIsLoading(true);
 
       const uploadedImageUrlArray: string[] = [];
       for (const file of images) {
@@ -92,56 +99,17 @@ export const PostCreateModal = ({
         onError?.(error.message);
       }
       onError?.(String(error));
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const widthClass = "w-[290px] md:w-[510px] xl:w-[540px]";
 
-  const imageSwiper = useMemo(
-    () => (
-      <Swiper
-        modules={[Navigation]}
-        spaceBetween={0}
-        slidesPerView={3}
-        navigation={true}
-        className="flex flex-1 items-center justify-center rounded-lg"
-      >
-        {images.map((file, idx) => (
-          <SwiperSlide
-            key={idx}
-            className="xl:w-[100px]bg-blue flex h-[70px] w-[70px] items-center justify-center md:h-[100px] md:w-[100px] xl:h-[100px]"
-          >
-            <div className="relative mx-auto h-[70px] w-[70px] md:h-[100px] md:w-[100px] xl:h-[100px] xl:w-[100px]">
-              <Image
-                src={URL.createObjectURL(file)}
-                alt={`preview-${idx}`}
-                fill
-                style={{ objectFit: "cover" }}
-                className="rounded-lg"
-              />
-              <button
-                type="button"
-                className="absolute top-0.5 right-0.5 rounded-full bg-black/50 p-1"
-                onClick={() => handleRemoveImage(idx)}
-              >
-                <img
-                  src="/icons/delete.svg"
-                  alt="삭제"
-                  className="h-2.5 w-2.5"
-                />
-              </button>
-            </div>
-          </SwiperSlide>
-        ))}
-      </Swiper>
-    ),
-    [images],
-  );
-
   return (
     <div
       className={cn(
-        "bg-black-950 fixed inset-0 z-50 flex items-center justify-center",
+        "fixed inset-0 z-50 flex items-center justify-center",
         "overflow-auto p-4",
         className,
       )}
@@ -155,15 +123,15 @@ export const PostCreateModal = ({
           <img
             src="/icons/delete.svg"
             alt="닫기"
-            className="h-6 w-6 text-gray-600"
+            className="h-6 w-6 text-gray-600 hover:cursor-pointer"
           />
         </button>
 
         <h2 className="text-lg font-semibold text-white">게시물 추가</h2>
 
-        <div className="flex items-center gap-4">
+        <div className="scrollbar-hide flex items-center gap-4 overflow-x-auto">
           <label
-            className="bg-black-800 flex h-[50px] w-[50px] shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-lg md:h-[70px] md:w-[70px] xl:h-[70px] xl:w-[70px]"
+            className="bg-black-800 flex h-[50px] w-[50px] shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-lg md:h-[70px] md:w-[70px]"
             onClick={() => inputRef.current?.click()}
           >
             <img
@@ -172,6 +140,7 @@ export const PostCreateModal = ({
               className="h-8 w-8"
             />
           </label>
+
           <input
             ref={inputRef}
             type="file"
@@ -181,8 +150,44 @@ export const PostCreateModal = ({
             className="hidden"
           />
 
-          {images.length > 0 && imageSwiper}
+          <div className="scrollbar-hide flex gap-3 overflow-x-auto py-1">
+            {images.map((file, idx) => (
+              <div
+                key={idx}
+                className="relative h-[70px] w-[70px] shrink-0 md:h-[100px] md:w-[100px] xl:h-[100px] xl:w-[100px]"
+              >
+                <Image
+                  src={URL.createObjectURL(file)}
+                  alt={`preview-${idx}`}
+                  fill
+                  className="rounded-lg object-cover"
+                />
+
+                <button
+                  type="button"
+                  className="absolute top-0.5 right-0.5 rounded-full bg-black/50 p-1"
+                  onClick={() => handleRemoveImage(idx)}
+                >
+                  <img
+                    src="/icons/delete.svg"
+                    alt="삭제"
+                    className="h-2.5 w-2.5"
+                  />
+                </button>
+              </div>
+            ))}
+          </div>
         </div>
+        {imageError && (
+          <span
+            className={cn(
+              "text-[12px] md:text-[12px] xl:text-[14px]",
+              "text-red",
+            )}
+          >
+            {imageError}
+          </span>
+        )}
 
         <TextField
           placeholder="제목을 입력해주세요"
@@ -219,11 +224,17 @@ export const PostCreateModal = ({
 
         <Button
           variant="primary"
-          disabled={!title || !price || !category || !description}
+          disabled={isLoading || !title || !price || !category || !description}
           onClick={handleSubmit}
           className={cn("mt-4", widthClass)}
         >
-          추가하기
+          {isLoading ? (
+            <span className="flex items-center gap-2">
+              추가 중 <LoadingDots />
+            </span>
+          ) : (
+            "추가하기"
+          )}
         </Button>
       </div>
     </div>

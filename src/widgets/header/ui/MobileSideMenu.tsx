@@ -2,14 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { useModalStore } from "@/shared/model/modal.store";
 import { useAuthStore } from "@/features/auth/model/auth.store";
+import { useOpenCreatePostWithAuth } from "@/features/createPost/lib/useOpenCreatePost";
 import cn from "@/shared/lib/cn";
-import { apiFetch } from "@/shared/api/fetcher";
-import { useQueryClient } from "@tanstack/react-query";
-import { getMyProfile } from "@/entities/user/api/mypage";
-import { useDebouncedCallback } from "@/shared/lib/useDebouncedCallback";
 
 export default function MobileSideMenu({
   onClose,
@@ -23,21 +21,13 @@ export default function MobileSideMenu({
   }) => void;
 }) {
   const router = useRouter();
+  const pathname = usePathname();
   const { isLogined, logout } = useAuthStore();
   const { openModal, closeModal } = useModalStore();
+  const { handleOpen } = useOpenCreatePostWithAuth();
   const [isVisible, setIsVisible] = useState(false);
 
-  const queryClient = useQueryClient();
-
-  const handleProfilePrefetch = () => {
-    queryClient.prefetchQuery({
-      queryKey: ["userProfile"],
-      queryFn: getMyProfile,
-    });
-  };
-
-  const { debouncedCallback: debouncedPrefetch, cancel: cancelPrefetch } =
-    useDebouncedCallback(handleProfilePrefetch, 500);
+  const hideSellButton = pathname.startsWith("/my");
 
   useEffect(() => {
     const timer = requestAnimationFrame(() => setIsVisible(true));
@@ -56,6 +46,33 @@ export default function MobileSideMenu({
   const handleOpenChat = () => {
     onOpenChat();
     handleClose();
+  };
+
+  const handleLogout = async () => {
+    const res = await fetch("/api/auth/logout", {
+      method: "POST",
+      credentials: "include",
+    });
+
+    if (res.ok) {
+      handleClose();
+      router.push("/login");
+      router.refresh();
+      logout();
+      openModal("normal", {
+        message: "로그아웃이 완료되었습니다.",
+        onClick: () => {
+          closeModal();
+        },
+      });
+    } else {
+      openModal("normal", {
+        message: "로그아웃에 실패했습니다.",
+        onClick: () => {
+          closeModal();
+        },
+      });
+    }
   };
 
   return (
@@ -101,23 +118,26 @@ export default function MobileSideMenu({
                   </button>
                 </li>
 
-                <li>
-                  <Link
-                    href="/ai"
-                    className="block px-4 py-3 text-white hover:bg-white/10"
-                    onClick={handleClose}
-                  >
-                    분석하기
-                  </Link>
-                </li>
+                {!hideSellButton && (
+                  <li>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        handleOpen();
+                        handleClose();
+                      }}
+                      className="w-full px-4 py-3 text-left text-white hover:bg-white/10"
+                    >
+                      판매하기
+                    </button>
+                  </li>
+                )}
 
                 <li>
                   <Link
                     href="/my"
                     className="block px-4 py-3 text-white hover:bg-white/10"
                     onClick={handleClose}
-                    onMouseEnter={debouncedPrefetch}
-                    onMouseLeave={cancelPrefetch}
                   >
                     마이페이지
                   </Link>
@@ -126,30 +146,16 @@ export default function MobileSideMenu({
                 <li>
                   <button
                     type="button"
-                    onClick={async () => {
-                      const res = await fetch("/api/auth/logout", {
-                        method: "POST",
-                        credentials: "include",
+                    onClick={() => {
+                      openModal("confirm", {
+                        message: "정말 로그아웃하시겠습니까?",
+                        onConfirm: async () => {
+                          await handleLogout();
+                        },
+                        onCancel: () => {
+                          closeModal();
+                        },
                       });
-                      handleClose();
-                      if (res.ok) {
-                        openModal("normal", {
-                          message: "로그아웃이 완료되었습니다.",
-                          onClick: () => {
-                            closeModal();
-                            logout();
-                            router.push("/login");
-                            router.refresh();
-                          },
-                        });
-                      } else {
-                        openModal("normal", {
-                          message: "로그아웃에 실패했습니다.",
-                          onClick: () => {
-                            closeModal();
-                          },
-                        });
-                      }
                     }}
                     className="w-full px-4 py-3 text-left text-red-400 hover:bg-white/10"
                   >
@@ -168,6 +174,7 @@ export default function MobileSideMenu({
                     로그인
                   </Link>
                 </li>
+
                 <li>
                   <Link
                     href="/signup"

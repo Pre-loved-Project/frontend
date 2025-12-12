@@ -2,9 +2,6 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useQueryClient } from "@tanstack/react-query";
-import { getPostDetail } from "@/entities/post/api/getPostDetail";
-import { useDebouncedCallback } from "@/shared/lib/useDebouncedCallback";
 import PostStatusBadge from "../badge/PostStatusBadge";
 import { PostStatus } from "../../model/types/post";
 
@@ -32,26 +29,8 @@ const PostCard = ({
   thumbnail,
   status,
 }: PostCardProps) => {
-  const queryClient = useQueryClient();
-
-  const { debouncedCallback: handleMouseEnter, cancel: handleMouseLeave } =
-    useDebouncedCallback(() => {
-      const cached = queryClient.getQueryData(["postDetail", postingId]);
-      if (cached) return;
-
-      queryClient.prefetchQuery({
-        queryKey: ["postDetail", postingId],
-        queryFn: () => getPostDetail(postingId),
-        staleTime: 1000 * 60 * 3,
-      });
-    }, 200);
-
   return (
-    <Link
-      href={`/detail/${postingId}`}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-    >
+    <Link href={`/detail/${postingId}`}>
       <article className="w-full rounded-lg border border-[#353542] bg-[#252530] p-2.5 md:pb-5 xl:pb-6">
         <div className="flex flex-col gap-2.5 md:gap-5 xl:gap-6">
           <div className="relative h-24 w-full overflow-hidden rounded-md md:h-40 xl:h-56">

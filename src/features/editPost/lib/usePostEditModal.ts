@@ -43,7 +43,7 @@ export const usePostEditModal = (handlers?: {
         handlers?.onFailure?.();
 
         openModal("normal", {
-          message: "게시물 수정 중 오류가 발생했습니다. " + message,
+          message: "게시물 수정을 실패했습니다.",
           buttonText: "확인",
           onClick: () => closeModal(),
         });

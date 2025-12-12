@@ -14,6 +14,7 @@ interface DropDownProps {
   onChange: (value: string | number) => void;
   placeholder?: string;
   className?: string;
+  disabled?: boolean;
 }
 
 export const DropDown = ({
@@ -22,6 +23,7 @@ export const DropDown = ({
   onChange,
   placeholder = "선택하세요",
   className,
+  disabled = false,
 }: DropDownProps) => {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -38,13 +40,22 @@ export const DropDown = ({
     };
   }, []);
 
+  const toggleOpen = () => {
+    if (disabled) return;
+    if (options.length === 0) return;
+    setOpen((prev) => !prev);
+  };
+
   return (
     <div className="relative" ref={ref}>
       <div
-        onClick={() => setOpen((prev) => !prev)}
+        onClick={toggleOpen}
         className={cn(
-          "bg-black-800 flex cursor-pointer items-center justify-between rounded-lg border px-4 transition-colors",
-          open ? "border-blue" : "border-gray-400",
+          "bg-black-800 flex items-center justify-between rounded-lg border px-4 transition-colors",
+          disabled
+            ? "cursor-not-allowed border-gray-600 opacity-50"
+            : "cursor-pointer",
+          open && !disabled ? "border-blue" : "border-gray-400",
           "h-[55px] w-[335px] text-[14px]",
           "md:h-[60px] md:w-[360px] md:text-[14px]",
           "xl:h-[70px] xl:w-[400px] xl:text-[16px]",
@@ -56,20 +67,23 @@ export const DropDown = ({
             ? options.find((opt) => opt.value === value)?.label
             : placeholder}
         </span>
-        {open ? (
-          <img
-            src="icons/arrow-up.svg"
-            alt="arrow up"
-            aria-label="arrow up"
-            className="h-[12px] w-[12px] md:h-[14px] md:w-[14px] xl:h-[16px] xl:w-[16px]"
-          />
-        ) : (
-          <img
-            src="icons/arrow-down.svg"
-            alt="arrow down"
-            aria-label="arrow down"
-            className="h-[12px] w-[12px] md:h-[14px] md:w-[14px] xl:h-[16px] xl:w-[16px]"
-          />
+
+        {!disabled && (
+          <>
+            {open ? (
+              <img
+                src="/icons/arrow-up.svg"
+                alt="arrow up"
+                className="h-[12px] w-[12px] md:h-[14px] md:w-[14px] xl:h-[16px] xl:w-[16px]"
+              />
+            ) : (
+              <img
+                src="/icons/arrow-down.svg"
+                alt="arrow down"
+                className="h-[12px] w-[12px] md:h-[14px] md:w-[14px] xl:h-[16px] xl:w-[16px]"
+              />
+            )}
+          </>
         )}
       </div>
 
@@ -83,10 +97,10 @@ export const DropDown = ({
           "w-[335px] gap-[5px] p-[10px]",
           "md:w-[360px] md:gap-[5px] md:p-[10px]",
           "xl:w-[400px] xl:gap-[5px] xl:p-[10px]",
-          className,
-          open
+          open && !disabled
             ? "pointer-events-auto scale-y-100 opacity-100"
             : "pointer-events-none scale-y-0 opacity-0",
+          className,
         )}
       >
         {options.map((opt) => (
@@ -97,12 +111,9 @@ export const DropDown = ({
               setOpen(false);
             }}
             className={cn(
-              "mt-1 flex cursor-pointer items-center rounded-md px-2 transition-colors",
+              "flex cursor-pointer items-center rounded-md px-2 py-2 transition-colors",
               "text-gray-400 hover:bg-gray-600 hover:text-white",
-              "w-[380px] gap-[5px] p-[10px]",
-              "md:w-[360px] md:gap-[5px] md:p-[10px]",
-              "xl:w-[400px] xl:gap-[5px] xl:p-[10px]",
-              className,
+              "w-full",
             )}
           >
             {opt.label}

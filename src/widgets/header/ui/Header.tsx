@@ -19,12 +19,12 @@ const navItems = [
     icon: "/icons/chats.svg",
     hasDivider: false,
   },
-  {
-    href: "/ai",
-    label: "분석하기",
-    icon: "/icons/analyze.svg",
-    hasDivider: true,
-  },
+  // {
+  //   href: "/ai",
+  //   label: "분석하기",
+  //   icon: "/icons/analyze.svg",
+  //   hasDivider: true,
+  // },
   {
     href: "/my",
     label: "마이페이지",

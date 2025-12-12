@@ -1,166 +1,132 @@
-import { DealStatus, MessageProps } from "./types";
 import { useAuthStore } from "@/features/auth/model/auth.store";
-import { PostStatus } from "@/entities/post/model/types/post";
 import { AuthorizationError } from "@/shared/error/error";
 import { handleError } from "@/shared/error/handleError";
 
-export interface ChatSocketEvents {
+// 모든 소켓 이벤트가 상속받을 기본 인터페이스
+export interface SocketEvents {
   onOpen?: () => void;
-  onMessage?: (message: MessageProps) => void;
-  onSystem?: (system: { type: string; message: string }) => void;
-  onDealUpdate?: (update: {
-    postStatus: PostStatus;
-    dealStatus: DealStatus;
-    message: string;
-  }) => void;
-  onClose?: (code: number, reason?: string) => void;
   onError?: (event: Event) => void;
+  onClose?: (code: number, reason?: string) => void;
 }
 
-export class ChatSocket {
-  private socket: WebSocket | null = null;
-  private chatId: number;
-  private events: ChatSocketEvents;
+// 각 소켓 클래스가 구현해야 하는 이벤트 핸들러
+export abstract class Socket<Events extends SocketEvents> {
+  protected socket: WebSocket | null = null;
+  protected events: Events;
 
-  constructor(chatId: number, events: ChatSocketEvents = {}) {
-    this.chatId = chatId;
+  constructor(events: Events) {
     this.events = events;
   }
 
-  isOpen(): boolean {
+  // 서브클래스에서 구현해야 하는 추상 메서드
+  protected abstract getEndpointPath(): string;
+  protected abstract handleMessage(event: MessageEvent): void;
+  protected abstract getDebugName(): string;
+  protected abstract getCloseCodeName(): string;
+
+  public isOpen(): boolean {
     return this.socket !== null && this.socket.readyState === WebSocket.OPEN;
   }
 
-  connect(): Promise<void> {
+  private getWsUrl(): string {
+    const { accessToken } = useAuthStore.getState();
+    const path = this.getEndpointPath();
+    const baseUrl = process.env.NEXT_PUBLIC_API_WS_URL || "ws://localhost:8000";
+
+    // 쿼리 파라미터로 accessToken을 추가하는 공통 로직
+    return `${baseUrl}${path}?token=${accessToken}`;
+  }
+
+  public connect(): Promise<void> {
     return new Promise((resolve, reject) => {
+      const debugName = this.getDebugName();
+
       if (this.socket) {
-        console.warn("[Socket] Already connected");
+        console.warn(`[${debugName}] Already connected`);
         resolve();
         return;
       }
 
-      const { accessToken } = useAuthStore.getState();
-      const wsUrl = `${
-        process.env.NEXT_PUBLIC_API_WS_URL || "ws://localhost:8000"
-      }/ws/chat/${this.chatId}?token=${accessToken}`;
-
-      this.socket = new WebSocket(wsUrl);
+      try {
+        this.socket = new WebSocket(this.getWsUrl());
+      } catch (e) {
+        console.error(`[${debugName}] Failed to create WebSocket URL.`);
+        reject(e);
+        return;
+      }
 
       this.socket.onopen = () => {
-        console.log("[Socket] Connected");
+        console.log(`[${debugName}] Connected`);
         this.events.onOpen?.();
         resolve();
       };
 
-      this.socket.onmessage = (event) => {
-        try {
-          const data = JSON.parse(event.data);
+      this.socket.onmessage = (event) => this.handleMessage(event);
 
-          if (data.type === "deal_update") {
-            this.events.onDealUpdate?.({
-              dealStatus: data.dealStatus,
-              postStatus: data.postStatus,
-              message: data.systemMessage,
-            });
-            return;
-          }
-
-          if (["welcome", "system", "read"].includes(data.type)) {
-            this.events.onSystem?.(data);
-            return;
-          }
-
-          if (data.messageId && data.content) {
-            const msg: MessageProps = {
-              messageId: data.messageId,
-              type: data.type,
-              content: data.content,
-              isMine: false,
-              sendAt: data.createdAt,
-              isRead: false,
-            };
-            this.events.onMessage?.(msg);
-          }
-        } catch (err) {
-          console.error("[Socket] Message parse error:", err);
-        }
-      };
-
-      this.socket.onclose = async (event) => {
-        if (event.code === 4001) {
-          console.warn("[Socket] Token expired (4001)");
-
-          const { logout, setAccessToken } = useAuthStore.getState();
-
-          try {
-            const refreshed = await fetch("/api/auth/refresh", {
-              method: "POST",
-              credentials: "include",
-            });
-
-            if (!refreshed.ok) {
-              logout();
-
-              throw new AuthorizationError(
-                "세션이 만료되었습니다.\n다시 로그인 해주세요.",
-              );
-            }
-
-            const { accessToken: newToken } = await refreshed.json();
-            setAccessToken(newToken);
-
-            this.reconnect();
-          } catch (err) {
-            handleError(err);
-            logout();
-            return;
-          }
-        }
-
-        console.warn("[Socket] Closed:", event.code);
-        this.events.onClose?.(event.code, event.reason);
-        this.socket = null;
-      };
+      this.socket.onclose = (event) => this.handleClose(event);
 
       this.socket.onerror = (err) => {
-        console.error("[Socket] Error:", err);
+        console.error(`[${debugName}] Error:`, err);
         this.events.onError?.(err);
         reject(err);
       };
     });
   }
 
-  private reconnect() {
-    console.log("[Socket] Reconnecting after refresh…");
+  // 토큰 만료 시 재연결 로직 (모든 소켓에 공통)
+  protected async handleClose(event: CloseEvent) {
+    const debugName = this.getDebugName();
+
+    if (event.code === 4001) {
+      console.warn(`[${debugName}] Token expired (4001). Attempting refresh.`);
+      const { logout, setAccessToken } = useAuthStore.getState();
+
+      try {
+        const refreshed = await fetch("/api/auth/refresh", {
+          method: "POST",
+          credentials: "include",
+        });
+
+        if (!refreshed.ok) {
+          logout();
+          throw new AuthorizationError(
+            "세션이 만료되었습니다.\\n다시 로그인 해주세요.",
+          );
+        }
+
+        const { accessToken: newToken } = await refreshed.json();
+        setAccessToken(newToken);
+        this.reconnect(); // 갱신 성공 시 재연결
+      } catch (err) {
+        handleError(err);
+        logout();
+        return;
+      }
+    }
+
+    console.warn(`[${debugName}] Closed:`, event.code);
+    this.events.onClose?.(event.code, event.reason);
+    this.socket = null;
+  }
+
+  protected reconnect() {
+    console.log(`[${this.getDebugName()}] Reconnecting after refresh…`);
     this.socket = null;
     this.connect();
   }
 
-  sendMessage(type: "text" | "image", content: string) {
-    if (!this.socket || this.socket.readyState !== WebSocket.OPEN) {
-      console.warn("[Socket] Not connected");
-      return;
-    }
-
-    const payload = {
-      event: "send_message",
-      type,
-      content,
-    };
-
-    this.socket.send(JSON.stringify(payload));
-  }
-
-  leaveRoom() {
+  public close() {
     if (!this.socket) return;
 
-    const state = this.socket.readyState;
-
-    if (state === WebSocket.OPEN) {
-      this.socket.send(JSON.stringify({ event: "leave_room" }));
-      this.socket.close(1000, "User left");
+    // 서브클래스에서 정의한 종료 이벤트 이름 사용
+    if (this.socket.readyState === WebSocket.OPEN) {
+      this.socket.send(JSON.stringify({ event: this.getCloseCodeName() }));
+      this.socket.close(1000, `User left ${this.getDebugName()}`);
     } else {
-      this.socket.close(1000, `User left skipped - ${state.toString()}`);
+      this.socket.close(
+        1000,
+        `User left skipped - ${this.socket.readyState.toString()}`,
+      );
     }
 
     this.socket = null;

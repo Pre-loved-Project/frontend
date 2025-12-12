@@ -14,7 +14,7 @@ export default async function Page({
 }: {
   params: { postingId: string };
 }) {
-  const { postingId } = params;
+  const { postingId } = await params;
   const id = Number(postingId);
   const queryClient = new QueryClient();
 

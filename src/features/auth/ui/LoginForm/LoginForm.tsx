@@ -3,49 +3,41 @@
 import React, { useState } from "react";
 import { Input } from "@/entities/user/ui/Input/Input";
 import Button from "@/shared/ui/Button/Button";
-import { useAuthStore } from "../../model/auth.store";
+import { LoadingDots } from "@/shared/ui/Loading/LoadingDots";
 import { apiFetch } from "@/shared/api/fetcher";
-
-type FormSize = "sm" | "md" | "lg";
+import { useAuthStore } from "../../model/auth.store";
 
 interface LoginFormProps {
-  size?: FormSize;
   onSuccess?: () => void;
   onError?: (msg: string) => void;
 }
 
-export const LoginForm = ({
-  size = "lg",
-  onSuccess,
-  onError,
-  ...props
-}: LoginFormProps) => {
+export const LoginForm = ({ onSuccess, onError }: LoginFormProps) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
   const [emailError, setEmailError] = useState<string | null>(null);
   const [passwordError, setPasswordError] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const { setAccessToken } = useAuthStore();
 
   const handleSubmit = async (e: React.FormEvent) => {
-    setIsLoading(true);
     e.preventDefault();
+    setIsLoading(true);
 
     try {
-      const data = await apiFetch<{ accessToken: string }>("/api/auth/login", {
+      const res = await apiFetch<{ accessToken: string }>("/api/auth/login", {
         method: "POST",
         body: JSON.stringify({ email, password }),
         noAuth: true,
-        useBaseUrl: false,
       });
 
-      setAccessToken(data.accessToken);
+      setAccessToken(res.accessToken);
       onSuccess?.();
     } catch (error) {
-      onError?.("로그인에 실패하였습니다.\n이메일과 비밀번호를 확인해주세요.");
-    } finally {
       setIsLoading(false);
+      onError?.("로그인에 실패하였습니다.\n이메일과 비밀번호를 확인해주세요.");
     }
   };
 
@@ -101,7 +93,13 @@ export const LoginForm = ({
           !email || emailError !== null || !password || passwordError !== null
         }
       >
-        {isLoading ? "로그인 중 ..." : "로그인"}
+        {isLoading ? (
+          <span className="flex items-center gap-1">
+            로그인 중 <LoadingDots />
+          </span>
+        ) : (
+          "로그인"
+        )}
       </Button>
     </form>
   );

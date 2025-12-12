@@ -1,12 +1,14 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState } from "react";
 import cn from "@/shared/lib/cn";
 import { ProfileImageChangeInput } from "../ProfileImageChangeInput/ProfileImageChangeInput";
 import { Input } from "@/entities/user/ui/Input/Input";
 import { TextBox } from "@/shared/ui/TextBox/TextBox";
 import { DropDown } from "@/shared/ui/DropDown/DropDown";
 import Button from "@/shared/ui/Button/Button";
+import { LoadingDots } from "@/shared/ui/Loading/LoadingDots";
+
 import { apiFetch } from "@/shared/api/fetcher";
 import { uploadImage } from "@/shared/api/uploadImage";
 
@@ -38,6 +40,7 @@ export const ProfileEditModal = ({
   onError,
 }: ProfileEditModalProps) => {
   const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imageChanged, setImageChanged] = useState<boolean>(false);
   const [nickname, setNickname] = useState(initialNickname);
   const [introduction, setIntroduction] = useState(initialIntroduction ?? "");
   const [category, setCategory] = useState(initialCategory ?? "");
@@ -56,20 +59,30 @@ export const ProfileEditModal = ({
     "반려동물/취미",
   ].map((cat) => ({ label: cat, value: cat }));
 
+  const isChanged =
+    imageChanged ||
+    nickname !== initialNickname ||
+    introduction !== (initialIntroduction ?? "") ||
+    category !== (initialCategory ?? "");
+
   const handleSave = async () => {
     try {
+      if (!isChanged) return;
       setLoading(true);
 
-      let uploadedImageUrl = imageUrl;
+      let uploadedImageUrl: string | null | undefined = imageUrl;
 
       if (imageFile) {
         uploadedImageUrl = await uploadImage(imageFile);
+      } else if (imageChanged) {
+        uploadedImageUrl = null;
       }
 
-      const updateBody: Record<string, string> = {};
+      const updateBody: Record<string, string | null> = {};
       if (nickname.trim()) updateBody.nickname = nickname;
       if (introduction.trim()) updateBody.introduction = introduction;
-      if (uploadedImageUrl) updateBody.imageUrl = uploadedImageUrl;
+      if (uploadedImageUrl !== undefined)
+        updateBody.imageUrl = uploadedImageUrl;
       if (category.trim()) updateBody.category = category;
 
       await apiFetch("/api/users/me", {
@@ -117,7 +130,13 @@ export const ProfileEditModal = ({
 
       <div className="flex w-full flex-col items-start gap-2">
         <label className="text-sm font-medium text-white">프로필 이미지</label>
-        <ProfileImageChangeInput imgUrl={imageUrl} onChange={setImageFile} />
+        <ProfileImageChangeInput
+          imgUrl={imageUrl}
+          onChange={(file) => {
+            setImageFile(file);
+            setImageChanged(true);
+          }}
+        />
       </div>
 
       <div className="flex flex-col items-start gap-2">
@@ -153,10 +172,16 @@ export const ProfileEditModal = ({
         <Button
           className="mt-3 md:w-[440px]"
           variant="primary"
-          disabled={loading}
+          disabled={loading || !nickname || !isChanged}
           onClick={handleSave}
         >
-          {loading ? "저장 중..." : "저장하기"}
+          {loading ? (
+            <span className="flex items-center gap-2">
+              저장 중 <LoadingDots />
+            </span>
+          ) : (
+            "저장하기"
+          )}
         </Button>
       </div>
     </div>
