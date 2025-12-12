@@ -32,6 +32,32 @@ const Profile = ({
   const { logout } = useAuthStore();
   const { openModal, closeModal } = useModalStore();
 
+  const handleLogout = async () => {
+    const res = await fetch("/api/auth/logout", {
+      method: "POST",
+      credentials: "include",
+    });
+
+    if (res.ok) {
+      router.push("/login");
+      router.refresh();
+      logout();
+      openModal("normal", {
+        message: "로그아웃이 완료되었습니다.",
+        onClick: () => {
+          closeModal();
+        },
+      });
+    } else {
+      openModal("normal", {
+        message: "로그아웃에 실패했습니다.",
+        onClick: () => {
+          closeModal();
+        },
+      });
+    }
+  };
+
   return (
     <article className="flex h-[556px] w-[335px] shrink-0 items-center justify-center rounded-lg border border-[#353542] bg-[#252530] px-5 py-7 md:h-[601px] md:w-[509px] md:px-7 xl:h-[753px] xl:w-[340px] xl:px-5 xl:pt-10">
       <div className="flex h-full w-full flex-col items-center justify-between">
@@ -89,30 +115,12 @@ const Profile = ({
           <Button
             variant="tertiary"
             className="w-full!"
-            onClick={async () => {
-              const res = await fetch("/api/auth/logout", {
-                method: "POST",
-                credentials: "include",
+            onClick={() => {
+              openModal("confirm", {
+                message: "정말 로그아웃하시겠습니까?",
+                onConfirm: handleLogout,
+                onCancel: closeModal,
               });
-
-              if (res.ok) {
-                openModal("normal", {
-                  message: "로그아웃이 완료되었습니다.",
-                  onClick: () => {
-                    closeModal();
-                    logout();
-                    router.push("/login");
-                    router.refresh();
-                  },
-                });
-              } else {
-                openModal("normal", {
-                  message: "로그아웃에 실패했습니다.",
-                  onClick: () => {
-                    closeModal();
-                  },
-                });
-              }
             }}
           >
             로그아웃
