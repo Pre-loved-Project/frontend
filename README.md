@@ -1,36 +1,106 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Chalddack
 
-## Getting Started
+- 배포 URL: https://chalddack.vercel.app/ 
+- 테스트용 계정
+  - ID: chal@test.com
+  - PW: 11111111
+## Chalddack 서비스 소개
+- 찰딱은 사용자 중심의 중고거래 경험을 제공하는 **중고 거래 플랫폼**입니다.
+- 다양한 중고 물품을 탐색하고, 직접 상품을 등록하거나 거래에 참여할 수 있습니다.
+- 실시간 채팅과 거래 예약 기능을 통해 안전한 거래를 진행할 수 있습니다.
+---
 
-First, run the development server:
+## 서비스 둘러보기
+### 인증 페이지 (로그인 · 회원가입)
+> 계정 생성 및 로그인을 제공하며, 인증 상태에 따라 사용자에게 명확한 피드백을 제공합니다.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+- **세션 만료 피드백**
+  - 인증 만료 시 `/login?expired=true`로 이동
+  - 로그인 페이지 진입 시 URL 파라미터를 통해 세션 만료 상태를 감지하여 인증 상태를 초기화하고 안내 모달을 표시
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- **인증 성공 / 실패 피드백**
+  - 로그인 · 회원가입 성공/실패를 공통 Modal 시스템으로 처리
+    
+---
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### GNB
+> 서비스 내 주요 페이지로의 이동을 제공하는 전역 네비게이션입니다.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- **인증 상태 기반 네비게이션**
+  
+  - 비로그인 상태: 로그인 / 회원가입 버튼 노출
+  - 로그인 상태: 판매하기 / 채팅하기 / 마이페이지 제공 
 
-## Learn More
+---
 
-To learn more about Next.js, take a look at the following resources:
+### 채팅 
+> 페이지 이동 없이 채팅 기능을 사용할 수 있도록,
+> Portal 기반으로 제공되는 실시간 채팅 UI입니다.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- **채팅 목록**
+  - 내가 참여 중인 채팅방 목록 제공
+  - 각 채팅방의 최근 메시지 및 상태 표시
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- **채팅방**
+  - 판매자·구매자 간 실시간 메시지 송수신
+  - 게시글 단위로 채팅방 관리
 
-## Deploy on Vercel
+---
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### 게시글 목록 페이지 (홈)
+> 중고 거래 물품을 탐색할 수 있습니다.
+- **상품 조회**
+   - 카테고리별 물품 탐색
+   - 최신순/좋아요순/채팅순/조회순 정렬
+   - SSR 기반 초기 데이터 프리패칭 + CSR 무한 스크롤
+   - 물품 클릭 시 상세페이지로 이동
+---
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### 게시글 상세 페이지
+> 게시글 상세 정보 및 채팅·좋아요 기능을 제공합니다.
+
+- **상품 상세 정보**
+  - 상품 제목, 가격, 설명 등 기본 정보 제공
+  - SSR 기반 데이터 프리패칭으로 상품 상세 정보 즉시 제공
+    
+- **사용자 인터랙션**
+  - 채팅을 통한 판매자와의 실시간 문의
+  - 좋아요를 통한 관심 상품 표시
+    
+- **연관 상품 탐색**
+  - 동일 판매자의 다른 상품 목록 제공
+---
+
+### 프로필 페이지
+> 사용자 정보를 관리하고, 내가 등록한 상품을 수정 및 삭제할 수 있습니다.
+
+- **사용자 프로필 관리**
+  - 닉네임, 프로필 이미지 등 기본 정보 표시
+  - 프로필 정보 수정 기능 제공
+  - SSR 기반 데이터 프리패칭으로 사용자 프로필 정보 즉시 제공
+
+- **판매 상품 관리**
+  - 내가 판매한 상품 목록 조회
+  - 판매 상태를 기준으로 상품 현황 관리
+  - 상품 수정 및 삭제 기능 제공
+    
+---
+
+### 게시글 등록 모달
+> 사용자가 새로운 상품 게시글을 등록할 수 있는 모달입니다.
+
+- 상품 제목, 가격, 카테고리, 설명, 이미지 입력
+- 로그인 사용자만 접근 가능
+- 등록 완료 시 즉각적인 피드백 제공
+  
+---
+
+### 게시글 수정 모달
+> 기존 상품 정보를 수정할 수 있는 모달입니다.
+
+- 기존 게시글 데이터를 초기값으로 제공
+- 등록 모달과 동일한 입력 검증 및 UX 유지
+
+---
+
+                                               
