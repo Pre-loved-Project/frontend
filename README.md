@@ -25,15 +25,21 @@
 
 <table align="center">
   <tr>
+    <th align="center">
+      회원가입
+    </th>
+    <th align="center">
+      로그인
+    </th>
+  </tr>
+  <tr>
     <td align="center">
-      <strong>회원가입</strong><br/>
       <img
         src="https://github.com/user-attachments/assets/2256579c-20c0-4702-9cd2-eb027e7c793e"
         height="420"
       />
     </td>
     <td align="center">
-      <strong>로그인</strong><br/>
       <img
         src="https://github.com/user-attachments/assets/756b3b30-670a-4ee5-b75b-4a745d9c6b26"
         height="420"
@@ -41,6 +47,7 @@
     </td>
   </tr>
 </table>
+
 
 ---
 
@@ -51,21 +58,34 @@
   - 비로그인 상태: 로그인 / 회원가입 버튼 
   - 로그인 상태: 판매하기 / 채팅하기 / 마이페이지 버튼  
 - **반응형 네비게이션**
-  - 화면 크기에 따라 레이아웃이 변경되는 반응형 GNB
-    
-#### 데스크탑 
-<img
-  src="https://github.com/user-attachments/assets/f12679bf-ae9e-4074-903f-f87bb864c29f"
-  width="100%"
-  alt="데스크탑 GNB"
-/>
-#### 모바일 
-<img
-  src="https://github.com/user-attachments/assets/1b89af9d-05c8-4139-920a-0f847d2cdb91"
-  width="360"
-  height="500"
-  alt="모바일 GNB"
-/>
+  - 화면 크기에 따라 레이아웃이 변경되는 반응형 GNB 구성 
+<table align="center" width="100%">
+  <tr>
+    <th align="center">데스크탑</th>
+  </tr>
+  <tr>
+    <td align="center">
+      <img
+        src="https://github.com/user-attachments/assets/f12679bf-ae9e-4074-903f-f87bb864c29f"
+        width="100%"
+        alt="데스크탑 GNB"
+      />
+    </td>
+  </tr>
+  <tr>
+    <th align="center">모바일</th>
+  </tr>
+  <tr>
+    <td>
+      <img
+        src="https://github.com/user-attachments/assets/1b89af9d-05c8-4139-920a-0f847d2cdb91"
+        width="360"
+        alt="모바일 GNB"
+      />
+    </td>
+  </tr>
+</table>
+
 
 ---
 
