@@ -38,7 +38,20 @@ export function PostDetailSection({ post }: { post: PostDetail }) {
   });
 
   const { toggleLike, isLoading: isLikeLoading } = useLike(post.postingId);
-  const handleToggleLike = () => toggleLike(!post.isFavorite);
+  const handleToggleLike = () => {
+    if (!isLogined) {
+      openModal("normal", {
+        message: "로그인이 필요한 서비스입니다.\n로그인 해주세요.",
+        onClick: () => {
+          closeModal();
+          router.replace("/login");
+        },
+      });
+      return;
+    }
+
+    toggleLike(!post.isFavorite);
+  };
 
   const { openPostEditModal } = usePostEditModal({
     onSuccess: async () => {
