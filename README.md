@@ -145,20 +145,62 @@
 - **상품 관리**
   - 사용자 행동(판매·구매·관심)에 따라 상품을 구분하여 조회
   - 등록한 상품의 수정 및 삭제 기능 제공
-  
+
+<table align="center" width="100%">
+  <tr>
+    <td align="center">
+      <strong>프로필 수정</strong>
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <img
+        src="https://github.com/user-attachments/assets/aeba87b2-ede0-4134-a790-dbf93ef5f230"
+        width="420"
+        alt="프로필 수정 모달"
+      />
+    </td>
+  </tr>
+</table>
+
+
 ---
 
-### 게시글 등록 모달
-> 사용자가 새로운 상품 게시글을 등록할 수 있는 모달입니다.
+### 상품 등록 / 수정 모달
+> 사용자가 상품 게시글을 등록하거나 수정할 수 있도록 제공되는 모달입니다.
+
+- **상품 정보 입력**
+  - 상품 제목, 가격, 카테고리, 설명, 이미지 입력 가능
+  - 필수 항목 누락 시 즉각적인 입력 안내 제공
+- **처리 모달**
+  - 등록 및 수정 성공 시 성공 안내 모달 표시
+  - 실패 시 에러 상황에 맞는 안내 모달 표시
+    
+<table align="center" width="100%">
+  <tr>
+    <td align="center">
+      <strong>등록 모달</strong>
+    </td>
+    <td align="center">
+      <strong>수정 모달</strong>
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <img
+        src="https://github.com/user-attachments/assets/58b6a55d-602a-4ca4-a5f7-50d1af7ea131"
+        width="90%"
+        alt="게시글 생성"
+      />
+    </td>
+    <td align="center">
+      <img
+        src="https://github.com/user-attachments/assets/5e742c77-22ac-4b16-b466-6c48f3e4acf0"
+        width="90%"
+        alt="게시글 수정"
+      />
+    </td>
+  </tr>
+</table>
 
 
-  
----
-
-### 게시글 수정 모달
-> 기존 상품 정보를 수정할 수 있는 모달입니다.
-
-
-
-
-                                               
