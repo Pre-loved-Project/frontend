@@ -80,6 +80,7 @@
       <img
         src="https://github.com/user-attachments/assets/1b89af9d-05c8-4139-920a-0f847d2cdb91"
         width="360"
+        height="500"
         alt="모바일 GNB"
       />
     </td>
