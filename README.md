@@ -2,7 +2,7 @@
 
 - 배포 URL: https://chalddack.vercel.app/ 
 - 테스트용 계정
-  - ID: chal@test.com
+  - ID: test1@test.com
   - PW: 11111111
 ## Chalddack 서비스 소개
 - 찰딱은 사용자 중심의 중고거래 경험을 제공하는 **중고 거래 플랫폼**입니다.
@@ -58,34 +58,36 @@
   - 비로그인 상태: 로그인 / 회원가입 버튼 
   - 로그인 상태: 판매하기 / 채팅하기 / 마이페이지 버튼  
 - **반응형 네비게이션**
-  - 화면 크기에 따라 레이아웃이 변경되는 반응형 GNB 구성 
-<table align="center" width="100%">
+  - 화면 크기에 따라 레이아웃이 변경되는 반응형 GNB 구성
+     
+<!-- <table align="center" width="100%">
+  <colgroup>
+    <col width="65%" />
+    <col width="35%" />
+  </colgroup>
   <tr>
-    <th align="center">데스크탑</th>
+    <th align="center">웹</th>
+    <th align="center">모바일</th>
   </tr>
   <tr>
-    <td align="center">
+    <td align="center" valign="top">
       <img
         src="https://github.com/user-attachments/assets/f12679bf-ae9e-4074-903f-f87bb864c29f"
         width="100%"
         alt="데스크탑 GNB"
       />
     </td>
-  </tr>
-  <tr>
-    <th align="center">모바일</th>
-  </tr>
-  <tr>
-    <td>
+    <td align="center" valign="top">
       <img
         src="https://github.com/user-attachments/assets/1b89af9d-05c8-4139-920a-0f847d2cdb91"
         width="360"
-        height="500"
         alt="모바일 GNB"
       />
     </td>
   </tr>
-</table>
+</table> -->
+
+
 
 
 ---
@@ -122,13 +124,42 @@
   - 상품 제목, 가격, 설명 등 기본 정보 제공
   - SSR 기반 데이터 프리패칭으로 상품 상세 정보 즉시 제공
     
+- **연관 상품 탐색**
+  - 동일 판매자의 다른 상품 목록 제공
+    
 - **사용자 인터랙션**
   - 채팅을 통한 판매자와의 실시간 문의
   - 좋아요를 통한 관심 상품 표시
     
-- **연관 상품 탐색**
-  - 동일 판매자의 다른 상품 목록 제공
-    
+
+<table align="center" width="100%">
+  <colgroup>
+    <col width="55%" />
+    <col width="45%" />
+  </colgroup>
+  <tr>
+    <td align="center"><strong>웹</strong></td>
+    <td align="center"><strong>모바일</strong></td>
+  </tr>
+  <tr>
+    <td align="center">
+      <img
+        src="https://github.com/user-attachments/assets/42d8f420-a0f9-4211-adcf-df9e90c4f766"
+        width="90%"
+        alt="웹 화면"
+      />
+    </td>
+    <td align="center">
+      <img
+        src="https://github.com/user-attachments/assets/38a4dd7d-509a-4d9b-96a1-c5949ef36852"
+        width="90%"
+        alt="모바일 화면"
+      />
+    </td>
+  </tr>
+</table>
+
+
 ---
 
 ### 마이 페이지
@@ -147,17 +178,27 @@
   - 등록한 상품의 수정 및 삭제 기능 제공
 
 <table align="center" width="100%">
+  <colgroup>
+    <col width="55%" />
+    <col width="45%" />
+  </colgroup>
   <tr>
-    <td align="center">
-      <strong>프로필 수정</strong>
-    </td>
+    <th align="center">웹</th>
+    <th align="center">모바일</th>
   </tr>
   <tr>
     <td align="center">
       <img
         src="https://github.com/user-attachments/assets/aeba87b2-ede0-4134-a790-dbf93ef5f230"
-        width="420"
-        alt="프로필 수정 모달"
+        width="90%"
+        alt="프로필 수정 - 웹"
+      />
+    </td>
+    <td align="center">
+      <img
+        src="https://github.com/user-attachments/assets/1cf06c59-fa4e-4d29-8490-ad6ead622fa1"
+        width="90%"
+        alt="프로필 수정 - 모바일"
       />
     </td>
   </tr>
