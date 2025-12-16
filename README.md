@@ -8,10 +8,61 @@
 - 찰딱은 사용자 중심의 중고거래 경험을 제공하는 **중고 거래 플랫폼**입니다.
 - 다양한 중고 물품을 탐색하고, 직접 상품을 등록하거나 거래에 참여할 수 있습니다.
 - 실시간 채팅과 거래 예약 기능을 통해 안전한 거래를 진행할 수 있습니다.
+
+## 팀원 소개
+<div align="center">
+
+| <a href="https://github.com/ghdtnals"><img src="https://github.com/ghdtnals.png" width="100"></a> | <a href="https://github.com/taew0o"><img src="https://github.com/taew0o.png" width="100"></a> |
+| :---: | :---: |
+| **[FE] [홍수민](https://github.com/ghdtnals)** | **[FE] [박태우](https://github.com/taew0o)** |
+
+</div>
+
 ---
 
-## 서비스 둘러보기
+## 1. 기술 스택
+| 분류 | 기술 스택 |
+|------|-----------|
+| **프론트엔드** | ![Next.js](https://img.shields.io/badge/Next.js-000000?style=flat&logo=nextdotjs&logoColor=white) ![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=flat&logo=typescript&logoColor=white) ![React](https://img.shields.io/badge/React-61DAFB?style=flat&logo=react&logoColor=black) ![TailwindCSS](https://img.shields.io/badge/TailwindCSS-38B2AC?style=flat&logo=tailwindcss&logoColor=white) ![React Query](https://img.shields.io/badge/React%20Query-FF4154?style=flat&logo=reactquery&logoColor=white) 
+| **CI / CD** | ![GitHub Actions](https://img.shields.io/badge/GitHub%20Actions-2088FF?style=flat&logo=githubactions&logoColor=white) ![Vercel](https://img.shields.io/badge/Vercel-000000?style=flat&logo=vercel&logoColor=white) |
+| **협업** | ![Git](https://img.shields.io/badge/Git-F05032?style=flat&logo=git&logoColor=white) ![GitHub](https://img.shields.io/badge/GitHub-181717?style=flat&logo=github&logoColor=white) ![Figma](https://img.shields.io/badge/Figma-F24E1E?style=flat&logo=figma&logoColor=white) ![Notion](https://img.shields.io/badge/Notion-000000?style=flat&logo=notion&logoColor=white) |
 
+## 2. 프로젝트 구조
+본 프로젝트는 **Next.js(App Router)** 기반으로 개발되었으며, **FSD(Feature-Sliced Design)** 아키텍처를 적용해 라우팅, 도메인, 기능, UI의 책임을 명확히 분리한 구조를 사용합니다.  
+
+```bash
+src/
+├─ app/                  # Next.js App Router (라우팅, 페이지 단위 책임)
+│  ├─ page.tsx
+│  ├─ layout.tsx
+│  ├─ error.tsx
+│  ├─ not-found.tsx
+│  ├─ login/
+│  ├─ signup/
+│  ├─ my/
+│  ├─ detail/[postingId]/
+│  ├─ chat/
+│  └─ api/               # Next Route Handlers
+│
+├─ apis/                 # HTTP 클라이언트 및 도메인별 API
+│
+├─ entities/             # 핵심 도메인 엔티티 (비즈니스 모델)
+│
+├─ features/             # 사용자 행동 단위 기능 (mutation, 로직)
+│
+├─ widgets/              # 여러 feature/entity를 조합한 UI 블록
+│
+├─ views/                # 페이지 전용 UI 조합
+│
+└─ shared/               # 전역 공통 모듈 (ui, hooks, utils, store)
+```
+
+## 3. 고민한 부분
+### 언마운트 애니메이션
+### SSR 인증 정보 접근
+
+
+## 4. 페이지별 기능
 ### 인증 페이지 (로그인 · 회원가입 페이지)
 > 계정 생성 및 로그인, 유효성 검사를 수행합니다.<br/>
 > 인증 상태에 따른 화면 전환 및 모달 처리를 수행합니다.
@@ -243,5 +294,6 @@
     </td>
   </tr>
 </table>
+
 
 
