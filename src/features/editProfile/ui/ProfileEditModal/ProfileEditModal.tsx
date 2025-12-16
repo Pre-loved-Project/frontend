@@ -80,7 +80,9 @@ export const ProfileEditModal = ({
 
       const updateBody: Record<string, string | null> = {};
       if (nickname.trim()) updateBody.nickname = nickname;
-      if (introduction.trim()) updateBody.introduction = introduction;
+      if (introduction !== undefined) {
+        updateBody.introduction = introduction.trim();
+      }
       if (uploadedImageUrl !== undefined)
         updateBody.imageUrl = uploadedImageUrl;
       if (category.trim()) updateBody.category = category;
