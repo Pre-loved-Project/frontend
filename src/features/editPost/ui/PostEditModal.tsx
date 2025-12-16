@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, useMemo } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import cn from "@/shared/lib/cn";
 import { TextField } from "@/shared/ui/TextField/TextField";
 import { TextBox } from "@/shared/ui/TextBox/TextBox";
@@ -11,33 +11,10 @@ import { LoadingDots } from "@/shared/ui/Loading/LoadingDots";
 import { apiFetch } from "@/shared/api/fetcher";
 import { uploadImage } from "@/shared/api/uploadImage";
 
-const ImageItem = (
-  idx: number,
-  url: string,
-  onRemove: (idx: number) => void,
-) => {
-  return (
-    <div
-      key={`${url}-${idx}`}
-      className="relative h-[70px] w-[70px] shrink-0 md:h-[100px] md:w-[100px] xl:h-[100px] xl:w-[100px]"
-    >
-      <Image
-        src={url}
-        alt={`preview-${idx}`}
-        fill
-        className="rounded-lg object-cover"
-      />
-
-      <button
-        type="button"
-        className="absolute top-0.5 right-0.5 flex items-center justify-center rounded-full bg-black/50 p-1"
-        onClick={() => onRemove(idx)}
-      >
-        <img src="/icons/delete.svg" alt="삭제" className="h-2.5 w-2.5" />
-      </button>
-    </div>
-  );
-};
+interface PreviewImage {
+  file: File;
+  previewUrl: string;
+}
 
 export interface PostEditModalProps {
   postId: number;
@@ -65,14 +42,17 @@ export const PostEditModal = ({
   onError,
 }: PostEditModalProps) => {
   const [imageUrls, setImageUrls] = useState<string[]>(initImages);
-  const [images, setImages] = useState<File[]>([]);
+  const [newImages, setNewImages] = useState<PreviewImage[]>([]);
   const [imageChanged, setImageChanged] = useState<boolean>(false);
   const [imageError, setImageError] = useState<string | null>(null);
+
   const [title, setTitle] = useState(initTitle);
   const [price, setPrice] = useState<number | "">(initPrice);
   const [category, setCategory] = useState(initCategory);
   const [content, setContent] = useState(initContent);
   const [isLoading, setIsLoading] = useState(false);
+
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const isChanged =
     imageChanged ||
@@ -80,8 +60,6 @@ export const PostEditModal = ({
     price !== initPrice ||
     category !== initCategory ||
     content !== initContent;
-
-  const inputRef = useRef<HTMLInputElement>(null);
 
   const categoryOptions = [
     "전자제품/가전제품",
@@ -98,13 +76,17 @@ export const PostEditModal = ({
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.currentTarget.files;
-    if (!files || files.length === 0) return;
+    if (!files) return;
 
-    const selected = Array.from(files);
-    setImages((prev) => [...prev, ...selected]);
-    e.target.value = "";
+    const selected: PreviewImage[] = Array.from(files).map((file) => ({
+      file,
+      previewUrl: URL.createObjectURL(file),
+    }));
+
+    setNewImages((prev) => [...prev, ...selected]);
     setImageChanged(true);
     setImageError(null);
+    e.target.value = "";
   };
 
   const handleRemoveImageUrl = (idx: number) => {
@@ -112,42 +94,48 @@ export const PostEditModal = ({
     setImageChanged(true);
   };
 
-  const handleRemoveImage = (idx: number) => {
-    setImages((prev) => prev.filter((_, i) => i !== idx));
+  const handleRemoveNewImage = (idx: number) => {
+    setNewImages((prev) => {
+      URL.revokeObjectURL(prev[idx].previewUrl);
+      return prev.filter((_, i) => i !== idx);
+    });
     setImageChanged(true);
   };
+
+  useEffect(() => {
+    return () => {
+      newImages.forEach((img) => URL.revokeObjectURL(img.previewUrl));
+    };
+  }, [newImages]);
 
   const handleSubmit = async () => {
     if (!isChanged) return;
 
     try {
       if (!title || !price || !category || !content) return;
-      if (imageUrls.length === 0 && images.length === 0) {
-        setImageError(
-          "이미지가 추가되지 않았습니다. 최소 1개의 이미지를 추가해주세요.",
-        );
+
+      if (imageUrls.length === 0 && newImages.length === 0) {
+        setImageError("이미지는 최소 1개 이상 필요합니다.");
         return;
       }
 
       setIsLoading(true);
 
-      const uploadedImageUrlArray: string[] = [];
-      for (const file of images) {
-        const url = await uploadImage(file);
-        uploadedImageUrlArray.push(url);
+      const uploadedImageUrls: string[] = [];
+      for (const img of newImages) {
+        const url = await uploadImage(img.file);
+        uploadedImageUrls.push(url);
       }
-
-      const body = {
-        title,
-        price,
-        content,
-        category,
-        images: [...imageUrls, ...uploadedImageUrlArray],
-      };
 
       await apiFetch(`/api/postings/${postId}`, {
         method: "PATCH",
-        body: JSON.stringify(body),
+        body: JSON.stringify({
+          title,
+          price,
+          content,
+          category,
+          images: [...imageUrls, ...uploadedImageUrls],
+        }),
       });
 
       onEdit?.();
@@ -205,17 +193,23 @@ export const PostEditModal = ({
             className="hidden"
           />
 
-          {(imageUrls.length > 0 || images.length > 0) && (
-            <div className="no-scrollbar flex gap-3 overflow-x-auto pr-2">
-              {imageUrls.map((url, idx) =>
-                ImageItem(idx, url, handleRemoveImageUrl),
-              )}
+          <div className="no-scrollbar flex gap-3 overflow-x-auto pr-2">
+            {imageUrls.map((url, idx) => (
+              <ImageItem
+                key={url}
+                url={url}
+                onRemove={() => handleRemoveImageUrl(idx)}
+              />
+            ))}
 
-              {images.map((file, idx) =>
-                ImageItem(idx, URL.createObjectURL(file), handleRemoveImage),
-              )}
-            </div>
-          )}
+            {newImages.map((img, idx) => (
+              <ImageItem
+                key={img.previewUrl}
+                url={img.previewUrl}
+                onRemove={() => handleRemoveNewImage(idx)}
+              />
+            ))}
+          </div>
         </div>
         {imageError && (
           <span
@@ -229,9 +223,9 @@ export const PostEditModal = ({
         )}
 
         <TextField
-          placeholder="제목을 입력해주세요"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
+          placeholder="제목"
           className={widthClass}
         />
 
@@ -281,3 +275,28 @@ export const PostEditModal = ({
     </div>
   );
 };
+
+const ImageItem = ({
+  url,
+  onRemove,
+}: {
+  url: string;
+  onRemove: () => void;
+}) => (
+  <div className="relative h-[70px] w-[70px] shrink-0 md:h-[100px] md:w-[100px]">
+    <Image
+      src={url}
+      alt="preview"
+      fill
+      unoptimized
+      className="rounded-lg object-cover"
+    />
+    <button
+      type="button"
+      className="absolute top-0.5 right-0.5 rounded-full bg-black/50 p-1"
+      onClick={onRemove}
+    >
+      <img src="/icons/delete.svg" alt="삭제" className="h-2.5 w-2.5" />
+    </button>
+  </div>
+);

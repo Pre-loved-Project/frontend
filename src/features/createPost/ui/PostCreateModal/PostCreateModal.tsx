@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, useMemo, useEffect } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import cn from "@/shared/lib/cn";
 import { TextField } from "@/shared/ui/TextField/TextField";
 import { TextBox } from "@/shared/ui/TextBox/TextBox";
@@ -18,13 +18,18 @@ export interface PostCreateModalProps {
   onError?: (message: string) => void;
 }
 
+interface PreviewImage {
+  file: File;
+  previewUrl: string;
+}
+
 export const PostCreateModal = ({
   className,
   onClose,
   onCreate,
   onError,
 }: PostCreateModalProps) => {
-  const [images, setImages] = useState<File[]>([]);
+  const [images, setImages] = useState<PreviewImage[]>([]);
   const [imageError, setImageError] = useState<string | null>(null);
   const [title, setTitle] = useState("");
   const [price, setPrice] = useState<number | "">("");
@@ -49,17 +54,30 @@ export const PostCreateModal = ({
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.currentTarget.files;
-    if (!files || files.length == 0) return;
+    if (!files || files.length === 0) return;
 
-    const selected = Array.from(files);
+    const selected: PreviewImage[] = Array.from(files).map((file) => ({
+      file,
+      previewUrl: URL.createObjectURL(file),
+    }));
+
     setImages((prev) => [...prev, ...selected]);
     setImageError(null);
     e.target.value = "";
   };
 
   const handleRemoveImage = (index: number) => {
-    setImages((prev) => prev.filter((_, i) => i !== index));
+    setImages((prev) => {
+      URL.revokeObjectURL(prev[index].previewUrl);
+      return prev.filter((_, i) => i !== index);
+    });
   };
+
+  useEffect(() => {
+    return () => {
+      images.forEach((img) => URL.revokeObjectURL(img.previewUrl));
+    };
+  }, [images]);
 
   const handleSubmit = async () => {
     try {
@@ -73,8 +91,8 @@ export const PostCreateModal = ({
       setIsLoading(true);
 
       const uploadedImageUrlArray: string[] = [];
-      for (const file of images) {
-        const uploadedImageUrl = await uploadImage(file);
+      for (const img of images) {
+        const uploadedImageUrl = await uploadImage(img.file);
         uploadedImageUrlArray.push(uploadedImageUrl);
       }
 
@@ -86,19 +104,18 @@ export const PostCreateModal = ({
         images: uploadedImageUrlArray,
       };
 
-      const res = await apiFetch("/api/postings", {
+      await apiFetch("/api/postings", {
         method: "POST",
         body: JSON.stringify(body),
       });
 
-      console.log("게시글 생성 성공! : ", res);
       onCreate?.();
     } catch (error) {
-      console.error("게시글 생성 실패 : ", error);
       if (error instanceof Error) {
         onError?.(error.message);
+      } else {
+        onError?.(String(error));
       }
-      onError?.(String(error));
     } finally {
       setIsLoading(false);
     }
@@ -151,15 +168,16 @@ export const PostCreateModal = ({
           />
 
           <div className="scrollbar-hide flex gap-3 overflow-x-auto py-1">
-            {images.map((file, idx) => (
+            {images.map((img, idx) => (
               <div
-                key={idx}
-                className="relative h-[70px] w-[70px] shrink-0 md:h-[100px] md:w-[100px] xl:h-[100px] xl:w-[100px]"
+                key={img.previewUrl}
+                className="relative h-[70px] w-[70px] shrink-0 md:h-[100px] md:w-[100px]"
               >
                 <Image
-                  src={URL.createObjectURL(file)}
+                  src={img.previewUrl}
                   alt={`preview-${idx}`}
                   fill
+                  unoptimized
                   className="rounded-lg object-cover"
                 />
 
