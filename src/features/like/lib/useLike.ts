@@ -26,7 +26,7 @@ export function useLike(postingId?: number) {
         queryClient.setQueryData(["postDetail", postingId], {
           ...previousData,
           isFavorite: newLiked,
-          likeCount: previousData.likeCount + (newLiked ? +1 : -1),
+          likeCount: previousData.likeCount + (newLiked ? 1 : -1),
         });
       }
 
@@ -35,13 +35,17 @@ export function useLike(postingId?: number) {
 
     onError: (err, newLiked, context) => {
       if (!postingId || !context?.previousData) return;
+
+      queryClient.setQueryData(["postDetail", postingId], context.previousData);
+
       openModal("normal", {
         message: "좋아요 처리 중 오류가 발생했습니다.",
         onClick: () => closeModal(),
       });
-      queryClient.setQueryData(["postDetail", postingId], context.previousData);
+    },
 
-      console.error(err);
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["myPosts"] });
     },
   });
 
