@@ -1,5 +1,11 @@
 "use client";
-import React, { useState, useRef, useEffect, useMemo } from "react";
+import React, {
+  useState,
+  useRef,
+  useEffect,
+  useMemo,
+  useLayoutEffect,
+} from "react";
 import { MessageRow, MessageRowProps } from "../MessageRow/MessageRow";
 import { uploadImage } from "@/shared/api/uploadImage";
 import { useModalStore } from "@/shared/model/modal.store";
@@ -63,7 +69,6 @@ export const ChattingRoom = ({
 
   const {
     messages,
-    lastReadMessageId,
     lastOtherMessageId,
     pushMessageToCache,
     applyReadStatus,
@@ -92,28 +97,41 @@ export const ChattingRoom = ({
     dealStatus ?? "ACTIVE",
   );
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
-
-  const initialScrollDone = useRef(false);
-
-  useEffect(() => {
-    if (!initialScrollDone.current && messages.length > 0) {
-      initialScrollDone.current = true;
-      messagesEndRef.current?.scrollIntoView({ behavior: "auto" });
-    }
-  }, [messages]);
-
   const { isSocketConnected, sendMessage, readLastMessage } = useChatSocket(
     chatId,
     otherId,
     pushMessageToCache,
-    scrollToBottom,
     applyUpdate,
-    () => lastOtherMessageId,
     applyReadStatus,
   );
+
+  const initialScrollDone = useRef(false);
+  useEffect(() => {
+    if (
+      !initialScrollDone.current &&
+      messages.length > 0 &&
+      isSocketConnected
+    ) {
+      requestAnimationFrame(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "auto" });
+        initialScrollDone.current = true;
+      });
+    }
+  }, [messages, isSocketConnected]);
+
+  useLayoutEffect(() => {
+    if (
+      !isSocketConnected ||
+      messages.length == 0 ||
+      !initialScrollDone.current
+    )
+      return;
+
+    messagesEndRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "end",
+    });
+  }, [messages.length, isSocketConnected]);
 
   const firstReadRequestDone = useRef(false);
   useEffect(() => {
@@ -126,10 +144,15 @@ export const ChattingRoom = ({
       messages.length > 0 &&
       lastOtherMessageId !== null
     ) {
-      readLastMessage();
+      readLastMessage(lastOtherMessageId);
       firstReadRequestDone.current = true;
     }
-  }, [messages, isSocketConnected]);
+  }, [
+    isMessagesLoading,
+    isSocketConnected,
+    messages.length,
+    lastOtherMessageId,
+  ]);
 
   const { openModal, closeModal } = useModalStore();
   const [text, setText] = useState("");

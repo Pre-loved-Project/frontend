@@ -75,7 +75,7 @@ const ChatList = ({ onSelect, tab = "all" }: ChatListProps) => {
     });
   };
 
-  useChatListSocket({
+  const { isSocketConnected } = useChatListSocket({
     onChatCreated: handleChatCreated,
     onChatListUpdate: handleChatListUpdated,
   });
@@ -83,7 +83,7 @@ const ChatList = ({ onSelect, tab = "all" }: ChatListProps) => {
     handleError(error);
   }
 
-  if (isLoading) {
+  if (isLoading || !isSocketConnected) {
     return <p className="p-4 text-center text-white/70">불러오는 중...</p>;
   }
 

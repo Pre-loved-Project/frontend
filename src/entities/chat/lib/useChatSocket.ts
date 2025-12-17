@@ -1,7 +1,8 @@
-import { useState, useEffect, useRef } from "react";
-import { ChatSocket } from "../model/chatSocket";
+import { useEffect, useRef } from "react";
 import { DealStatus, MessageProps } from "../model/types";
 import { PostStatus } from "@/entities/post/model/types/post";
+import { useChatSocketManager } from "@/features/chat/model/chatSocketManager.store";
+import { ChatSocket } from "../model/chatSocket";
 
 interface QueuedMessage {
   type: "text" | "image";
@@ -12,92 +13,16 @@ export const useChatSocket = (
   chatId: number | null,
   otherId: number | null,
   pushMessageToCache: (msg: MessageProps) => void,
-  scrollToBottom?: () => void,
   onDealUpdate?: (update: {
     postStatus: PostStatus;
     dealStatus: DealStatus;
   }) => void,
-  getLastOtherMessageId?: () => number | null,
   onMessageRead?: (messageId: number) => void,
 ) => {
-  const [isSocketConnected, setIsSocketConncted] = useState(false);
+  const { connectChatRoom, disconnectChatRoom } = useChatSocketManager();
   const socketRef = useRef<ChatSocket | null>(null);
-  const messageQueue = useRef<QueuedMessage[]>([]); // 🔥 메시지 큐
-
-  /** 메시지 전송 공통 함수 (push + socket) */
-  const processMessage = (type: "text" | "image", content: string) => {
-    socketRef.current?.sendMessage(type, content);
-    requestAnimationFrame(() => scrollToBottom?.());
-  };
-
-  /** 큐 flush */
-  const flushQueue = () => {
-    if (!socketRef.current || !socketRef.current.isOpen()) return;
-    messageQueue.current.forEach(({ type, content }) => {
-      processMessage(type, content);
-    });
-    messageQueue.current = [];
-  };
-
-  //현재 화면 상대 마지막 메시지를 서버에 읽음 처리 요청
-  const readLastMessage = () => {
-    const lastId = getLastOtherMessageId?.();
-    if (lastId && socketRef.current?.isOpen()) {
-      socketRef.current.readMessage(lastId);
-      console.log(`[Socket] Send read_message for ID: ${lastId}`);
-    }
-  };
-
-  const connectSocket = async () => {
-    if (!chatId || !otherId) return;
-    if (socketRef.current?.isOpen()) return;
-
-    if (!socketRef.current) {
-      socketRef.current = new ChatSocket(chatId, otherId, {
-        onOpen: () => {
-          setIsSocketConncted(true);
-          console.log("[Socket] Connected");
-          flushQueue();
-        },
-        onMessage: (msg) => {
-          pushMessageToCache(msg);
-          requestAnimationFrame(() => scrollToBottom?.());
-          if (!msg.isMine) {
-            readLastMessage();
-          }
-        },
-        onDealUpdate: (update) => {
-          onDealUpdate?.(update);
-          pushMessageToCache({
-            messageId: Date.now(),
-            type: "system",
-            content: update.systemMessage,
-            isMine: false,
-            sendAt: new Date().toISOString(),
-            isRead: true,
-          });
-          requestAnimationFrame(() => scrollToBottom?.());
-        },
-        onRead: onMessageRead,
-        onClose: () => {
-          console.log("[Socket] disconnected");
-          setIsSocketConncted(false);
-        },
-      });
-    }
-
-    await socketRef.current.connect();
-  };
-
-  useEffect(() => {
-    if (chatId) connectSocket();
-
-    return () => {
-      socketRef.current?.close();
-      socketRef.current = null;
-      setIsSocketConncted(false);
-    };
-  }, [chatId]);
+  const messageQueue = useRef<QueuedMessage[]>([]);
+  const readQueue = useRef<number[]>([]);
 
   const sendMessage = async (type: "text" | "image", content: string) => {
     if (!chatId || !socketRef.current?.isOpen()) {
@@ -105,8 +30,65 @@ export const useChatSocket = (
       return;
     }
 
-    processMessage(type, content);
+    socketRef.current.sendMessage(type, content);
   };
 
-  return { isSocketConnected, sendMessage, readLastMessage };
+  //현재 화면 상대 마지막 메시지를 서버에 읽음 처리 요청
+  const readLastMessage = (messageId: number) => {
+    if (messageId) {
+      if (!socketRef.current?.isOpen()) {
+        readQueue.current.push(messageId);
+        return;
+      }
+      socketRef.current.readMessage(messageId);
+    }
+  };
+
+  useEffect(() => {
+    if (!chatId || !otherId) return;
+
+    connectChatRoom(chatId, otherId, {
+      onOpen: () => {
+        socketRef.current = useChatSocketManager.getState().chatRoomSocket;
+        messageQueue.current.forEach(({ type, content }) =>
+          socketRef.current?.sendMessage(type, content),
+        );
+        readQueue.current.forEach((chatId) =>
+          socketRef.current?.readMessage(chatId),
+        );
+        messageQueue.current = [];
+        readQueue.current = [];
+      },
+
+      onMessage: (msg) => {
+        pushMessageToCache(msg);
+        if (!msg.isMine) readLastMessage(msg.messageId);
+      },
+
+      onDealUpdate: (update) => {
+        onDealUpdate?.(update);
+        pushMessageToCache({
+          messageId: Date.now(),
+          type: "system",
+          content: update.systemMessage,
+          isMine: false,
+          sendAt: new Date().toISOString(),
+          isRead: true,
+        });
+      },
+
+      onRead: onMessageRead,
+    });
+
+    return () => {
+      disconnectChatRoom();
+      socketRef.current = null;
+    };
+  }, [chatId, otherId]);
+
+  return {
+    isSocketConnected: useChatSocketManager((s) => s.chatRoomSocketConnected),
+    sendMessage,
+    readLastMessage,
+  };
 };

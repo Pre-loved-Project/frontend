@@ -46,7 +46,6 @@ export class ChatSocket extends Socket<ChatSocketEvents> {
       }
 
       if (data.type === "read") {
-        console.log(`[Socket] : 읽음 처리 이벤트 수신`);
         this.events.onRead?.(data.lastReadMessageId);
         return;
       }
