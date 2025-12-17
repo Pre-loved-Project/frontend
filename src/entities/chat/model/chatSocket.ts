@@ -8,7 +8,7 @@ export interface ChatSocketEvents extends SocketEvents {
   onDealUpdate?: (update: {
     postStatus: PostStatus;
     dealStatus: DealStatus;
-    message: string;
+    systemMessage: string;
   }) => void;
   onRead?: (messageId: number) => void;
 }

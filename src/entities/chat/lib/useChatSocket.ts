@@ -71,7 +71,7 @@ export const useChatSocket = (
           pushMessageToCache({
             messageId: Date.now(),
             type: "system",
-            content: update.message,
+            content: update.systemMessage,
             isMine: false,
             sendAt: new Date().toISOString(),
             isRead: true,

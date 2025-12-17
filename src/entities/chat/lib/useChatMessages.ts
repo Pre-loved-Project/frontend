@@ -84,6 +84,7 @@ export const useChatMessages = (chatId: number | null) => {
     );
 
     //chats list의 lastMessage 업데이트
+    if (newMsg.type === "system") return;
     const roles = [undefined, "buyer", "seller"];
     roles.forEach((role) => {
       queryClient.setQueryData<Chat[]>(["chats", role], (oldChats) => {
