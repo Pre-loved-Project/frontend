@@ -24,6 +24,7 @@ export const useChatMessages = (chatId: number | null) => {
     queryKey: ["chatMessages", chatId],
     enabled: !!chatId,
     initialPageParam: null as number | null,
+    gcTime: 50_000,
 
     queryFn: async ({ pageParam }) => {
       const url = pageParam
@@ -44,11 +45,6 @@ export const useChatMessages = (chatId: number | null) => {
       .slice()
       .reverse()
       .flatMap((page) => [...page.messages].reverse());
-  }, [data]);
-
-  const lastReadMessageId = useMemo(() => {
-    if (!data || data.pages.length == 0) return null;
-    return data.pages[0].lastReadMessageId;
   }, [data]);
 
   const lastOtherMessageId: number | null = useMemo(() => {
@@ -82,30 +78,7 @@ export const useChatMessages = (chatId: number | null) => {
         };
       },
     );
-
-    //chats list의 lastMessage 업데이트
-    if (newMsg.type === "system") return;
-    const roles = [undefined, "buyer", "seller"];
-    roles.forEach((role) => {
-      queryClient.setQueryData<Chat[]>(["chats", role], (oldChats) => {
-        if (!oldChats) return oldChats;
-
-        const updatedChats = oldChats.map((chat) =>
-          chat.chatId === chatId
-            ? {
-                ...chat,
-                lastMessage: newMsg,
-              }
-            : chat,
-        );
-
-        return updatedChats.sort(
-          (a, b) =>
-            new Date(b.lastMessage?.sendAt ?? 0).getTime() -
-            new Date(a.lastMessage?.sendAt ?? 0).getTime(),
-        );
-      });
-    });
+    queryClient.invalidateQueries({ queryKey: ["chats"] });
   };
 
   const applyReadStatus = () => {
@@ -157,7 +130,6 @@ export const useChatMessages = (chatId: number | null) => {
 
   return {
     messages,
-    lastReadMessageId,
     lastOtherMessageId,
     pushMessageToCache,
     applyReadStatus,

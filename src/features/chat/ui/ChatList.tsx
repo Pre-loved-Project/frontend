@@ -21,7 +21,6 @@ interface ChatListProps {
 const ChatList = ({ onSelect, tab = "all" }: ChatListProps) => {
   const queryClient = useQueryClient();
   const role = tab === "all" ? undefined : tab === "buyer" ? "buyer" : "seller";
-  const queryKey = ["chats", role];
 
   const {
     data: chats = [],
@@ -31,6 +30,7 @@ const ChatList = ({ onSelect, tab = "all" }: ChatListProps) => {
   } = useQuery<Chat[], Error>({
     queryKey: ["chats", role],
     queryFn: () => fetchChatList(role),
+    gcTime: 50_000,
   });
 
   const handleChatCreated = (newChat: Chat) => {
@@ -69,6 +69,9 @@ const ChatList = ({ onSelect, tab = "all" }: ChatListProps) => {
         );
         return [updatedChat, ...remainChats];
       });
+    });
+    queryClient.invalidateQueries({
+      queryKey: ["chatMessages", update.chatId],
     });
   };
 
