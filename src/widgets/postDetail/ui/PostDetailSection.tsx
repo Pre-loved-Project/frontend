@@ -1,10 +1,9 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
-import { getUser } from "@/entities/user/api/getUser";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { useQueryClient } from "@tanstack/react-query";
 
+import { getUser } from "@/entities/user/api/getUser";
 import PostCarousel from "@/entities/post/ui/carousel/PostCarousel";
 import LikeButton from "@/features/like/ui/LikeButton";
 import Button from "@/shared/ui/Button/Button";
@@ -15,6 +14,7 @@ import { usePostEditModal } from "@/features/editPost/lib/usePostEditModal";
 import { useChatStore } from "@/features/chat/model/chat.store";
 import { useModalStore } from "@/shared/model/modal.store";
 import { useAuthStore } from "@/features/auth/model/auth.store";
+
 import { PostDetail } from "@/entities/post/model/types/post";
 import PostStatusBadge from "@/entities/post/ui/badge/PostStatusBadge";
 import { getChattingRoomStatus } from "@/features/chat/api/getChattingRoomStatus";
@@ -23,21 +23,26 @@ import { apiFetch } from "@/shared/api/fetcher";
 export function PostDetailSection({ post }: { post: PostDetail }) {
   const router = useRouter();
   const queryClient = useQueryClient();
+
   const { isLogined } = useAuthStore();
   const { openModal, closeModal } = useModalStore();
   const openChat = useChatStore((s) => s.mount);
+
+  const isSoldOut = post.status === "SOLD";
 
   const { data: seller } = useQuery({
     queryKey: ["seller", post.sellerId],
     queryFn: () => getUser(post.sellerId),
     enabled: !!post.sellerId,
   });
+
   const { data: chattingRoomStatus } = useQuery({
     queryKey: ["findRoom", post.postingId],
     queryFn: () => getChattingRoomStatus(post.postingId),
   });
 
   const { toggleLike, isLoading: isLikeLoading } = useLike(post.postingId);
+
   const handleToggleLike = () => {
     if (!isLogined) {
       openModal("normal", {
@@ -75,7 +80,7 @@ export function PostDetailSection({ post }: { post: PostDetail }) {
   const handleChatClick = () => {
     if (!isLogined) {
       openModal("normal", {
-        message: " 로그인이 필요한 서비스입니다.\n로그인 해주세요.",
+        message: "로그인이 필요한 서비스입니다.\n로그인 해주세요.",
         onClick: () => {
           closeModal();
           router.replace("/login");
@@ -88,7 +93,7 @@ export function PostDetailSection({ post }: { post: PostDetail }) {
       openChat({
         postingId: post.postingId,
         otherId: post.sellerId,
-        chatId: chattingRoomStatus?.chatId,
+        chatId: chattingRoomStatus.chatId,
       });
     }
   };
@@ -126,9 +131,8 @@ export function PostDetailSection({ post }: { post: PostDetail }) {
           closeModal();
           openModal("normal", {
             message: "게시글 삭제에 실패했습니다.",
-            onClick: () => closeModal(),
+            onClick: closeModal,
           });
-
           console.error(err);
         }
       },
@@ -140,6 +144,7 @@ export function PostDetailSection({ post }: { post: PostDetail }) {
     <section className="flex flex-col px-4 md:px-10 xl:flex-row xl:gap-10 xl:px-16">
       <div className="-mx-1 md:-mx-2.5 xl:mx-0 xl:w-1/2">
         <PostCarousel images={post.images} />
+
         <div className="align-center mx-4 flex gap-3 py-4 md:mx-6 xl:mx-0">
           <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-full md:h-16 md:w-16 xl:h-14 xl:w-14">
             {seller?.imageUrl ? (
@@ -157,6 +162,7 @@ export function PostDetailSection({ post }: { post: PostDetail }) {
             {seller?.nickname || "판매자"}
           </span>
         </div>
+
         <div className="h-px bg-gray-600 xl:hidden" />
       </div>
 
@@ -167,6 +173,7 @@ export function PostDetailSection({ post }: { post: PostDetail }) {
           <p className="text-base whitespace-pre-line md:text-lg xl:text-base">
             {post.content}
           </p>
+
           <PostStatusBadge
             status={post.status}
             className="absolute top-1 right-5"
@@ -191,16 +198,18 @@ export function PostDetailSection({ post }: { post: PostDetail }) {
                 </Button>
               </>
             ) : (
-              <>
-                <Button className="w-full flex-1" onClick={handleChatClick}>
-                  채팅하기
-                </Button>
-                <LikeButton
-                  liked={post.isFavorite}
-                  loading={isLikeLoading}
-                  onToggle={handleToggleLike}
-                />
-              </>
+              !isSoldOut && (
+                <>
+                  <Button className="w-full flex-1" onClick={handleChatClick}>
+                    채팅하기
+                  </Button>
+                  <LikeButton
+                    liked={post.isFavorite}
+                    loading={isLikeLoading}
+                    onToggle={handleToggleLike}
+                  />
+                </>
+              )
             )}
           </div>
         </div>
