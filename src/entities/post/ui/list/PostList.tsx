@@ -43,8 +43,8 @@ export default function PostList({
         lastPage.length === POST_PAGE_SIZE ? allPages.length + 1 : undefined,
       initialPageParam: 1,
     });
-
-  const posts = data?.pages.flat() ?? [];
+  const posts =
+    data?.pages.flat().filter((post) => post.status === "SELLING") ?? [];
   const lastRef = useInfiniteScroll(
     () => fetchNextPage(),
     isFetchingNextPage,
