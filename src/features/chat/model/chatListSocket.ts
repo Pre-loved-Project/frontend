@@ -32,9 +32,6 @@ export class ChatListSocket extends Socket<ChatListSocketEvents> {
   protected handleMessage(event: MessageEvent): void {
     try {
       const data = JSON.parse(event.data);
-      console.log(
-        `event : ${JSON.stringify(event)}, data : ${JSON.stringify(data)} 호출`,
-      );
       switch (data.event) {
         case "chat_created":
           this.events.onChatCreated?.(data.payload);

@@ -1,9 +1,9 @@
 // src/features/chat/hooks/useChatListSocket.ts
 
-import { useEffect, useRef } from "react";
-import { ChatListSocket } from "../model/chatListSocket";
-import { handleError } from "@/shared/error/handleError";
+import { useEffect } from "react";
+import { useChatSocketManager } from "../model/chatSocketManager.store";
 import { Chat, MessageProps } from "@/entities/chat/model/types";
+
 interface UseChatListSocketProps {
   onChatCreated: (chat: Chat) => void;
   onChatListUpdate: (update: {
@@ -16,44 +16,27 @@ export const useChatListSocket = ({
   onChatCreated,
   onChatListUpdate,
 }: UseChatListSocketProps) => {
-  const socketRef = useRef<ChatListSocket | null>(null);
-
-  const connectListSocket = async () => {
-    if (socketRef.current?.isOpen()) return;
-
-    if (!socketRef.current) {
-      socketRef.current = new ChatListSocket({
-        onOpen: () => {
-          console.log("[useChatListSocket] List Socket Ready.");
-        },
-        onChatCreated: onChatCreated,
-        onChatListUpdate: onChatListUpdate,
-        onClose: (code) => {
-          console.log(`[useChatListSocket] Closed: ${code}`);
-        },
-      });
-    }
-
-    try {
-      await socketRef.current.connect();
-    } catch (error) {
-      console.error("[useChatListSocket] Initial connection failed:", error);
-      handleError(error);
-    }
-  };
+  const { chatListSocket, connectChatList, disconnectChatList } =
+    useChatSocketManager();
 
   useEffect(() => {
-    connectListSocket();
+    connectChatList({
+      onOpen: () => {
+        console.log(`ChatList Socket connected`);
+      },
+      onChatCreated,
+      onChatListUpdate,
+      onClose: () => {
+        console.log(`ChatList Socket disconnected`);
+      },
+    });
 
     return () => {
-      socketRef.current?.close();
-      socketRef.current = null;
+      disconnectChatList();
     };
   }, []);
 
-  const isConnected = socketRef.current?.isOpen();
-
   return {
-    isConnected,
+    isSocketConnected: useChatSocketManager((s) => s.chatListSocketConnected),
   };
 };

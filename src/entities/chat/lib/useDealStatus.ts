@@ -76,18 +76,7 @@ export const useDealStatus = (
         };
       });
 
-      const roles = [undefined, "buyer", "seller"];
-      roles.forEach((role) => {
-        queryClient.setQueryData<Chat[]>(["chats", role], (oldChats) => {
-          if (!oldChats) return oldChats;
-
-          return oldChats.map((chat) =>
-            chat.postingId === postingId
-              ? { ...chat, status: updatedDealStatus }
-              : chat,
-          );
-        });
-      });
+      queryClient.invalidateQueries({ queryKey: ["chats"] });
     },
     onError: () => {
       openModal("normal", {

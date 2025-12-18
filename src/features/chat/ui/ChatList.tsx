@@ -21,7 +21,6 @@ interface ChatListProps {
 const ChatList = ({ onSelect, tab = "all" }: ChatListProps) => {
   const queryClient = useQueryClient();
   const role = tab === "all" ? undefined : tab === "buyer" ? "buyer" : "seller";
-  const queryKey = ["chats", role];
 
   const {
     data: chats = [],
@@ -31,6 +30,7 @@ const ChatList = ({ onSelect, tab = "all" }: ChatListProps) => {
   } = useQuery<Chat[], Error>({
     queryKey: ["chats", role],
     queryFn: () => fetchChatList(role),
+    gcTime: 50_000,
   });
 
   const handleChatCreated = (newChat: Chat) => {
@@ -70,9 +70,12 @@ const ChatList = ({ onSelect, tab = "all" }: ChatListProps) => {
         return [updatedChat, ...remainChats];
       });
     });
+    queryClient.invalidateQueries({
+      queryKey: ["chatMessages", update.chatId],
+    });
   };
 
-  useChatListSocket({
+  const { isSocketConnected } = useChatListSocket({
     onChatCreated: handleChatCreated,
     onChatListUpdate: handleChatListUpdated,
   });
@@ -80,7 +83,7 @@ const ChatList = ({ onSelect, tab = "all" }: ChatListProps) => {
     handleError(error);
   }
 
-  if (isLoading) {
+  if (isLoading || !isSocketConnected) {
     return <p className="p-4 text-center text-white/70">불러오는 중...</p>;
   }
 
