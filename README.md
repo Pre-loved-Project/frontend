@@ -1,4 +1,4 @@
-# Chalddack
+# Chalddack 찰딱
 
 - 배포 URL: https://chalddack.vercel.app/ 
 - 테스트용 계정
@@ -18,6 +18,7 @@
 
 </div>
 
+
 ---
 
 ## 1. 기술 스택
@@ -28,39 +29,44 @@
 | **협업** | ![Git](https://img.shields.io/badge/Git-F05032?style=flat&logo=git&logoColor=white) ![GitHub](https://img.shields.io/badge/GitHub-181717?style=flat&logo=github&logoColor=white) ![Figma](https://img.shields.io/badge/Figma-F24E1E?style=flat&logo=figma&logoColor=white) ![Notion](https://img.shields.io/badge/Notion-000000?style=flat&logo=notion&logoColor=white) |
 
 ## 2. 프로젝트 구조
-본 프로젝트는 **Next.js(App Router)** 기반으로 개발되었으며, **FSD(Feature-Sliced Design)** 아키텍처를 적용해 라우팅, 도메인, 기능, UI의 책임을 명확히 분리한 구조를 사용합니다.  
+본 프로젝트는 **Next.js(App Router)** 기반으로 개발되었으며, **FSD(Feature-Sliced Design)** 아키텍처를 기반으로 핵심 레이어의 책임을 유지하되, 프로젝트 규모에 맞게 구조를 간소화하여 적용했습니다.
 
 ```bash
 src/
-├─ app/                  # Next.js App Router (라우팅, 페이지 단위 책임)
-│  ├─ page.tsx
-│  ├─ layout.tsx
-│  ├─ error.tsx
-│  ├─ not-found.tsx
-│  ├─ login/
-│  ├─ signup/
-│  ├─ my/
-│  ├─ detail/[postingId]/
-│  ├─ chat/
-│  └─ api/               # Next Route Handlers
+├─ app/                        # Next.js App Router 
+│  ├─ login/                  
+│  ├─ signup/                 
+│  ├─ my/                      
+│  ├─ detail/[postingId]/      
+│  └─ api/                     # Next Route Handlers 
 │
-├─ apis/                 # HTTP 클라이언트 및 도메인별 API
+├─ entities/                   # 핵심 도메인
+│  ├─ post/
+│  ├─ user/
+│  └─ chat/
 │
-├─ entities/             # 핵심 도메인 엔티티 (비즈니스 모델)
+├─ features/                   # 사용자 행동 단위 기능
+│  ├─ auth/
+│  ├─ like/
+│  ├─ createPost/
+│  ├─ editPost/
+│  ├─ editProfile/
+│  ├─ deal/
+│  └─ chat/
 │
-├─ features/             # 사용자 행동 단위 기능 (mutation, 로직)
+├─ widgets/                    # 복합 UI 블록
+│  ├─ GNB/
+│  └─ footer/
 │
-├─ widgets/              # 여러 feature/entity를 조합한 UI 블록
+├─ views/                       # 페이지 전용 UI 
 │
-├─ views/                # 페이지 전용 UI 조합
-│
-└─ shared/               # 전역 공통 모듈 (ui, hooks, utils, store)
+└─ shared/                      # 전역 공통 
 ```
 
 ## 3. 고민한 부분
-### 언마운트 애니메이션
-### SSR 인증 정보 접근
-
+### SSR 인증 인가
+### 웹소켓
+### 모달
 
 ## 4. 페이지별 기능
 ### 인증 페이지 (로그인 · 회원가입 페이지)
@@ -165,8 +171,36 @@ src/
    - 최신순/좋아요순/채팅순/조회순 정렬
    - SSR 기반 초기 데이터 프리패칭 + CSR 무한 스크롤
    - 물품 클릭 시 상세페이지로 이동
-     
+
+<table align="center" width="100%">
+  <colgroup>
+    <col width="55%" />
+    <col width="45%" />
+  </colgroup>
+  <tr>
+    <td align="center"><strong>웹</strong></td>
+    <td align="center"><strong>모바일</strong></td>
+  </tr>
+  <tr>
+    <td align="center">
+      <img
+        src="https://github.com/user-attachments/assets/cb6046bc-e167-4658-a920-f9f986528386"
+        width="90%"
+        alt="웹 화면"
+      />
+    </td>
+    <td align="center">
+      <img
+        src="https://github.com/user-attachments/assets/0cb7faab-3ab5-4946-b42b-7c388e92ec9c"
+        width="90%"
+        alt="모바일 화면"
+      />
+    </td>
+  </tr>
+</table>
+
 ---
+
 
 ### 게시글 상세 페이지
 > 게시글 상세 정보 및 채팅·좋아요 기능을 제공합니다.
