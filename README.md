@@ -160,9 +160,48 @@ src/
 - **채팅방**
   - 판매자·구매자 간 실시간 메시지 송수신
   - 게시글 단위로 채팅방 관리
-![찰딱_채팅생성](https://github.com/user-attachments/assets/4231a32a-ae64-4ae4-9542-0053c75c96d0)
-![찰딱_채팅](https://github.com/user-attachments/assets/12666480-d24a-45ee-be27-0aa02c83f65f)
-![찰딱_채팅거래](https://github.com/user-attachments/assets/39a35b9f-040b-4f00-95ff-6d9c866c762e)
+
+<table align="center" width="100%">
+  <tr>
+    <th align="center">채팅생성</th>
+  </tr>
+  <tr>
+    <td align="center">
+      <img
+        src="https://github.com/user-attachments/assets/4231a32a-ae64-4ae4-9542-0053c75c96d0"
+        width="100%"
+        alt="채팅 생성"
+      />
+    </td>
+  </tr>
+
+  <tr>
+    <th align="center">채팅</th>
+  </tr>
+  <tr>
+    <td align="center">
+      <img
+        src="https://github.com/user-attachments/assets/12666480-d24a-45ee-be27-0aa02c83f65f"
+        width="100%"
+        alt="채팅 화면"
+      />
+    </td>
+  </tr>
+
+  <tr>
+    <th align="center">채팅거래</th>
+  </tr>
+  <tr>
+    <td align="center">
+      <img
+        src="https://github.com/user-attachments/assets/39a35b9f-040b-4f00-95ff-6d9c866c762e"
+        width="100%"
+        alt="채팅 거래"
+      />
+    </td>
+  </tr>
+</table>
+
 
 ---
 
